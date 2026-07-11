@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@color/colorPrimary">
+
+    <TextView
+        android:id="@+id/tv_dialog_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimary"
+        android:text="Add Web Page"
+        android:layout_marginBottom="16dp" />
+
+    <com.hwanyu365.webplugin.ui.view.NoAutofillEditText
+        android:id="@+id/et_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Page Title"
+        android:inputType="textNoSuggestions"
+        android:layout_marginBottom="12dp"
+        android:importantForAutofill="no"
+        android:privateImeOptions="com.samsung.android.inputmethod.disableAutofill=true,disableAutofill=true"
+        android:autofillHints="" />
+
+    <com.hwanyu365.webplugin.ui.view.NoAutofillEditText
+        android:id="@+id/et_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="https://example.com"
+        android:inputType="textUri|textNoSuggestions"
+        android:layout_marginBottom="12dp"
+        android:importantForAutofill="no"
+        android:privateImeOptions="com.samsung.android.inputmethod.disableAutofill=true,disableAutofill=true"
+        android:autofillHints="" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textColor="@color/colorTextSecondary"
+        android:text="Select Plugin:"
+        android:layout_marginBottom="4dp" />
+
+    <Spinner
+        android:id="@+id/sp_plugins"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/btn_dialog_cancel"
+            style="?attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"
+            android:textColor="@color/colorTextSecondary" />
+
+        <Button
+            android:id="@+id/btn_dialog_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/save"
+            android:backgroundTint="@color/colorAccent"
+            android:textColor="@color/colorWhite"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

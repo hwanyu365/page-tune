@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Main WebView container -->
+    <WebView
+        android:id="@+id/wv_browser"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Progress indicator overlayed at the top -->
+    <ProgressBar
+        android:id="@+id/pb_browser_loading"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:visibility="gone" />
+
+    <!-- Floating GNB (Semitemporary Overlay at bottom) -->
+    <LinearLayout
+        android:id="@+id/layout_floating_gnb"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorOverlay"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="8dp"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/btn_gnb_prev"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="◁ Prev"
+            android:backgroundTint="@color/colorAccent"
+            android:textColor="@color/colorWhite"
+            android:layout_marginEnd="16dp" />
+
+        <Button
+            android:id="@+id/btn_gnb_next"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Next ▷"
+            android:backgroundTint="@color/colorAccent"
+            android:textColor="@color/colorWhite"
+            android:layout_marginStart="16dp" />
+
+    </LinearLayout>
+
+</RelativeLayout>

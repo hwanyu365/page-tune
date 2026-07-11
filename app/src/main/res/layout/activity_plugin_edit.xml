@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Top bar: Plugin name & Test URL -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:background="@color/colorPrimary">
+
+        <com.hwanyu365.webplugin.ui.view.NoAutofillEditText
+            android:id="@+id/et_inp_pname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Plugin Name"
+            android:textColor="@color/colorWhite"
+            android:textColorHint="@color/colorTextSecondary"
+            android:backgroundTint="@color/colorWhite"
+            android:inputType="textNoSuggestions"
+            android:importantForAutofill="no"
+            android:privateImeOptions="com.samsung.android.inputmethod.disableAutofill=true,disableAutofill=true"
+            android:autofillHints="" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+
+            <com.hwanyu365.webplugin.ui.view.NoAutofillEditText
+                android:id="@+id/et_inp_taddr"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="https://example.com (URL to pick element)"
+                android:textColor="@color/colorWhite"
+                android:textColorHint="@color/colorTextSecondary"
+                android:backgroundTint="@color/colorWhite"
+                android:inputType="textUri|textNoSuggestions"
+                android:importantForAutofill="no"
+                android:privateImeOptions="com.samsung.android.inputmethod.disableAutofill=true,disableAutofill=true"
+                android:autofillHints="" />
+
+            <Button
+                android:id="@+id/btn_load_url"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Load"
+                android:backgroundTint="@color/colorAccent"
+                android:textColor="@color/colorWhite" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Mid layout: WebView with Element Inspector overlay -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <WebView
+            android:id="@+id/wv_inspector"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <!-- Floating Indicator when Inspector Mode is ON (Semi-transparent Orange) -->
+        <TextView
+            android:id="@+id/tv_inspector_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="8dp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:background="#B3FF9800"
+            android:textColor="@color/colorWhite"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:text="INSPECTOR MODE: Tap web element to select"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+    <!-- Bottom config sheet (Fixed 280dp height container) -->
+    <LinearLayout
+        android:id="@+id/layout_bottom_config_container"
+        android:layout_width="match_parent"
+        android:layout_height="280dp"
+        android:background="@color/colorGrayLight"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- Scrollable content area -->
+        <ScrollView
+            android:id="@+id/scroll_bottom_config"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:scrollbars="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Pick Mode Toggle & Selector Display -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <ToggleButton
+                        android:id="@+id/btn_toggle_inspect"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textOn="Pick Mode: ON"
+                        android:textOff="Pick Mode: OFF"
+                        android:checked="false"
+                        android:backgroundTint="@color/colorAccent"
+                        android:textColor="@color/colorWhite" />
+
+                    <TextView
+                        android:id="@+id/tv_selected_selector"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:textSize="12sp"
+                        android:textStyle="italic"
+                        android:textColor="@color/colorTextPrimary"
+                        android:text="Selected element: None"
+                        android:maxLines="2"
+                        android:ellipsize="end" />
+
+                </LinearLayout>
+
+                <!-- Parent / Child Traversal Buttons -->
+                <LinearLayout
+                    android:id="@+id/layout_traversal_actions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="8dp"
+                    android:visibility="gone">
+
+                    <Button
+                        android:id="@+id/btn_select_parent"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:text="Select Parent ⇧"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="11sp" />
+
+                    <Button
+                        android:id="@+id/btn_select_child"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:text="Select Child ⇩"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="11sp" />
+
+                </LinearLayout>
+
+                <!-- Action Config Panel -->
+                <LinearLayout
+                    android:id="@+id/layout_action_config"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Action Type:"
+                        android:textStyle="bold"
+                        android:textSize="12sp" />
+
+                    <RadioGroup
+                        android:id="@+id/rg_action_type"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+
+                        <RadioButton
+                            android:id="@+id/rb_action_hidden"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Hidden"
+                            android:checked="true" />
+
+                        <RadioButton
+                            android:id="@+id/rb_action_click"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Click Event" />
+
+                    </RadioGroup>
+
+                    <!-- Panel for Click Trigger setup (Visible only when 'Click Event' is selected) -->
+                    <LinearLayout
+                        android:id="@+id/layout_click_trigger_setup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Click Trigger:"
+                            android:textStyle="bold"
+                            android:textSize="12sp" />
+
+                        <RadioGroup
+                            android:id="@+id/rg_trigger_type"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginBottom="8dp">
+
+                            <RadioButton
+                                android:id="@+id/rb_trigger_gesture_top"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Gesture: Top 50% Double Tap"
+                                android:checked="true" />
+
+                            <RadioButton
+                                android:id="@+id/rb_trigger_gesture_bottom"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Gesture: Bottom 50% Double Tap" />
+
+                            <RadioButton
+                                android:id="@+id/rb_trigger_gnb_prev"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Floating GNB: Previous Button (◁)" />
+
+                            <RadioButton
+                                android:id="@+id/rb_trigger_gnb_next"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Floating GNB: Next Button (▷)" />
+
+                        </RadioGroup>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Gesture Area Height Percent (1% - 50%):"
+                            android:textSize="11sp" />
+
+                        <com.hwanyu365.webplugin.ui.view.NoAutofillEditText
+                            android:id="@+id/et_gesture_area"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Default: 40%"
+                            android:textColor="@color/colorTextPrimary"
+                            android:textColorHint="@color/colorTextSecondary"
+                            android:inputType="number"
+                            android:importantForAutofill="no"
+                            android:privateImeOptions="com.samsung.android.inputmethod.disableAutofill=true,disableAutofill=true"
+                            android:autofillHints="" />
+
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btn_add_action"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Add Action to Plugin"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:textColor="@color/colorWhite" />
+
+                </LinearLayout>
+
+                <!-- Actions list summary -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Registered Actions:"
+                    android:textStyle="bold"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp" />
+
+                <LinearLayout
+                    android:id="@+id/layout_actions_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="4dp" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:layout_marginVertical="8dp" />
+
+        <!-- Save / Cancel (Always pinned at the bottom) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_plugin_cancel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/cancel"
+                android:backgroundTint="@color/colorPrimary"
+                android:textColor="@color/colorWhite"
+                android:layout_marginEnd="8dp" />
+
+            <Button
+                android:id="@+id/btn_plugin_save"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/save"
+                android:backgroundTint="@color/colorAccent"
+                android:textColor="@color/colorWhite" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

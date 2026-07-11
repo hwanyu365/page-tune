@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Web Plugin Browser</string>
+    <string name="tab_webpages">Web Pages</string>
+    <string name="tab_plugins">Plugins</string>
+    <string name="action_add">Add</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_delete">Delete</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="confirm">Confirm</string>
+</resources>

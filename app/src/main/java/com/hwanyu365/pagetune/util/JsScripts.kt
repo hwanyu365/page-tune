@@ -1,4 +1,4 @@
-package com.hwanyu365.webplugin.util
+package com.hwanyu365.pagetune.util
 
 object JsScripts {
 

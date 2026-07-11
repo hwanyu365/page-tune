@@ -1,4 +1,4 @@
-package com.hwanyu365.webplugin.ui.fragment
+package com.hwanyu365.pagetune.ui.fragment
 
 import android.app.AlertDialog
 import android.content.Intent
@@ -7,10 +7,10 @@ import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.hwanyu365.webplugin.PluginEditActivity
-import com.hwanyu365.webplugin.R
-import com.hwanyu365.webplugin.db.AppDatabase
-import com.hwanyu365.webplugin.ui.adapter.PluginAdapter
+import com.hwanyu365.pagetune.PluginEditActivity
+import com.hwanyu365.pagetune.R
+import com.hwanyu365.pagetune.db.AppDatabase
+import com.hwanyu365.pagetune.ui.adapter.PluginAdapter
 import kotlinx.android.synthetic.main.fragment_plugins.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -67,8 +67,8 @@ class PluginsFragment : Fragment() {
                 return@setOnClickListener
             }
             AlertDialog.Builder(requireContext())
-                .setTitle("Delete Plugins")
-                .setMessage("Are you sure you want to delete " + selectedIds.size + " plugins?")
+                .setTitle("Delete Tunes")
+                .setMessage("Are you sure you want to delete " + selectedIds.size + " Tunes?")
                 .setPositiveButton("Delete") { _, _ ->
                     mainScope.launch {
                         withContext(Dispatchers.IO) {

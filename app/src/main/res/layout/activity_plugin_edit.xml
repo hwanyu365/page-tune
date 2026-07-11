@@ -12,11 +12,11 @@
         android:padding="8dp"
         android:background="@color/colorPrimary">
 
-        <com.hwanyu365.webplugin.ui.view.NoAutofillEditText
+        <com.hwanyu365.pagetune.ui.view.NoAutofillEditText
             android:id="@+id/et_inp_pname"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Plugin Name"
+            android:hint="Tune Name"
             android:textColor="@color/colorWhite"
             android:textColorHint="@color/colorTextSecondary"
             android:backgroundTint="@color/colorWhite"
@@ -31,7 +31,7 @@
             android:orientation="horizontal"
             android:layout_marginTop="4dp">
 
-            <com.hwanyu365.webplugin.ui.view.NoAutofillEditText
+            <com.hwanyu365.pagetune.ui.view.NoAutofillEditText
                 android:id="@+id/et_inp_taddr"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -269,7 +269,7 @@
                             android:text="Gesture Area Height Percent (1% - 50%):"
                             android:textSize="11sp" />
 
-                        <com.hwanyu365.webplugin.ui.view.NoAutofillEditText
+                        <com.hwanyu365.pagetune.ui.view.NoAutofillEditText
                             android:id="@+id/et_gesture_area"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -287,7 +287,7 @@
                         android:id="@+id/btn_add_action"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Add Action to Plugin"
+                        android:text="Add Setup to Tune"
                         android:backgroundTint="@color/colorPrimary"
                         android:textColor="@color/colorWhite" />
 
@@ -297,7 +297,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Registered Actions:"
+                    android:text="Tune Setups:"
                     android:textStyle="bold"
                     android:textSize="12sp"
                     android:layout_marginTop="8dp" />

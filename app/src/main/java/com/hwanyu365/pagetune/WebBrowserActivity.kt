@@ -1,4 +1,4 @@
-package com.hwanyu365.webplugin
+package com.hwanyu365.pagetune
 
 import android.annotation.SuppressLint
 import android.graphics.Rect
@@ -12,10 +12,10 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.hwanyu365.webplugin.db.AppDatabase
-import com.hwanyu365.webplugin.db.PluginAction
-import com.hwanyu365.webplugin.db.WebPageWithPlugin
-import com.hwanyu365.webplugin.util.JsScripts
+import com.hwanyu365.pagetune.db.AppDatabase
+import com.hwanyu365.pagetune.db.PluginAction
+import com.hwanyu365.pagetune.db.WebPageWithPlugin
+import com.hwanyu365.pagetune.util.JsScripts
 import kotlinx.android.synthetic.main.activity_web_browser.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

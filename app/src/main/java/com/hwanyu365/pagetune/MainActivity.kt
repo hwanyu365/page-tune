@@ -1,12 +1,12 @@
-package com.hwanyu365.webplugin
+package com.hwanyu365.pagetune
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import com.hwanyu365.webplugin.ui.fragment.PluginsFragment
-import com.hwanyu365.webplugin.ui.fragment.WebPagesFragment
+import com.hwanyu365.pagetune.ui.fragment.PluginsFragment
+import com.hwanyu365.pagetune.ui.fragment.WebPagesFragment
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {

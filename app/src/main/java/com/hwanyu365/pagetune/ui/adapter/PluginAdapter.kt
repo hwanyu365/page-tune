@@ -1,11 +1,11 @@
-package com.hwanyu365.webplugin.ui.adapter
+package com.hwanyu365.pagetune.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.hwanyu365.webplugin.R
-import com.hwanyu365.webplugin.db.Plugin
+import com.hwanyu365.pagetune.R
+import com.hwanyu365.pagetune.db.Plugin
 import kotlinx.android.synthetic.main.item_plugin.view.*
 
 class PluginAdapter(

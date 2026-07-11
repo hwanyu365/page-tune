@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">Web Plugin Browser</string>
+    <string name="app_name">PageTune</string>
     <string name="tab_webpages">Web Pages</string>
-    <string name="tab_plugins">Plugins</string>
+    <string name="tab_plugins">Tunes</string>
     <string name="action_add">Add</string>
     <string name="action_edit">Edit</string>
     <string name="action_delete">Delete</string>

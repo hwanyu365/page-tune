@@ -57,7 +57,7 @@
                 android:textColor="@color/colorAccent"
                 android:textStyle="italic"
                 android:layout_marginTop="4dp"
-                android:text="Plugin: None" />
+                android:text="Tune: None" />
 
         </LinearLayout>
 

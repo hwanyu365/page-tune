@@ -1,4 +1,4 @@
-package com.hwanyu365.webplugin.db
+package com.hwanyu365.pagetune.db
 
 import androidx.room.*
 

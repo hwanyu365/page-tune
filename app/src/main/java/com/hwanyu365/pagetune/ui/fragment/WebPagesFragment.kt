@@ -1,4 +1,4 @@
-package com.hwanyu365.webplugin.ui.fragment
+package com.hwanyu365.pagetune.ui.fragment
 
 import android.app.AlertDialog
 import android.content.Intent
@@ -8,13 +8,13 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.hwanyu365.webplugin.R
-import com.hwanyu365.webplugin.WebBrowserActivity
-import com.hwanyu365.webplugin.db.AppDatabase
-import com.hwanyu365.webplugin.db.Plugin
-import com.hwanyu365.webplugin.db.WebPage
-import com.hwanyu365.webplugin.db.WebPageWithPlugin
-import com.hwanyu365.webplugin.ui.adapter.WebPageAdapter
+import com.hwanyu365.pagetune.R
+import com.hwanyu365.pagetune.WebBrowserActivity
+import com.hwanyu365.pagetune.db.AppDatabase
+import com.hwanyu365.pagetune.db.Plugin
+import com.hwanyu365.pagetune.db.WebPage
+import com.hwanyu365.pagetune.db.WebPageWithPlugin
+import com.hwanyu365.pagetune.ui.adapter.WebPageAdapter
 import kotlinx.android.synthetic.main.dialog_webpage_edit.view.*
 import kotlinx.android.synthetic.main.fragment_webpages.*
 import kotlinx.coroutines.CoroutineScope

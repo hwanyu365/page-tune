@@ -1,4 +1,4 @@
-package com.hwanyu365.webplugin
+package com.hwanyu365.pagetune
 
 import android.annotation.SuppressLint
 import android.graphics.Color
@@ -11,10 +11,10 @@ import android.webkit.WebViewClient
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.hwanyu365.webplugin.db.AppDatabase
-import com.hwanyu365.webplugin.db.Plugin
-import com.hwanyu365.webplugin.db.PluginAction
-import com.hwanyu365.webplugin.util.JsScripts
+import com.hwanyu365.pagetune.db.AppDatabase
+import com.hwanyu365.pagetune.db.Plugin
+import com.hwanyu365.pagetune.db.PluginAction
+import com.hwanyu365.pagetune.util.JsScripts
 import kotlinx.android.synthetic.main.activity_plugin_edit.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -287,14 +287,14 @@ class PluginEditActivity : AppCompatActivity() {
         // Apply instantly to the inspector WebView
         applyCurrentHiddenActions()
         
-        Toast.makeText(this, "Action added successfully", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Setup added successfully", Toast.LENGTH_SHORT).show()
     }
 
     private fun refreshActionsListUI() {
         layout_actions_list.removeAllViews()
         if (tempActions.isEmpty()) {
             val emptyTv = TextView(this).apply {
-                text = "No actions added yet."
+                text = "No setups added yet."
                 textSize = 12f
                 setTextColor(androidx.core.content.ContextCompat.getColor(this@PluginEditActivity, R.color.colorTextSecondary))
             }
@@ -314,13 +314,13 @@ class PluginEditActivity : AppCompatActivity() {
                 val json = JSONObject(action.targetSelector)
                 val selector = json.optString("selector")
                 val typeDesc = if (action.actionType == "hidden") "Hide" else "Click via ${action.triggerType}"
-                text1.text = "Action #${index + 1}: $typeDesc"
+                text1.text = "Setup #${index + 1}: $typeDesc"
                 text1.setTextColor(textColorPrimary)
                 text2.text = selector
                 text2.setTextColor(textColorSecondary)
                 text2.textSize = 11f
             } catch (e: Exception) {
-                text1.text = "Action #${index + 1}: ${action.actionType}"
+                text1.text = "Setup #${index + 1}: ${action.actionType}"
                 text1.setTextColor(textColorPrimary)
                 text2.text = "Broken Selector"
                 text2.setTextColor(textColorSecondary)
@@ -331,7 +331,7 @@ class PluginEditActivity : AppCompatActivity() {
                 tempActions.removeAt(index)
                 refreshActionsListUI()
                 wv_inspector.reload() // Reload page to restore deleted hidden item
-                Toast.makeText(this, "Action removed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Setup removed", Toast.LENGTH_SHORT).show()
             }
 
             layout_actions_list.addView(view)
@@ -341,7 +341,7 @@ class PluginEditActivity : AppCompatActivity() {
     private fun savePlugin() {
         val name = et_inp_pname.text.toString().trim()
         if (name.isEmpty()) {
-            Toast.makeText(this, "Please enter a plugin name", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Please enter a Tune name", Toast.LENGTH_SHORT).show()
             return
         }
         val testUrl = et_inp_taddr.text.toString().trim()
@@ -363,7 +363,7 @@ class PluginEditActivity : AppCompatActivity() {
                     db.pluginDao().insertActions(actionsToSave)
                 }
             }
-            Toast.makeText(this@PluginEditActivity, "Plugin saved successfully", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@PluginEditActivity, "Tune saved successfully", Toast.LENGTH_SHORT).show()
             finish()
         }
     }

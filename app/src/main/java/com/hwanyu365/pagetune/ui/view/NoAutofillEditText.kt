@@ -1,4 +1,4 @@
-package com.hwanyu365.webplugin.ui.view
+package com.hwanyu365.pagetune.ui.view
 
 import android.content.Context
 import android.util.AttributeSet

@@ -2,14 +2,12 @@ import os
 import sys
 
 def main():
-    # Automatically check and install Pillow if not installed
     try:
-        from PIL import Image, ImageOps
+        from PIL import Image
     except ImportError:
-        print("Pillow library not found. Installing...")
         import subprocess
         subprocess.check_call([sys.executable, "-m", "pip", "install", "pillow"])
-        from PIL import Image, ImageOps
+        from PIL import Image
 
     input_path = r"C:\Users\hwanyu365\.gemini\antigravity-cli\brain\f409b679-6c98-4773-ad9c-2608ab6ca1c3\ic_launcher_single_neon_line_1783771382302.jpg"
     output_path = r"E:\01_dev\page-tune\app\src\main\res\drawable\ic_launcher.png"
@@ -18,40 +16,42 @@ def main():
         print(f"Input file not found: {input_path}")
         return
 
-    print("Opening source icon image...")
+    print("Opening source icon image for high-precision cleaning...")
     img = Image.open(input_path).convert("RGBA")
     width, height = img.size
+    pixels = img.load()
 
-    # We want to crop out the outer white borders.
-    # Usually, the image generator creates a white background at the very edge (often around 10-20 pixels).
-    # Let's inspect the pixels and find where the white border ends, or simply crop by a safe margin (e.g., 5%),
-    # and then place it onto a clean solid #171717 background.
+    # Define target background color (#171717)
+    target_bg_color = (23, 23, 23, 255) # RGB 23, 23, 23
+
+    # We will process pixels.
+    # 1. Any pixel that is bright/whitish (R > 180, G > 180, B > 180) -> change to #171717
+    # 2. To ensure no remnants in the outer corners, any pixel within the outer 8% margin
+    #    that is not part of the glowing orange logo (which is highly red-saturated) -> change to #171717
+    # Orange logo pixels usually have high Red value and lower Green/Blue, e.g., R > 150, G < 120
     
-    # 1. Define safe crop margins (5% from each side) to guarantee all white borders are discarded
-    margin_w = int(width * 0.05)
-    margin_h = int(height * 0.05)
-    
-    cropped_img = img.crop((margin_w, margin_h, width - margin_w, height - margin_h))
-    
-    # 2. Create a brand new clean solid background of color #171717 (23, 23, 23)
-    target_bg_color = (23, 23, 23, 255) # #171717 in RGBA
-    new_img = Image.new("RGBA", (width, height), target_bg_color)
-    
-    # 3. Resize cropped logo back to original size or paste it centrally
-    # Let's resize cropped_img back to fit nicely inside the clean #171717 canvas with a tiny padding
-    target_size = (int(width * 0.9), int(height * 0.9))
-    resized_logo = cropped_img.resize(target_size, Image.Resampling.LANCZOS)
-    
-    # Paste centered
-    offset_x = (width - target_size[0]) // 2
-    offset_y = (height - target_size[1]) // 2
-    new_img.paste(resized_logo, (offset_x, offset_y), resized_logo)
-    
+    margin_w = int(width * 0.08)
+    margin_h = int(height * 0.08)
+
+    for y in range(height):
+        for x in range(width):
+            r, g, b, a = pixels[x, y]
+            
+            # Condition A: Bright/white pixel (e.g. background glare, corners)
+            is_bright = (r > 160 and g > 160 and b > 160)
+            
+            # Condition B: Edge pixel that isn't part of the orange neon logo
+            is_in_edge_margin = (x < margin_w or x > width - margin_w or y < margin_h or y > height - margin_h)
+            is_orange = (r > 120 and g < 130 and b < 100) # Orange detection heuristic
+            
+            if is_bright or (is_in_edge_margin and not is_orange):
+                pixels[x, y] = target_bg_color
+
     # Save as PNG
-    print(f"Saving cleaned icon to: {output_path}")
+    print(f"Saving high-precision cleaned icon to: {output_path}")
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    new_img.save(output_path, "PNG")
-    print("Icon cleaning completed successfully!")
+    img.save(output_path, "PNG")
+    print("Precision icon cleaning completed successfully!")
 
 if __name__ == "__main__":
     main()

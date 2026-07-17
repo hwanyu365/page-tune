@@ -19,9 +19,6 @@ interface PluginDao {
     @Update
     suspend fun updatePlugin(plugin: Plugin)
 
-    @Delete
-    suspend fun deletePlugin(plugin: Plugin)
-
     @Query("SELECT * FROM plugins ORDER BY id DESC")
     suspend fun getAllPlugins(): List<Plugin>
 
@@ -29,14 +26,7 @@ interface PluginDao {
     @Query("SELECT * FROM plugins WHERE id = :pluginId")
     suspend fun getPluginWithActions(pluginId: Long): PluginWithActions?
 
-    @Transaction
-    @Query("SELECT * FROM plugins ORDER BY id DESC")
-    suspend fun getAllPluginsWithActions(): List<PluginWithActions>
-
     // Plugin Actions
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAction(action: PluginAction): Long
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertActions(actions: List<PluginAction>)
 

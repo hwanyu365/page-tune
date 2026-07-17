@@ -57,30 +57,8 @@ class PluginEditActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled", "AddJavascriptInterface")
     private fun setupWebView() {
-        val settings = wv_inspector.settings
-        settings.javaScriptEnabled = true
-        settings.domStorageEnabled = true
-        settings.databaseEnabled = true
-        settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
-        settings.javaScriptCanOpenWindowsAutomatically = true
-        settings.mediaPlaybackRequiresUserGesture = false
-        settings.builtInZoomControls = false // Disable zoom control to avoid double click interference
-        
-        // Anti-blocking: set User-Agent to standard mobile Chrome (Latest Android 13 version)
-        settings.userAgentString = "Mozilla/5.0 (Linux; Android 13; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
-        
-        // Mixed Content allow
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-        }
+        com.hwanyu365.pagetune.util.WebViewConfig.applyCommon(wv_inspector)
 
-        // Enable cookies
-        val cookieManager = android.webkit.CookieManager.getInstance()
-        cookieManager.setAcceptCookie(true)
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            cookieManager.setAcceptThirdPartyCookies(wv_inspector, true)
-        }
-        
         wv_inspector.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
                 super.onPageStarted(view, url, favicon)

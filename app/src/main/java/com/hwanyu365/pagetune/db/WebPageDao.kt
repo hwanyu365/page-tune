@@ -19,14 +19,8 @@ interface WebPageDao {
     @Update
     suspend fun updateWebPage(webPage: WebPage)
 
-    @Delete
-    suspend fun deleteWebPage(webPage: WebPage)
-
     @Query("DELETE FROM webpages WHERE id IN (:ids)")
     suspend fun deleteWebPagesByIds(ids: List<Long>)
-
-    @Query("SELECT * FROM webpages ORDER BY id DESC")
-    suspend fun getAllWebPages(): List<WebPage>
 
     @Transaction
     @Query("SELECT * FROM webpages ORDER BY id DESC")

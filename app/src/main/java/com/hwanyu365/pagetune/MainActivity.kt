@@ -16,27 +16,17 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        val adapter = MainPagerAdapter(supportFragmentManager)
-        adapter.addFragment(WebPagesFragment(), getString(R.string.tab_webpages))
-        adapter.addFragment(PluginsFragment(), getString(R.string.tab_plugins))
-
-        view_pager.adapter = adapter
+        view_pager.adapter = MainPagerAdapter(supportFragmentManager)
         tab_layout.setupWithViewPager(view_pager)
     }
 
-    private class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
-        private val fragmentList = mutableListOf<Fragment>()
-        private val fragmentTitleList = mutableListOf<String>()
+    private inner class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+        override fun getCount(): Int = 2
 
-        fun addFragment(fragment: Fragment, title: String) {
-            fragmentList.add(fragment)
-            fragmentTitleList.add(title)
-        }
+        override fun getItem(position: Int): Fragment =
+            if (position == 0) WebPagesFragment() else PluginsFragment()
 
-        override fun getItem(position: Int): Fragment = fragmentList[position]
-
-        override fun getCount(): Int = fragmentList.size
-
-        override fun getPageTitle(position: Int): CharSequence? = fragmentTitleList[position]
+        override fun getPageTitle(position: Int): CharSequence =
+            getString(if (position == 0) R.string.tab_webpages else R.string.tab_plugins)
     }
 }

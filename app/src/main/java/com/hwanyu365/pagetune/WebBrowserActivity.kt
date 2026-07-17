@@ -7,14 +7,12 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.webkit.WebChromeClient
-import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.hwanyu365.pagetune.db.AppDatabase
 import com.hwanyu365.pagetune.db.PluginAction
-import com.hwanyu365.pagetune.db.WebPageWithPlugin
 import com.hwanyu365.pagetune.util.JsScripts
 import kotlinx.android.synthetic.main.activity_web_browser.*
 import kotlinx.coroutines.CoroutineScope
@@ -29,8 +27,7 @@ class WebBrowserActivity : AppCompatActivity() {
     private val mainScope = CoroutineScope(Dispatchers.Main)
     
     private var webPageId: Long = -1
-    private var webPageData: WebPageWithPlugin? = null
-    
+
     private var mGestureDetector: GestureDetector? = null
     private val mHitRect = Rect()
     private var originalUrlHost: String? = null
@@ -75,31 +72,11 @@ class WebBrowserActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
     private fun setupWebView() {
-        val webSettings: WebSettings = wv_browser.settings
-        webSettings.javaScriptEnabled = true
-        webSettings.domStorageEnabled = true
-        webSettings.databaseEnabled = true
-        webSettings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
-        webSettings.javaScriptCanOpenWindowsAutomatically = true
-        webSettings.mediaPlaybackRequiresUserGesture = false
-        webSettings.builtInZoomControls = false
-        webSettings.displayZoomControls = false
-        webSettings.useWideViewPort = true
-        webSettings.loadWithOverviewMode = true
-
-        // Anti-blocking: set User-Agent to standard mobile Chrome (Latest Android 13 version)
-        webSettings.userAgentString = "Mozilla/5.0 (Linux; Android 13; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
-        
-        // Mixed Content allow
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            webSettings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-        }
-
-        // Enable cookies
-        val cookieManager = android.webkit.CookieManager.getInstance()
-        cookieManager.setAcceptCookie(true)
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            cookieManager.setAcceptThirdPartyCookies(wv_browser, true)
+        com.hwanyu365.pagetune.util.WebViewConfig.applyCommon(wv_browser)
+        wv_browser.settings.apply {
+            displayZoomControls = false
+            useWideViewPort = true
+            loadWithOverviewMode = true
         }
 
         wv_browser.webViewClient = object : WebViewClient() {
@@ -288,10 +265,6 @@ class WebBrowserActivity : AppCompatActivity() {
         } else {
             layout_floating_gnb.visibility = View.GONE
         }
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
     }
 
 }

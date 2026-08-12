@@ -20,8 +20,9 @@ import androidx.room.PrimaryKey
 data class PluginAction(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val pluginId: Long,
-    val actionType: String, // "hidden" or "click"
+    val actionType: String, // "hidden", "click" or "color"
     val targetSelector: String, // JSON dynamic selector details
     val triggerType: String? = null, // "gesture_top", "gesture_bottom", "gnb_prev", "gnb_next"
-    val gestureAreaPercent: Int = 40 // Default to 40% from reference app
+    val gestureAreaPercent: Int = 40, // Default to 40% from reference app
+    val styleCss: String? = null // "color" action 의 CSS 선언부 (e.g. "background-color:#000000;color:#ffffff")
 )

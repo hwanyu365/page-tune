@@ -211,7 +211,67 @@
                             android:layout_height="wrap_content"
                             android:text="Click Event" />
 
+                        <RadioButton
+                            android:id="@+id/rb_action_color"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Color" />
+
                     </RadioGroup>
+
+                    <!-- Panel for Color setup (Visible only when 'Color' is selected) -->
+                    <LinearLayout
+                        android:id="@+id/layout_color_setup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Colors (hex or name, leave blank to keep):"
+                            android:textStyle="bold"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Background:"
+                            android:textSize="11sp" />
+
+                        <com.hwanyu365.pagetune.ui.view.NoAutofillEditText
+                            android:id="@+id/et_color_bg"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="e.g. #000000 or black"
+                            android:textColor="@color/colorTextPrimary"
+                            android:textColorHint="@color/colorTextSecondary"
+                            android:inputType="textNoSuggestions"
+                            android:importantForAutofill="no"
+                            android:privateImeOptions="com.samsung.android.inputmethod.disableAutofill=true,disableAutofill=true"
+                            android:autofillHints="" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Text:"
+                            android:textSize="11sp" />
+
+                        <com.hwanyu365.pagetune.ui.view.NoAutofillEditText
+                            android:id="@+id/et_color_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="e.g. #ffffff or white"
+                            android:textColor="@color/colorTextPrimary"
+                            android:textColorHint="@color/colorTextSecondary"
+                            android:inputType="textNoSuggestions"
+                            android:importantForAutofill="no"
+                            android:privateImeOptions="com.samsung.android.inputmethod.disableAutofill=true,disableAutofill=true"
+                            android:autofillHints="" />
+
+                    </LinearLayout>
 
                     <!-- Panel for Click Trigger setup (Visible only when 'Click Event' is selected) -->
                     <LinearLayout

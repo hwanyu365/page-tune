@@ -34,6 +34,7 @@ class WebBrowserActivity : AppCompatActivity() {
 
     // Cached actions for quick access
     private val hiddenActions = mutableListOf<PluginAction>()
+    private val colorActions = mutableListOf<PluginAction>()
     private var gestureTopAction: PluginAction? = null
     private var gestureBottomAction: PluginAction? = null
     private var gnbPrevAction: PluginAction? = null
@@ -89,6 +90,7 @@ class WebBrowserActivity : AppCompatActivity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 pb_browser_loading.visibility = View.GONE
+                applyColorActions()
                 applyHiddenActions()
             }
 
@@ -179,6 +181,7 @@ class WebBrowserActivity : AppCompatActivity() {
 
     private fun classifyActions(actions: List<PluginAction>) {
         hiddenActions.clear()
+        colorActions.clear()
         gestureTopAction = null
         gestureBottomAction = null
         gnbPrevAction = null
@@ -187,6 +190,8 @@ class WebBrowserActivity : AppCompatActivity() {
         actions.forEach { action ->
             if (action.actionType == "hidden") {
                 hiddenActions.add(action)
+            } else if (action.actionType == "color") {
+                colorActions.add(action)
             } else if (action.actionType == "click") {
                 when (action.triggerType) {
                     "gesture_top" -> gestureTopAction = action
@@ -196,6 +201,11 @@ class WebBrowserActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun applyColorActions() {
+        if (colorActions.isEmpty()) return
+        wv_browser.evaluateJavascript(JsScripts.getColorScriptFor(colorActions), null)
     }
 
     private fun applyHiddenActions() {

@@ -3,6 +3,13 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
+// 마이그레이션 SQL 이 엔티티와 어긋나면 Room 이 런타임에 터진다. 스키마 스냅샷을 남겨 커밋 시점에 대조할 수 있게 한다.
+kapt {
+    arguments {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
+}
+
 android {
     compileSdkVersion 28
 
@@ -36,4 +43,6 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
+
+    testImplementation 'junit:junit:4.13.2'
 }

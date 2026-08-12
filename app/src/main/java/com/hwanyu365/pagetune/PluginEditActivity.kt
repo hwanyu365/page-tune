@@ -75,7 +75,7 @@ class PluginEditActivity : AppCompatActivity() {
                     injectPickerScript()
                 }
                 // Automatically re-apply all current hidden actions
-                applyCurrentHiddenActions()
+                applyCurrentActions()
             }
 
             override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
@@ -134,11 +134,10 @@ class PluginEditActivity : AppCompatActivity() {
         }
 
         rg_action_type.setOnCheckedChangeListener { _, checkedId ->
-            if (checkedId == R.id.rb_action_click) {
-                layout_click_trigger_setup.visibility = View.VISIBLE
-            } else {
-                layout_click_trigger_setup.visibility = View.GONE
-            }
+            layout_click_trigger_setup.visibility =
+                if (checkedId == R.id.rb_action_click) View.VISIBLE else View.GONE
+            layout_color_setup.visibility =
+                if (checkedId == R.id.rb_action_color) View.VISIBLE else View.GONE
         }
 
         btn_add_action.setOnClickListener {
@@ -201,7 +200,12 @@ class PluginEditActivity : AppCompatActivity() {
         selectedElementJson = null
     }
 
-    private fun applyCurrentHiddenActions() {
+    private fun applyCurrentActions() {
+        // 색상은 CSS 규칙이라 hidden 유무와 무관하게 항상 갱신한다. 액션이 비면 규칙도 비워져 자동으로 풀린다.
+        wv_inspector.evaluateJavascript(
+            JsScripts.getColorScriptFor(tempActions.filter { it.actionType == "color" }), null
+        )
+
         val hiddenActions = tempActions.filter { it.actionType == "hidden" }
         if (hiddenActions.isEmpty()) {
             // Disconnect old MutationObserver if no hidden actions
@@ -216,12 +220,42 @@ class PluginEditActivity : AppCompatActivity() {
         wv_inspector.evaluateJavascript(script, null)
     }
 
+    /** 색상 입력을 CSS 선언부로 만든다. 입력이 잘못됐거나 둘 다 비면 null 을 돌려 액션 추가를 막는다. */
+    private fun buildStyleCss(): String? {
+        val bg = et_color_bg.text.toString().trim()
+        val fg = et_color_text.text.toString().trim()
+
+        if (listOf(bg, fg).any { it.isNotEmpty() && !JsScripts.isColorValue(it) }) {
+            Toast.makeText(this, "Enter a color like #000000 or black", Toast.LENGTH_SHORT).show()
+            return null
+        }
+
+        val declarations = listOfNotNull(
+            bg.takeIf { it.isNotEmpty() }?.let { "background-color:$it" },
+            fg.takeIf { it.isNotEmpty() }?.let { "color:$it" }
+        )
+        if (declarations.isEmpty()) {
+            Toast.makeText(this, "Please enter at least one color", Toast.LENGTH_SHORT).show()
+            return null
+        }
+        return declarations.joinToString(";")
+    }
+
     private fun addAction() {
         val details = selectedElementJson ?: return
-        val actionType = if (rb_action_hidden.isChecked) "hidden" else "click"
-        
+        val actionType = when {
+            rb_action_click.isChecked -> "click"
+            rb_action_color.isChecked -> "color"
+            else -> "hidden"
+        }
+
         var triggerType: String? = null
         var areaPercent = 40
+        var styleCss: String? = null
+
+        if (actionType == "color") {
+            styleCss = buildStyleCss() ?: return
+        }
 
         if (actionType == "click") {
             triggerType = when {
@@ -250,7 +284,8 @@ class PluginEditActivity : AppCompatActivity() {
             actionType = actionType,
             targetSelector = details,
             triggerType = triggerType,
-            gestureAreaPercent = areaPercent
+            gestureAreaPercent = areaPercent,
+            styleCss = styleCss
         )
 
         tempActions.add(action)
@@ -263,7 +298,7 @@ class PluginEditActivity : AppCompatActivity() {
         hideActionConfigPanel()
         
         // Apply instantly to the inspector WebView
-        applyCurrentHiddenActions()
+        applyCurrentActions()
         
         Toast.makeText(this, "Setup added successfully", Toast.LENGTH_SHORT).show()
     }
@@ -291,7 +326,11 @@ class PluginEditActivity : AppCompatActivity() {
             try {
                 val json = JSONObject(action.targetSelector)
                 val selector = json.optString("selector")
-                val typeDesc = if (action.actionType == "hidden") "Hide" else "Click via ${action.triggerType}"
+                val typeDesc = when (action.actionType) {
+                    "hidden" -> "Hide"
+                    "color" -> "Color (${action.styleCss})"
+                    else -> "Click via ${action.triggerType}"
+                }
                 text1.text = "Setup #${index + 1}: $typeDesc"
                 text1.setTextColor(textColorPrimary)
                 text2.text = selector

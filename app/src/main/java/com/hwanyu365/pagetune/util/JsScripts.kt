@@ -1,5 +1,8 @@
 package com.hwanyu365.pagetune.util
 
+import com.hwanyu365.pagetune.db.PluginAction
+import org.json.JSONObject
+
 object JsScripts {
 
     /**
@@ -187,6 +190,68 @@ object JsScripts {
                 } else {
                     console.error("WebPlugin: Target element not found for click.");
                 }
+            })();
+        """.trimIndent()
+    }
+
+    /**
+     * hex(`#000`, `#000000`) 또는 CSS 색상 이름(`red`, `transparent`)만 허용한다.
+     * 알파벳만 통과시키므로 값에 세미콜론이나 중괄호를 끼워 다른 CSS 선언을 덧붙이는 것이 막힌다.
+     * 이름의 오타는 잡지 않는다. 브라우저가 해당 선언만 무시하고, 인스펙터 미리보기에서 바로 드러난다.
+     */
+    fun isColorValue(value: String): Boolean = COLOR_VALUE.matches(value)
+
+    private val COLOR_VALUE = Regex("^(#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})|[a-zA-Z]+)$")
+
+    /**
+     * "color" 액션들을 style 주입 스크립트로 만든다.
+     * 액션이 비면 빈 CSS 가 나가 style 태그를 비우므로, 액션 삭제 시 색상도 함께 풀린다.
+     */
+    fun getColorScriptFor(actions: List<PluginAction>): String {
+        val rules = actions.mapNotNull { action ->
+            runCatching {
+                val info = JSONObject(action.targetSelector)
+                val id = info.optString("id")
+                // id 가 있으면 가장 안정적인 셀렉터다.
+                val selector = if (id.isNotEmpty()) "#$id" else info.optString("selector")
+                selector to (action.styleCss ?: "")
+            }.getOrNull()
+        }
+        return getColorStyleScript(buildColorCss(rules))
+    }
+
+    /**
+     * "color" 액션들을 하나의 CSS 텍스트로 조립한다.
+     * 셀렉터에 하위 노드(`sel *`)까지 넣는 이유는, 자식이 자기 색을 갖고 있으면 부모에만 건 규칙이 덮이기 때문이다.
+     * @param rules (CSS 셀렉터, "background-color:#000;color:#fff" 형태의 선언부) 쌍.
+     */
+    fun buildColorCss(rules: List<Pair<String, String>>): String {
+        return rules.mapNotNull { (selector, declarations) ->
+            val sel = selector.trim()
+            val decls = declarations.split(";")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .joinToString("; ") { "$it !important" }
+            if (sel.isEmpty() || decls.isEmpty()) null else "$sel, $sel * { $decls; }"
+        }.joinToString("\n")
+    }
+
+    /**
+     * 색상은 MutationObserver 대신 style 태그로 넣는다.
+     * CSS 는 나중에 추가된 노드에도 자동 적용되므로 재적용 루프가 필요 없고, hide 쪽 observer 와도 충돌하지 않는다.
+     */
+    fun getColorStyleScript(css: String): String {
+        val escaped = css.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n")
+        return """
+            (function() {
+                var css = '$escaped';
+                var tag = document.getElementById('webPluginColorStyle');
+                if (!tag) {
+                    tag = document.createElement('style');
+                    tag.id = 'webPluginColorStyle';
+                    (document.head || document.documentElement).appendChild(tag);
+                }
+                tag.textContent = css;
             })();
         """.trimIndent()
     }

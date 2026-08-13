@@ -32,8 +32,6 @@ class PluginEditActivity : AppCompatActivity() {
     private var selectedElementJson: String? = null
     
     private var isInspectMode = false
-    private var retryCount = 0
-    private val MAX_RETRY = 3
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,31 +58,16 @@ class PluginEditActivity : AppCompatActivity() {
         com.hwanyu365.pagetune.util.WebViewConfig.applyCommon(wv_inspector)
 
         wv_inspector.webViewClient = object : WebViewClient() {
-            override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
-                super.onPageStarted(view, url, favicon)
-                // Bypass navigator.webdriver detection used by Cloudflare
-                view?.evaluateJavascript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})", null)
-            }
-
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
-                // Reset retry count on successful load
-                retryCount = 0
+                // Cloudflare 통과 쿠키(cf_clearance)는 앱이 죽으면 날아간다. 페이지마다 디스크로 내려 재방문 시 챌린지를 건너뛴다.
+                android.webkit.CookieManager.getInstance().flush()
                 // If inspect mode is on when page finishes loading, inject picker script again
                 if (isInspectMode) {
                     injectPickerScript()
                 }
                 // Automatically re-apply all current hidden actions
                 applyCurrentActions()
-            }
-
-            override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
-                super.onReceivedError(view, errorCode, description, failingUrl)
-                // Auto-retry on connection reset (Cloudflare challenge needs time)
-                if (errorCode == ERROR_CONNECT && retryCount < MAX_RETRY) {
-                    retryCount++
-                    view?.postDelayed({ view.reload() }, 3000)
-                }
             }
         }
         wv_inspector.webChromeClient = WebChromeClient()

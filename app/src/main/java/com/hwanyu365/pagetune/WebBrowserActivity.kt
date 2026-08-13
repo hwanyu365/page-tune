@@ -81,14 +81,10 @@ class WebBrowserActivity : AppCompatActivity() {
         }
 
         wv_browser.webViewClient = object : WebViewClient() {
-            override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
-                super.onPageStarted(view, url, favicon)
-                // Bypass navigator.webdriver detection used by Cloudflare
-                view?.evaluateJavascript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})", null)
-            }
-
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
+                // Cloudflare 통과 쿠키(cf_clearance)는 앱이 죽으면 날아간다. 페이지마다 디스크로 내려 재방문 시 챌린지를 건너뛴다.
+                android.webkit.CookieManager.getInstance().flush()
                 pb_browser_loading.visibility = View.GONE
                 applyColorActions()
                 applyHiddenActions()

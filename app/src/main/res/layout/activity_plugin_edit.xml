@@ -231,45 +231,28 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Colors (hex or name, leave blank to keep):"
+                            android:text="Colors (tap to pick, Clear to keep original):"
                             android:textStyle="bold"
                             android:textSize="12sp" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Background:"
-                            android:textSize="11sp" />
-
-                        <com.hwanyu365.pagetune.ui.view.NoAutofillEditText
-                            android:id="@+id/et_color_bg"
+                        <Button
+                            android:id="@+id/btn_color_bg"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="e.g. #000000 or black"
-                            android:textColor="@color/colorTextPrimary"
-                            android:textColorHint="@color/colorTextSecondary"
-                            android:inputType="textNoSuggestions"
-                            android:importantForAutofill="no"
-                            android:privateImeOptions="com.samsung.android.inputmethod.disableAutofill=true,disableAutofill=true"
-                            android:autofillHints="" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Text:"
+                            android:text="Background: none"
+                            android:backgroundTint="@color/colorPrimary"
+                            android:textColor="@color/colorWhite"
                             android:textSize="11sp" />
 
-                        <com.hwanyu365.pagetune.ui.view.NoAutofillEditText
-                            android:id="@+id/et_color_text"
+                        <Button
+                            android:id="@+id/btn_color_text"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="e.g. #ffffff or white"
-                            android:textColor="@color/colorTextPrimary"
-                            android:textColorHint="@color/colorTextSecondary"
-                            android:inputType="textNoSuggestions"
-                            android:importantForAutofill="no"
-                            android:privateImeOptions="com.samsung.android.inputmethod.disableAutofill=true,disableAutofill=true"
-                            android:autofillHints="" />
+                            android:layout_marginTop="4dp"
+                            android:text="Text: none"
+                            android:backgroundTint="@color/colorPrimary"
+                            android:textColor="@color/colorWhite"
+                            android:textSize="11sp" />
 
                     </LinearLayout>
 

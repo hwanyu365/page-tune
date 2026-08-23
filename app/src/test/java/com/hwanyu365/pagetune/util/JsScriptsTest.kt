@@ -8,21 +8,6 @@ import org.junit.Test
 class JsScriptsTest {
 
     @Test
-    fun `hex 와 CSS 색상 이름을 모두 받는다`() {
-        listOf("#000000", "#FFF", "red", "white", "rebeccapurple", "transparent").forEach {
-            assertTrue(it, JsScripts.isColorValue(it))
-        }
-    }
-
-    @Test
-    fun `CSS 규칙을 깨뜨릴 수 있는 값은 거부한다`() {
-        // 세미콜론이나 중괄호가 통과하면 임의의 CSS 선언을 덧붙일 수 있다.
-        listOf("", " ", "red; }", "#12345", "#00ff00aa", "rgb(0,0,0)", "url(x)").forEach {
-            assertFalse(it, JsScripts.isColorValue(it))
-        }
-    }
-
-    @Test
     fun `색상 선언마다 important 를 붙인다`() {
         val css = JsScripts.buildColorCss(listOf("#content" to "background-color:#000000;color:#ffffff"))
 

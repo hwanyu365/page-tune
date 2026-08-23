@@ -9,4 +9,6 @@
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
     <string name="confirm">Confirm</string>
+    <string name="ok">OK</string>
+    <string name="clear">Clear</string>
 </resources>

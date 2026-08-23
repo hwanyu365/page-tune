@@ -195,15 +195,6 @@ object JsScripts {
     }
 
     /**
-     * hex(`#000`, `#000000`) 또는 CSS 색상 이름(`red`, `transparent`)만 허용한다.
-     * 알파벳만 통과시키므로 값에 세미콜론이나 중괄호를 끼워 다른 CSS 선언을 덧붙이는 것이 막힌다.
-     * 이름의 오타는 잡지 않는다. 브라우저가 해당 선언만 무시하고, 인스펙터 미리보기에서 바로 드러난다.
-     */
-    fun isColorValue(value: String): Boolean = COLOR_VALUE.matches(value)
-
-    private val COLOR_VALUE = Regex("^(#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})|[a-zA-Z]+)$")
-
-    /**
      * "color" 액션들을 style 주입 스크립트로 만든다.
      * 액션이 비면 빈 CSS 가 나가 style 태그를 비우므로, 액션 삭제 시 색상도 함께 풀린다.
      */

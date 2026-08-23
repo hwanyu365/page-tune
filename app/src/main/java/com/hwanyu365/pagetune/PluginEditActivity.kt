@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.hwanyu365.pagetune.db.AppDatabase
 import com.hwanyu365.pagetune.db.Plugin
 import com.hwanyu365.pagetune.db.PluginAction
+import com.hwanyu365.pagetune.ui.view.ColorPickerDialog
 import com.hwanyu365.pagetune.util.JsScripts
 import kotlinx.android.synthetic.main.activity_plugin_edit.*
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +33,10 @@ class PluginEditActivity : AppCompatActivity() {
     private var selectedElementJson: String? = null
     
     private var isInspectMode = false
+
+    // "color" 액션의 입력값. picker 만 이 값을 만들므로 항상 "#RRGGBB" 이거나 null 이다.
+    private var colorBg: String? = null
+    private var colorText: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -123,6 +128,20 @@ class PluginEditActivity : AppCompatActivity() {
                 if (checkedId == R.id.rb_action_color) View.VISIBLE else View.GONE
         }
 
+        btn_color_bg.setOnClickListener {
+            ColorPickerDialog.show(this, "Background", colorBg) { picked ->
+                colorBg = picked
+                refreshColorButtons()
+            }
+        }
+
+        btn_color_text.setOnClickListener {
+            ColorPickerDialog.show(this, "Text", colorText) { picked ->
+                colorText = picked
+                refreshColorButtons()
+            }
+        }
+
         btn_add_action.setOnClickListener {
             addAction()
         }
@@ -181,6 +200,14 @@ class PluginEditActivity : AppCompatActivity() {
         layout_action_config.visibility = View.GONE
         tv_selected_selector.text = "Selected element: None"
         selectedElementJson = null
+        colorBg = null
+        colorText = null
+        refreshColorButtons()
+    }
+
+    private fun refreshColorButtons() {
+        btn_color_bg.text = "Background: ${colorBg ?: "none"}"
+        btn_color_text.text = "Text: ${colorText ?: "none"}"
     }
 
     private fun applyCurrentActions() {
@@ -203,22 +230,14 @@ class PluginEditActivity : AppCompatActivity() {
         wv_inspector.evaluateJavascript(script, null)
     }
 
-    /** 색상 입력을 CSS 선언부로 만든다. 입력이 잘못됐거나 둘 다 비면 null 을 돌려 액션 추가를 막는다. */
+    /** 선택한 색상을 CSS 선언부로 만든다. 둘 다 비면 null 을 돌려 액션 추가를 막는다. */
     private fun buildStyleCss(): String? {
-        val bg = et_color_bg.text.toString().trim()
-        val fg = et_color_text.text.toString().trim()
-
-        if (listOf(bg, fg).any { it.isNotEmpty() && !JsScripts.isColorValue(it) }) {
-            Toast.makeText(this, "Enter a color like #000000 or black", Toast.LENGTH_SHORT).show()
-            return null
-        }
-
         val declarations = listOfNotNull(
-            bg.takeIf { it.isNotEmpty() }?.let { "background-color:$it" },
-            fg.takeIf { it.isNotEmpty() }?.let { "color:$it" }
+            colorBg?.let { "background-color:$it" },
+            colorText?.let { "color:$it" }
         )
         if (declarations.isEmpty()) {
-            Toast.makeText(this, "Please enter at least one color", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Please pick at least one color", Toast.LENGTH_SHORT).show()
             return null
         }
         return declarations.joinToString(";")

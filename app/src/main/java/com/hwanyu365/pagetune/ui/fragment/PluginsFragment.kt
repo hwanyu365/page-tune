@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.hwanyu365.pagetune.PluginEditActivity
 import com.hwanyu365.pagetune.R
 import com.hwanyu365.pagetune.db.AppDatabase
+import com.hwanyu365.pagetune.db.Plugin
 import com.hwanyu365.pagetune.ui.adapter.PluginAdapter
 import kotlinx.android.synthetic.main.fragment_plugins.*
 import kotlinx.coroutines.CoroutineScope
@@ -45,6 +46,9 @@ class PluginsFragment : Fragment() {
                     putExtra("plugin_id", plugin.id)
                 }
                 startActivity(intent)
+            },
+            onCopyClick = { plugin ->
+                duplicatePlugin(plugin)
             }
         )
 
@@ -92,6 +96,22 @@ class PluginsFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         loadPlugins()
+    }
+
+    /** Tune 을 액션까지 통째로 복제한다. 비슷한 사이트용 Tune 을 처음부터 다시 만들지 않기 위한 기능이다. */
+    private fun duplicatePlugin(plugin: Plugin) {
+        mainScope.launch {
+            withContext(Dispatchers.IO) {
+                val source = db.pluginDao().getPluginWithActions(plugin.id) ?: return@withContext
+                // id 를 0 으로 비워야 Room 이 새 행으로 넣는다. 그대로 두면 REPLACE 정책 때문에 원본을 덮어쓴다.
+                val newId = db.pluginDao().insertPlugin(
+                    source.plugin.copy(id = 0, name = source.plugin.name + " (copy)")
+                )
+                db.pluginDao().insertActions(source.actions.map { it.copy(id = 0, pluginId = newId) })
+            }
+            loadPlugins()
+            Toast.makeText(requireContext(), "Tune duplicated", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun loadPlugins() {

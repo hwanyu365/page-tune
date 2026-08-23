@@ -9,7 +9,8 @@ import com.hwanyu365.pagetune.db.Plugin
 import kotlinx.android.synthetic.main.item_plugin.view.*
 
 class PluginAdapter(
-    private val onEditClick: (Plugin) -> Unit
+    private val onEditClick: (Plugin) -> Unit,
+    private val onCopyClick: (Plugin) -> Unit
 ) : RecyclerView.Adapter<PluginAdapter.ViewHolder>() {
 
     private var items = listOf<Plugin>()
@@ -59,6 +60,7 @@ class PluginAdapter(
             if (isDeleteMode) {
                 itemView.chk_delete.visibility = View.VISIBLE
                 itemView.btn_edit_plugin.visibility = View.GONE
+                itemView.btn_copy_plugin.visibility = View.GONE
                 itemView.chk_delete.isChecked = selectedIds.contains(item.id)
 
                 itemView.setOnClickListener {
@@ -73,9 +75,11 @@ class PluginAdapter(
             } else {
                 itemView.chk_delete.visibility = View.GONE
                 itemView.btn_edit_plugin.visibility = View.VISIBLE
+                itemView.btn_copy_plugin.visibility = View.VISIBLE
 
                 itemView.setOnClickListener { onEditClick(item) }
                 itemView.btn_edit_plugin.setOnClickListener { onEditClick(item) }
+                itemView.btn_copy_plugin.setOnClickListener { onCopyClick(item) }
             }
         }
     }

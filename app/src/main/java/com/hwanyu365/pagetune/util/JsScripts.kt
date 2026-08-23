@@ -248,6 +248,29 @@ object JsScripts {
     }
 
     /**
+     * 저장된 스크롤 위치로 페이지를 이동시킨다.
+     * 로드 직후엔 본문이 아직 짧아 scrollTo 가 문서 끝에서 잘린다. 목표에 닿을 때까지 짧게 재시도한다.
+     * 사용자가 화면을 만지면 멈춘다. 재시도가 사용자의 스크롤을 계속 되돌리면 페이지를 쓸 수 없다.
+     */
+    fun getScrollScript(y: Int): String {
+        return """
+            (function() {
+                var tries = 0;
+                var stopped = false;
+                document.addEventListener('touchstart', function() { stopped = true; }, true);
+                function go() {
+                    if (stopped) return;
+                    window.scrollTo(0, ${y});
+                    if (++tries < 20 && Math.abs(window.pageYOffset - ${y}) > 2) {
+                        setTimeout(go, 100);
+                    }
+                }
+                go();
+            })();
+        """.trimIndent()
+    }
+
+    /**
      * Returns JavaScript that uses MutationObserver to continuously monitor the DOM
      * and hide target elements based on advanced selectors, preventing them from being shown dynamically.
      * @param selectorJsonArray A JSON array of element details strings (actions to hide).

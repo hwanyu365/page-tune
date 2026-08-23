@@ -47,4 +47,27 @@ class JsScriptsTest {
         assertTrue(script.contains("""a[x=\'y\']"""))
         assertFalse(script.contains("{\n color"))
     }
+
+    @Test
+    fun `스크롤 스크립트는 저장된 y 로 이동한다`() {
+        val script = JsScripts.getScrollScript(1234)
+
+        assertTrue(script.contains("window.scrollTo(0, 1234)"))
+    }
+
+    @Test
+    fun `스크롤 스크립트는 도달하지 못하면 재시도한다`() {
+        // 페이지가 늦게 자라면 첫 scrollTo 는 문서 끝에서 잘려 목표에 못 간다.
+        val script = JsScripts.getScrollScript(1234)
+
+        assertTrue(script.contains("setTimeout"))
+    }
+
+    @Test
+    fun `스크롤 스크립트는 사용자가 화면을 만지면 멈춘다`() {
+        // 재시도가 사용자의 스크롤을 계속 되돌리면 페이지를 쓸 수 없다.
+        val script = JsScripts.getScrollScript(1234)
+
+        assertTrue(script.contains("touchstart"))
+    }
 }

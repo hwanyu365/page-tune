@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
+import org.json.JSONObject
 
 class WebBrowserActivity : AppCompatActivity() {
 
@@ -35,6 +36,7 @@ class WebBrowserActivity : AppCompatActivity() {
     // Cached actions for quick access
     private val hiddenActions = mutableListOf<PluginAction>()
     private val colorActions = mutableListOf<PluginAction>()
+    private var scrollAction: PluginAction? = null
     private var gestureTopAction: PluginAction? = null
     private var gestureBottomAction: PluginAction? = null
     private var gnbPrevAction: PluginAction? = null
@@ -88,6 +90,7 @@ class WebBrowserActivity : AppCompatActivity() {
                 pb_browser_loading.visibility = View.GONE
                 applyColorActions()
                 applyHiddenActions()
+                applyScrollAction()
             }
 
             override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
@@ -178,6 +181,7 @@ class WebBrowserActivity : AppCompatActivity() {
     private fun classifyActions(actions: List<PluginAction>) {
         hiddenActions.clear()
         colorActions.clear()
+        scrollAction = null
         gestureTopAction = null
         gestureBottomAction = null
         gnbPrevAction = null
@@ -188,6 +192,8 @@ class WebBrowserActivity : AppCompatActivity() {
                 hiddenActions.add(action)
             } else if (action.actionType == "color") {
                 colorActions.add(action)
+            } else if (action.actionType == "scroll") {
+                scrollAction = action
             } else if (action.actionType == "click") {
                 when (action.triggerType) {
                     "gesture_top" -> gestureTopAction = action
@@ -202,6 +208,12 @@ class WebBrowserActivity : AppCompatActivity() {
     private fun applyColorActions() {
         if (colorActions.isEmpty()) return
         wv_browser.evaluateJavascript(JsScripts.getColorScriptFor(colorActions), null)
+    }
+
+    private fun applyScrollAction() {
+        val action = scrollAction ?: return
+        val y = runCatching { JSONObject(action.targetSelector).getInt("y") }.getOrNull() ?: return
+        wv_browser.evaluateJavascript(JsScripts.getScrollScript(y), null)
     }
 
     private fun applyHiddenActions() {

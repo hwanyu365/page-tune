@@ -142,6 +142,16 @@
 
                 </LinearLayout>
 
+                <Button
+                    android:id="@+id/btn_set_scroll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="Set Current Scroll as Start Position"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="11sp" />
+
                 <!-- Parent / Child Traversal Buttons -->
                 <LinearLayout
                     android:id="@+id/layout_traversal_actions"

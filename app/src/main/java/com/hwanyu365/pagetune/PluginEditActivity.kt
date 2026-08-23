@@ -142,6 +142,10 @@ class PluginEditActivity : AppCompatActivity() {
             }
         }
 
+        btn_set_scroll.setOnClickListener {
+            addScrollAction()
+        }
+
         btn_add_action.setOnClickListener {
             addAction()
         }
@@ -243,6 +247,31 @@ class PluginEditActivity : AppCompatActivity() {
         return declarations.joinToString(";")
     }
 
+    /**
+     * 편집 중인 웹뷰의 현재 스크롤 위치를 시작 위치로 저장한다.
+     * Tune 당 하나만 의미가 있으므로 기존 scroll 액션을 덮어쓴다.
+     */
+    private fun addScrollAction() {
+        // WebView.scrollY 는 기기 밀도가 곱해진 값이라 CSS 픽셀과 어긋난다. 적용도 JS 로 하므로 읽는 쪽도 JS 기준으로 맞춘다.
+        wv_inspector.evaluateJavascript("Math.round(window.pageYOffset)") { result ->
+            val y = result?.trim('"')?.toDoubleOrNull()?.toInt()
+            if (y == null) {
+                Toast.makeText(this, "Could not read scroll position", Toast.LENGTH_SHORT).show()
+                return@evaluateJavascript
+            }
+            tempActions.removeAll { it.actionType == "scroll" }
+            tempActions.add(
+                PluginAction(
+                    pluginId = pluginId,
+                    actionType = "scroll",
+                    targetSelector = JSONObject().put("y", y).toString()
+                )
+            )
+            refreshActionsListUI()
+            Toast.makeText(this, "Start scroll position set to $y", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun addAction() {
         val details = selectedElementJson ?: return
         val actionType = when {
@@ -331,11 +360,12 @@ class PluginEditActivity : AppCompatActivity() {
                 val typeDesc = when (action.actionType) {
                     "hidden" -> "Hide"
                     "color" -> "Color (${action.styleCss})"
+                    "scroll" -> "Start scroll at y=${json.optInt("y")}"
                     else -> "Click via ${action.triggerType}"
                 }
                 text1.text = "Setup #${index + 1}: $typeDesc"
                 text1.setTextColor(textColorPrimary)
-                text2.text = selector
+                text2.text = if (action.actionType == "scroll") "Applied on every page load" else selector
                 text2.setTextColor(textColorSecondary)
                 text2.textSize = 11f
             } catch (e: Exception) {

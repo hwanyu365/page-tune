@@ -13,3 +13,14 @@
 /buildSrc/build
 .kotlin
 *.hprof
+
+# 비공개 설정 — CI 비밀 파일 가드와 같은 목록을 유지한다
+.env
+.env.*
+!.env.example
+*.pem
+service-account*.json
+
+# 로컬 agent 상태
+.add/
+.claude/settings.local.json

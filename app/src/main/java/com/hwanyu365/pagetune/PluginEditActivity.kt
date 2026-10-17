@@ -14,9 +14,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.hwanyu365.pagetune.db.AppDatabase
 import com.hwanyu365.pagetune.db.Plugin
 import com.hwanyu365.pagetune.db.PluginAction
+import com.hwanyu365.pagetune.databinding.ActivityPluginEditBinding
 import com.hwanyu365.pagetune.ui.view.ColorPickerDialog
 import com.hwanyu365.pagetune.util.JsScripts
-import kotlinx.android.synthetic.main.activity_plugin_edit.*
+import com.hwanyu365.pagetune.util.enableDarkEdgeToEdge
+import com.hwanyu365.pagetune.util.padForInsets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,9 +27,10 @@ import org.json.JSONObject
 
 class PluginEditActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityPluginEditBinding
     private lateinit var db: AppDatabase
     private val mainScope = CoroutineScope(Dispatchers.Main)
-    
+
     private var pluginId: Long = -1
     private val tempActions = mutableListOf<PluginAction>()
     private var selectedElementJson: String? = null
@@ -40,7 +43,10 @@ class PluginEditActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_plugin_edit)
+        enableDarkEdgeToEdge()
+        binding = ActivityPluginEditBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.root.padForInsets()
 
         // Programmatically exclude all views in this Activity from Android Autofill Service
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -60,9 +66,9 @@ class PluginEditActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled", "AddJavascriptInterface")
     private fun setupWebView() {
-        com.hwanyu365.pagetune.util.WebViewConfig.applyCommon(wv_inspector)
+        com.hwanyu365.pagetune.util.WebViewConfig.applyCommon(binding.wvInspector)
 
-        wv_inspector.webViewClient = object : WebViewClient() {
+        binding.wvInspector.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 // Cloudflare 통과 쿠키(cf_clearance)는 앱이 죽으면 날아간다. 페이지마다 디스크로 내려 재방문 시 챌린지를 건너뛴다.
@@ -75,86 +81,86 @@ class PluginEditActivity : AppCompatActivity() {
                 applyCurrentActions()
             }
         }
-        wv_inspector.webChromeClient = WebChromeClient()
-        wv_inspector.addJavascriptInterface(AndroidInspectorBridge(), "AndroidBridge")
+        binding.wvInspector.webChromeClient = WebChromeClient()
+        binding.wvInspector.addJavascriptInterface(AndroidInspectorBridge(), "AndroidBridge")
     }
 
     private fun setupListeners() {
-        btn_load_url.setOnClickListener {
-            var url = et_inp_taddr.text.toString().trim()
+        binding.btnLoadUrl.setOnClickListener {
+            var url = binding.etInpTaddr.text.toString().trim()
             if (url.isNotEmpty()) {
                 if (!url.startsWith("http://") && !url.startsWith("https://")) {
                     url = "https://$url"
-                    et_inp_taddr.setText(url)
+                    binding.etInpTaddr.setText(url)
                 }
                 // If the target URL is already the current URL, force reload
-                if (wv_inspector.url == url) {
-                    wv_inspector.reload()
+                if (binding.wvInspector.url == url) {
+                    binding.wvInspector.reload()
                 } else {
-                    wv_inspector.loadUrl(url)
+                    binding.wvInspector.loadUrl(url)
                 }
             }
         }
 
-        btn_toggle_inspect.setOnCheckedChangeListener { _, isChecked ->
+        binding.btnToggleInspect.setOnCheckedChangeListener { _, isChecked ->
             isInspectMode = isChecked
             if (isChecked) {
-                tv_inspector_status.visibility = View.VISIBLE
-                wv_inspector.evaluateJavascript("if (typeof window.webPluginInspectEnabled !== 'undefined') { window.webPluginInspectEnabled = true; 'enabled'; } else { 'inject'; }") { result ->
+                binding.tvInspectorStatus.visibility = View.VISIBLE
+                binding.wvInspector.evaluateJavascript("if (typeof window.webPluginInspectEnabled !== 'undefined') { window.webPluginInspectEnabled = true; 'enabled'; } else { 'inject'; }") { result ->
                     if (result == "\"inject\"") {
                         injectPickerScript()
                     }
                 }
             } else {
-                tv_inspector_status.visibility = View.GONE
+                binding.tvInspectorStatus.visibility = View.GONE
                 // Disable click listener in JS and clear highlights
-                wv_inspector.evaluateJavascript("window.webPluginInspectEnabled = false; window.webPluginClearHighlight();", null)
+                binding.wvInspector.evaluateJavascript("window.webPluginInspectEnabled = false; window.webPluginClearHighlight();", null)
                 hideActionConfigPanel()
             }
         }
 
-        btn_select_parent.setOnClickListener {
-            wv_inspector.evaluateJavascript("window.webPluginSelectParent();", null)
+        binding.btnSelectParent.setOnClickListener {
+            binding.wvInspector.evaluateJavascript("window.webPluginSelectParent();", null)
         }
 
-        btn_select_child.setOnClickListener {
-            wv_inspector.evaluateJavascript("window.webPluginSelectChild();", null)
+        binding.btnSelectChild.setOnClickListener {
+            binding.wvInspector.evaluateJavascript("window.webPluginSelectChild();", null)
         }
 
-        rg_action_type.setOnCheckedChangeListener { _, checkedId ->
-            layout_click_trigger_setup.visibility =
+        binding.rgActionType.setOnCheckedChangeListener { _, checkedId ->
+            binding.layoutClickTriggerSetup.visibility =
                 if (checkedId == R.id.rb_action_click) View.VISIBLE else View.GONE
-            layout_color_setup.visibility =
+            binding.layoutColorSetup.visibility =
                 if (checkedId == R.id.rb_action_color) View.VISIBLE else View.GONE
         }
 
-        btn_color_bg.setOnClickListener {
+        binding.btnColorBg.setOnClickListener {
             ColorPickerDialog.show(this, "Background", colorBg) { picked ->
                 colorBg = picked
                 refreshColorButtons()
             }
         }
 
-        btn_color_text.setOnClickListener {
+        binding.btnColorText.setOnClickListener {
             ColorPickerDialog.show(this, "Text", colorText) { picked ->
                 colorText = picked
                 refreshColorButtons()
             }
         }
 
-        btn_set_scroll.setOnClickListener {
+        binding.btnSetScroll.setOnClickListener {
             addScrollAction()
         }
 
-        btn_add_action.setOnClickListener {
+        binding.btnAddAction.setOnClickListener {
             addAction()
         }
 
-        btn_plugin_save.setOnClickListener {
+        binding.btnPluginSave.setOnClickListener {
             savePlugin()
         }
 
-        btn_plugin_cancel.setOnClickListener {
+        binding.btnPluginCancel.setOnClickListener {
             finish()
         }
     }
@@ -165,10 +171,10 @@ class PluginEditActivity : AppCompatActivity() {
                 db.pluginDao().getPluginWithActions(pluginId)
             }
             if (pluginWithActions != null) {
-                et_inp_pname.setText(pluginWithActions.plugin.name)
+                binding.etInpPname.setText(pluginWithActions.plugin.name)
                 pluginWithActions.plugin.testUrl?.let { testUrl ->
-                    et_inp_taddr.setText(testUrl)
-                    wv_inspector.loadUrl(testUrl)
+                    binding.etInpTaddr.setText(testUrl)
+                    binding.wvInspector.loadUrl(testUrl)
                 }
                 tempActions.addAll(pluginWithActions.actions)
                 refreshActionsListUI()
@@ -177,7 +183,7 @@ class PluginEditActivity : AppCompatActivity() {
     }
 
     private fun injectPickerScript() {
-        wv_inspector.evaluateJavascript(JsScripts.ELEMENT_PICKER_SCRIPT, null)
+        binding.wvInspector.evaluateJavascript(JsScripts.ELEMENT_PICKER_SCRIPT, null)
     }
 
     private fun onElementSelectedFromJs(detailsJson: String) {
@@ -191,18 +197,18 @@ class PluginEditActivity : AppCompatActivity() {
             } else {
                 "Selected: $selector"
             }
-            tv_selected_selector.text = displayText
-            layout_traversal_actions.visibility = View.VISIBLE
-            layout_action_config.visibility = View.VISIBLE
+            binding.tvSelectedSelector.text = displayText
+            binding.layoutTraversalActions.visibility = View.VISIBLE
+            binding.layoutActionConfig.visibility = View.VISIBLE
         } catch (e: Exception) {
-            tv_selected_selector.text = "Error parsing element"
+            binding.tvSelectedSelector.text = "Error parsing element"
         }
     }
 
     private fun hideActionConfigPanel() {
-        layout_traversal_actions.visibility = View.GONE
-        layout_action_config.visibility = View.GONE
-        tv_selected_selector.text = "Selected element: None"
+        binding.layoutTraversalActions.visibility = View.GONE
+        binding.layoutActionConfig.visibility = View.GONE
+        binding.tvSelectedSelector.text = "Selected element: None"
         selectedElementJson = null
         colorBg = null
         colorText = null
@@ -210,20 +216,20 @@ class PluginEditActivity : AppCompatActivity() {
     }
 
     private fun refreshColorButtons() {
-        btn_color_bg.text = "Background: ${colorBg ?: "none"}"
-        btn_color_text.text = "Text: ${colorText ?: "none"}"
+        binding.btnColorBg.text = "Background: ${colorBg ?: "none"}"
+        binding.btnColorText.text = "Text: ${colorText ?: "none"}"
     }
 
     private fun applyCurrentActions() {
         // 색상은 CSS 규칙이라 hidden 유무와 무관하게 항상 갱신한다. 액션이 비면 규칙도 비워져 자동으로 풀린다.
-        wv_inspector.evaluateJavascript(
+        binding.wvInspector.evaluateJavascript(
             JsScripts.getColorScriptFor(tempActions.filter { it.actionType == "color" }), null
         )
 
         val hiddenActions = tempActions.filter { it.actionType == "hidden" }
         if (hiddenActions.isEmpty()) {
             // Disconnect old MutationObserver if no hidden actions
-            wv_inspector.evaluateJavascript("(function() { if (window.webPluginObserver) { window.webPluginObserver.disconnect(); } })();", null)
+            binding.wvInspector.evaluateJavascript("(function() { if (window.webPluginObserver) { window.webPluginObserver.disconnect(); } })();", null)
             return
         }
         val jsonArray = org.json.JSONArray()
@@ -231,7 +237,7 @@ class PluginEditActivity : AppCompatActivity() {
             jsonArray.put(it.targetSelector)
         }
         val script = JsScripts.getMutationObserverHideScript(jsonArray.toString())
-        wv_inspector.evaluateJavascript(script, null)
+        binding.wvInspector.evaluateJavascript(script, null)
     }
 
     /** 선택한 색상을 CSS 선언부로 만든다. 둘 다 비면 null 을 돌려 액션 추가를 막는다. */
@@ -253,7 +259,7 @@ class PluginEditActivity : AppCompatActivity() {
      */
     private fun addScrollAction() {
         // WebView.scrollY 는 기기 밀도가 곱해진 값이라 CSS 픽셀과 어긋난다. 적용도 JS 로 하므로 읽는 쪽도 JS 기준으로 맞춘다.
-        wv_inspector.evaluateJavascript("Math.round(window.pageYOffset)") { result ->
+        binding.wvInspector.evaluateJavascript("Math.round(window.pageYOffset)") { result ->
             val y = result?.trim('"')?.toDoubleOrNull()?.toInt()
             if (y == null) {
                 Toast.makeText(this, "Could not read scroll position", Toast.LENGTH_SHORT).show()
@@ -275,8 +281,8 @@ class PluginEditActivity : AppCompatActivity() {
     private fun addAction() {
         val details = selectedElementJson ?: return
         val actionType = when {
-            rb_action_click.isChecked -> "click"
-            rb_action_color.isChecked -> "color"
+            binding.rbActionClick.isChecked -> "click"
+            binding.rbActionColor.isChecked -> "color"
             else -> "hidden"
         }
 
@@ -290,15 +296,15 @@ class PluginEditActivity : AppCompatActivity() {
 
         if (actionType == "click") {
             triggerType = when {
-                rb_trigger_gesture_top.isChecked -> "gesture_top"
-                rb_trigger_gesture_bottom.isChecked -> "gesture_bottom"
-                rb_trigger_gnb_prev.isChecked -> "gnb_prev"
-                rb_trigger_gnb_next.isChecked -> "gnb_next"
+                binding.rbTriggerGestureTop.isChecked -> "gesture_top"
+                binding.rbTriggerGestureBottom.isChecked -> "gesture_bottom"
+                binding.rbTriggerGnbPrev.isChecked -> "gnb_prev"
+                binding.rbTriggerGnbNext.isChecked -> "gnb_next"
                 else -> null
             }
             
             if (triggerType?.startsWith("gesture") == true) {
-                val areaText = et_gesture_area.text.toString().trim()
+                val areaText = binding.etGestureArea.text.toString().trim()
                 if (areaText.isNotEmpty()) {
                     val value = areaText.toIntOrNull()
                     if (value == null || value <= 0 || value > 50) {
@@ -323,7 +329,7 @@ class PluginEditActivity : AppCompatActivity() {
         refreshActionsListUI()
         
         // Clear selection highlights visually but keep pick mode active
-        wv_inspector.evaluateJavascript("window.webPluginClearHighlight();", null)
+        binding.wvInspector.evaluateJavascript("window.webPluginClearHighlight();", null)
         
         // Reset configuration layout but keep inspector mode on
         hideActionConfigPanel()
@@ -335,14 +341,14 @@ class PluginEditActivity : AppCompatActivity() {
     }
 
     private fun refreshActionsListUI() {
-        layout_actions_list.removeAllViews()
+        binding.layoutActionsList.removeAllViews()
         if (tempActions.isEmpty()) {
             val emptyTv = TextView(this).apply {
                 text = "No setups added yet."
                 textSize = 12f
                 setTextColor(androidx.core.content.ContextCompat.getColor(this@PluginEditActivity, R.color.colorTextSecondary))
             }
-            layout_actions_list.addView(emptyTv)
+            binding.layoutActionsList.addView(emptyTv)
             return
         }
 
@@ -379,21 +385,21 @@ class PluginEditActivity : AppCompatActivity() {
             view.setOnClickListener {
                 tempActions.removeAt(index)
                 refreshActionsListUI()
-                wv_inspector.reload() // Reload page to restore deleted hidden item
+                binding.wvInspector.reload() // Reload page to restore deleted hidden item
                 Toast.makeText(this, "Setup removed", Toast.LENGTH_SHORT).show()
             }
 
-            layout_actions_list.addView(view)
+            binding.layoutActionsList.addView(view)
         }
     }
 
     private fun savePlugin() {
-        val name = et_inp_pname.text.toString().trim()
+        val name = binding.etInpPname.text.toString().trim()
         if (name.isEmpty()) {
             Toast.makeText(this, "Please enter a Tune name", Toast.LENGTH_SHORT).show()
             return
         }
-        val testUrl = et_inp_taddr.text.toString().trim()
+        val testUrl = binding.etInpTaddr.text.toString().trim()
 
         mainScope.launch {
             withContext(Dispatchers.IO) {

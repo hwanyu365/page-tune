@@ -4,9 +4,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.hwanyu365.pagetune.R
+import com.hwanyu365.pagetune.databinding.ItemWebpageBinding
 import com.hwanyu365.pagetune.db.WebPageWithPlugin
-import kotlinx.android.synthetic.main.item_webpage.view.*
 
 class WebPageAdapter(
     private val onItemClick: (WebPageWithPlugin) -> Unit,
@@ -43,8 +42,7 @@ class WebPageAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_webpage, parent, false)
-        return ViewHolder(view)
+        return ViewHolder(ItemWebpageBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
     override fun getItemCount(): Int = items.size
@@ -53,16 +51,16 @@ class WebPageAdapter(
         holder.bind(items[position])
     }
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class ViewHolder(private val binding: ItemWebpageBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: WebPageWithPlugin) {
-            itemView.tv_title.text = item.webPage.title
-            itemView.tv_url.text = item.webPage.url
-            itemView.tv_plugin.text = "Tune: ${item.plugin?.name ?: "None"}"
+            binding.tvTitle.text = item.webPage.title
+            binding.tvUrl.text = item.webPage.url
+            binding.tvPlugin.text = "Tune: ${item.plugin?.name ?: "None"}"
 
             if (isDeleteMode) {
-                itemView.chk_delete.visibility = View.VISIBLE
-                itemView.btn_edit.visibility = View.GONE
-                itemView.chk_delete.isChecked = selectedIds.contains(item.webPage.id)
+                binding.chkDelete.visibility = View.VISIBLE
+                binding.btnEdit.visibility = View.GONE
+                binding.chkDelete.isChecked = selectedIds.contains(item.webPage.id)
 
                 itemView.setOnClickListener {
                     val id = item.webPage.id
@@ -74,11 +72,11 @@ class WebPageAdapter(
                     notifyItemChanged(adapterPosition)
                 }
             } else {
-                itemView.chk_delete.visibility = View.GONE
-                itemView.btn_edit.visibility = View.VISIBLE
+                binding.chkDelete.visibility = View.GONE
+                binding.btnEdit.visibility = View.VISIBLE
 
                 itemView.setOnClickListener { onItemClick(item) }
-                itemView.btn_edit.setOnClickListener { onEditClick(item) }
+                binding.btnEdit.setOnClickListener { onEditClick(item) }
             }
         }
     }

@@ -10,9 +10,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.hwanyu365.pagetune.PluginEditActivity
 import com.hwanyu365.pagetune.R
 import com.hwanyu365.pagetune.db.AppDatabase
+import com.hwanyu365.pagetune.databinding.FragmentPluginsBinding
 import com.hwanyu365.pagetune.db.Plugin
 import com.hwanyu365.pagetune.ui.adapter.PluginAdapter
-import kotlinx.android.synthetic.main.fragment_plugins.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,6 +20,7 @@ import kotlinx.coroutines.withContext
 
 class PluginsFragment : Fragment() {
 
+    private lateinit var binding: FragmentPluginsBinding
     private lateinit var db: AppDatabase
     private lateinit var adapter: PluginAdapter
     private val mainScope = CoroutineScope(Dispatchers.Main)
@@ -33,8 +34,9 @@ class PluginsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_plugins, container, false)
+    ): View {
+        binding = FragmentPluginsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,19 +54,19 @@ class PluginsFragment : Fragment() {
             }
         )
 
-        rv_plugins.layoutManager = LinearLayoutManager(requireContext())
-        rv_plugins.adapter = adapter
+        binding.rvPlugins.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvPlugins.adapter = adapter
 
-        fab_add_plugin.setOnClickListener {
+        binding.fabAddPlugin.setOnClickListener {
             val intent = Intent(requireContext(), PluginEditActivity::class.java)
             startActivity(intent)
         }
 
-        btn_cancel_delete.setOnClickListener {
+        binding.btnCancelDelete.setOnClickListener {
             exitDeleteMode()
         }
 
-        btn_confirm_delete.setOnClickListener {
+        binding.btnConfirmDelete.setOnClickListener {
             val selectedIds = adapter.getSelectedIds()
             if (selectedIds.isEmpty()) {
                 Toast.makeText(requireContext(), "No items selected", Toast.LENGTH_SHORT).show()
@@ -86,7 +88,7 @@ class PluginsFragment : Fragment() {
                 .show()
         }
 
-        chk_select_all.setOnCheckedChangeListener { _, isChecked ->
+        binding.chkSelectAll.setOnCheckedChangeListener { _, isChecked ->
             adapter.selectAll(isChecked)
         }
 
@@ -138,16 +140,16 @@ class PluginsFragment : Fragment() {
 
     private fun enterDeleteMode() {
         adapter.setDeleteMode(true)
-        layout_header.visibility = View.VISIBLE
-        layout_delete_actions.visibility = View.VISIBLE
-        fab_add_plugin.visibility = View.GONE
-        chk_select_all.isChecked = false
+        binding.layoutHeader.visibility = View.VISIBLE
+        binding.layoutDeleteActions.visibility = View.VISIBLE
+        binding.fabAddPlugin.visibility = View.GONE
+        binding.chkSelectAll.isChecked = false
     }
 
     private fun exitDeleteMode() {
         adapter.setDeleteMode(false)
-        layout_header.visibility = View.GONE
-        layout_delete_actions.visibility = View.GONE
-        fab_add_plugin.visibility = View.VISIBLE
+        binding.layoutHeader.visibility = View.GONE
+        binding.layoutDeleteActions.visibility = View.GONE
+        binding.fabAddPlugin.visibility = View.VISIBLE
     }
 }

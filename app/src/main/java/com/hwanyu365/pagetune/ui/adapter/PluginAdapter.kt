@@ -4,9 +4,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.hwanyu365.pagetune.R
+import com.hwanyu365.pagetune.databinding.ItemPluginBinding
 import com.hwanyu365.pagetune.db.Plugin
-import kotlinx.android.synthetic.main.item_plugin.view.*
 
 class PluginAdapter(
     private val onEditClick: (Plugin) -> Unit,
@@ -43,8 +42,7 @@ class PluginAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_plugin, parent, false)
-        return ViewHolder(view)
+        return ViewHolder(ItemPluginBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
     override fun getItemCount(): Int = items.size
@@ -53,15 +51,15 @@ class PluginAdapter(
         holder.bind(items[position])
     }
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class ViewHolder(private val binding: ItemPluginBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: Plugin) {
-            itemView.tv_plugin_name.text = item.name
+            binding.tvPluginName.text = item.name
 
             if (isDeleteMode) {
-                itemView.chk_delete.visibility = View.VISIBLE
-                itemView.btn_edit_plugin.visibility = View.GONE
-                itemView.btn_copy_plugin.visibility = View.GONE
-                itemView.chk_delete.isChecked = selectedIds.contains(item.id)
+                binding.chkDelete.visibility = View.VISIBLE
+                binding.btnEditPlugin.visibility = View.GONE
+                binding.btnCopyPlugin.visibility = View.GONE
+                binding.chkDelete.isChecked = selectedIds.contains(item.id)
 
                 itemView.setOnClickListener {
                     val id = item.id
@@ -73,13 +71,13 @@ class PluginAdapter(
                     notifyItemChanged(adapterPosition)
                 }
             } else {
-                itemView.chk_delete.visibility = View.GONE
-                itemView.btn_edit_plugin.visibility = View.VISIBLE
-                itemView.btn_copy_plugin.visibility = View.VISIBLE
+                binding.chkDelete.visibility = View.GONE
+                binding.btnEditPlugin.visibility = View.VISIBLE
+                binding.btnCopyPlugin.visibility = View.VISIBLE
 
                 itemView.setOnClickListener { onEditClick(item) }
-                itemView.btn_edit_plugin.setOnClickListener { onEditClick(item) }
-                itemView.btn_copy_plugin.setOnClickListener { onCopyClick(item) }
+                binding.btnEditPlugin.setOnClickListener { onEditClick(item) }
+                binding.btnCopyPlugin.setOnClickListener { onCopyClick(item) }
             }
         }
     }

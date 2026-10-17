@@ -5,19 +5,26 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import com.hwanyu365.pagetune.databinding.ActivityMainBinding
 import com.hwanyu365.pagetune.ui.fragment.PluginsFragment
 import com.hwanyu365.pagetune.ui.fragment.WebPagesFragment
-import kotlinx.android.synthetic.main.activity_main.*
+import com.hwanyu365.pagetune.util.enableDarkEdgeToEdge
+import com.hwanyu365.pagetune.util.padForInsets
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
+        enableDarkEdgeToEdge()
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.root.padForInsets()
+        setSupportActionBar(binding.toolbar)
 
-        view_pager.adapter = MainPagerAdapter(supportFragmentManager)
-        tab_layout.setupWithViewPager(view_pager)
+        binding.viewPager.adapter = MainPagerAdapter(supportFragmentManager)
+        binding.tabLayout.setupWithViewPager(binding.viewPager)
     }
 
     private inner class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {

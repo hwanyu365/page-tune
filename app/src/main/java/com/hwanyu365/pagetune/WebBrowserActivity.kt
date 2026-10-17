@@ -11,10 +11,12 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowInsetsCompat
 import com.hwanyu365.pagetune.db.AppDatabase
 import com.hwanyu365.pagetune.db.PluginAction
+import com.hwanyu365.pagetune.databinding.ActivityWebBrowserBinding
 import com.hwanyu365.pagetune.util.JsScripts
-import kotlinx.android.synthetic.main.activity_web_browser.*
+import com.hwanyu365.pagetune.util.padForInsets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,9 +26,10 @@ import org.json.JSONObject
 
 class WebBrowserActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityWebBrowserBinding
     private lateinit var db: AppDatabase
     private val mainScope = CoroutineScope(Dispatchers.Main)
-    
+
     private var webPageId: Long = -1
 
     private var mGestureDetector: GestureDetector? = null
@@ -57,7 +60,10 @@ class WebBrowserActivity : AppCompatActivity() {
                 or android.view.View.SYSTEM_UI_FLAG_FULLSCREEN
                 or android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
 
-        setContentView(R.layout.activity_web_browser)
+        binding = ActivityWebBrowserBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        // 상태바는 숨기고 노치까지 쓰는 화면이라 내비게이션 바만 피한다.
+        binding.root.padForInsets(WindowInsetsCompat.Type.navigationBars())
 
         db = AppDatabase.getDatabase(this)
         webPageId = intent.getLongExtra("webpage_id", -1)
@@ -75,19 +81,19 @@ class WebBrowserActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
     private fun setupWebView() {
-        com.hwanyu365.pagetune.util.WebViewConfig.applyCommon(wv_browser)
-        wv_browser.settings.apply {
+        com.hwanyu365.pagetune.util.WebViewConfig.applyCommon(binding.wvBrowser)
+        binding.wvBrowser.settings.apply {
             displayZoomControls = false
             useWideViewPort = true
             loadWithOverviewMode = true
         }
 
-        wv_browser.webViewClient = object : WebViewClient() {
+        binding.wvBrowser.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 // Cloudflare 통과 쿠키(cf_clearance)는 앱이 죽으면 날아간다. 페이지마다 디스크로 내려 재방문 시 챌린지를 건너뛴다.
                 android.webkit.CookieManager.getInstance().flush()
-                pb_browser_loading.visibility = View.GONE
+                binding.pbBrowserLoading.visibility = View.GONE
                 applyColorActions()
                 applyHiddenActions()
                 applyScrollAction()
@@ -120,24 +126,24 @@ class WebBrowserActivity : AppCompatActivity() {
             }
         }
 
-        wv_browser.webChromeClient = object : WebChromeClient() {
+        binding.wvBrowser.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView?, newProgress: Int) {
                 super.onProgressChanged(view, newProgress)
                 if (newProgress < 100) {
-                    pb_browser_loading.visibility = View.VISIBLE
+                    binding.pbBrowserLoading.visibility = View.VISIBLE
                 } else {
-                    pb_browser_loading.visibility = View.GONE
+                    binding.pbBrowserLoading.visibility = View.GONE
                 }
             }
         }
     }
 
     private fun setupListeners() {
-        btn_gnb_prev.setOnClickListener {
+        binding.btnGnbPrev.setOnClickListener {
             triggerClickAction(gnbPrevAction)
         }
 
-        btn_gnb_next.setOnClickListener {
+        binding.btnGnbNext.setOnClickListener {
             triggerClickAction(gnbNextAction)
         }
     }
@@ -171,7 +177,7 @@ class WebBrowserActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 originalUrlHost = null
             }
-            wv_browser.loadUrl(data.url)
+            binding.wvBrowser.loadUrl(data.url)
             
             setupGestureControls()
             setupGnbControls()
@@ -207,13 +213,13 @@ class WebBrowserActivity : AppCompatActivity() {
 
     private fun applyColorActions() {
         if (colorActions.isEmpty()) return
-        wv_browser.evaluateJavascript(JsScripts.getColorScriptFor(colorActions), null)
+        binding.wvBrowser.evaluateJavascript(JsScripts.getColorScriptFor(colorActions), null)
     }
 
     private fun applyScrollAction() {
         val action = scrollAction ?: return
         val y = runCatching { JSONObject(action.targetSelector).getInt("y") }.getOrNull() ?: return
-        wv_browser.evaluateJavascript(JsScripts.getScrollScript(y), null)
+        binding.wvBrowser.evaluateJavascript(JsScripts.getScrollScript(y), null)
     }
 
     private fun applyHiddenActions() {
@@ -226,20 +232,20 @@ class WebBrowserActivity : AppCompatActivity() {
         }
         
         val script = JsScripts.getMutationObserverHideScript(jsonArray.toString())
-        wv_browser.evaluateJavascript(script, null)
+        binding.wvBrowser.evaluateJavascript(script, null)
     }
 
     private fun triggerClickAction(action: PluginAction?) {
         if (action == null) return
         val script = JsScripts.getClickEventScript(action.targetSelector)
-        wv_browser.evaluateJavascript(script, null)
+        binding.wvBrowser.evaluateJavascript(script, null)
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupGestureControls() {
         val hasGesture = (gestureTopAction != null || gestureBottomAction != null)
         if (!hasGesture) {
-            wv_browser.setOnTouchListener(null)
+            binding.wvBrowser.setOnTouchListener(null)
             return
         }
 
@@ -250,7 +256,7 @@ class WebBrowserActivity : AppCompatActivity() {
 
         mGestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent): Boolean {
-                wv_browser.getHitRect(mHitRect)
+                binding.wvBrowser.getHitRect(mHitRect)
                 val areaPercent = areaPercentVal / 100f
                 val prevHitY = mHitRect.bottom * areaPercent
                 val nextHitY = mHitRect.bottom - prevHitY
@@ -267,7 +273,7 @@ class WebBrowserActivity : AppCompatActivity() {
             }
         })
 
-        wv_browser.setOnTouchListener { _, motionEvent ->
+        binding.wvBrowser.setOnTouchListener { _, motionEvent ->
             mGestureDetector?.onTouchEvent(motionEvent) ?: false
         }
     }
@@ -275,13 +281,13 @@ class WebBrowserActivity : AppCompatActivity() {
     private fun setupGnbControls() {
         val hasGnb = (gnbPrevAction != null || gnbNextAction != null)
         if (hasGnb) {
-            layout_floating_gnb.visibility = View.VISIBLE
+            binding.layoutFloatingGnb.visibility = View.VISIBLE
             
             // Adjust buttons visibility
-            btn_gnb_prev.visibility = if (gnbPrevAction != null) View.VISIBLE else View.GONE
-            btn_gnb_next.visibility = if (gnbNextAction != null) View.VISIBLE else View.GONE
+            binding.btnGnbPrev.visibility = if (gnbPrevAction != null) View.VISIBLE else View.GONE
+            binding.btnGnbNext.visibility = if (gnbNextAction != null) View.VISIBLE else View.GONE
         } else {
-            layout_floating_gnb.visibility = View.GONE
+            binding.layoutFloatingGnb.visibility = View.GONE
         }
     }
 

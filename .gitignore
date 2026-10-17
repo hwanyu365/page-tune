@@ -8,3 +8,8 @@
 **/*.apk
 /app/build
 .omc
+*.jks
+*.keystore
+/buildSrc/build
+.kotlin
+*.hprof

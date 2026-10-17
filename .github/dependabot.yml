@@ -1,0 +1,12 @@
+version: 2
+updates:
+  # 스택의 패키지 생태계(gradle, npm, pip 등)는 /add:init 에서 추가한다.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly

@@ -56,6 +56,7 @@ class PluginEditActivity : AppCompatActivity() {
     private var isInspectMode = false
 
     private lateinit var sheet: BottomSheetBehavior<View>
+    private var imeExtra = 0
     private var initialSnapshot = EditSnapshot.of("", "", emptyList())
 
     // "color" 액션의 입력값. picker 만 이 값을 만들므로 항상 "#RRGGBB" 이거나 null 이다.
@@ -220,6 +221,15 @@ class PluginEditActivity : AppCompatActivity() {
             .show()
     }
 
+    // 키보드 높이는 시트 접힌 높이에만 더하고 WebView 하단 padding 에서는 뺀다. WebView 는 줄지 않고 시트만 올라온다.
+    private fun updateSheetPeek() {
+        val peek = binding.layoutSheetPeekEnd.bottom + binding.layoutBottomConfigContainer.paddingBottom
+        if (sheet.peekHeight != peek) sheet.peekHeight = peek
+        val webPadding = peek - imeExtra
+        if (binding.layoutEditMain.paddingBottom != webPadding) binding.layoutEditMain.updatePadding(bottom = webPadding)
+        updateSheetMaxHeight()
+    }
+
     private fun updateSheetMaxHeight() {
         val max = SheetHeight.max(binding.root.height, binding.layoutEditTop.bottom, sheet.peekHeight)
         if (sheet.maxHeight != max) sheet.maxHeight = max
@@ -241,18 +251,13 @@ class PluginEditActivity : AppCompatActivity() {
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
             binding.layoutEditMain.updatePadding(left = bars.left, top = bars.top, right = bars.right)
             val bottomInset = maxOf(bars.bottom, insets.getInsets(WindowInsetsCompat.Type.ime()).bottom)
+            imeExtra = bottomInset - bars.bottom
             container.updatePadding(left = sheetSide + bars.left, right = sheetSide + bars.right, bottom = sheetBottom + bottomInset)
+            updateSheetPeek()
             insets
         }
 
-        binding.layoutSheetPeekEnd.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, _ ->
-            val peek = bottom + container.paddingBottom
-            if (sheet.peekHeight != peek) {
-                sheet.peekHeight = peek
-                binding.layoutEditMain.updatePadding(bottom = peek)
-                updateSheetMaxHeight()
-            }
-        }
+        binding.layoutSheetPeekEnd.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateSheetPeek() }
         binding.root.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateSheetMaxHeight() }
         binding.layoutEditTop.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateSheetMaxHeight() }
 

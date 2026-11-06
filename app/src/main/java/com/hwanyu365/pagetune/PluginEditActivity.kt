@@ -249,6 +249,7 @@ class PluginEditActivity : AppCompatActivity() {
             if (sheet.peekHeight != peek) {
                 sheet.peekHeight = peek
                 binding.layoutEditMain.updatePadding(bottom = peek)
+                updateSheetMaxHeight()
             }
         }
         binding.root.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateSheetMaxHeight() }

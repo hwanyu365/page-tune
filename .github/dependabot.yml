@@ -10,3 +10,11 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # AGP 8.x 라인 유지 결정(docs/spec_release.md §6) → AGP 9 로 올릴 때 이 제외를 함께 지운다
+    ignore:
+      - dependency-name: "com.android.tools.build:gradle"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "com.github.triplet.gradle:play-publisher"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "gradle-wrapper"
+        update-types: ["version-update:semver-major"]

@@ -368,12 +368,12 @@ UC2 가 이 형식을 읽어 요소를 찾는다 (`spec_page_view.md` §6).
 
 - 테스트 방법: 픽스처 HTML 을 엔진에 올리고 → Kotlin 이 만든 스크립트 문자열을 그대로 실행 → DOM 상태(숨김 스타일, 클릭 핸들러 호출 기록, 브리지로 받은 요소 정보)를 단언한다.
   - 선택 스크립트가 부르는 `AndroidBridge` 는 테스트에서 JS 객체로 대신해 넘어온 요소 정보를 기록한다.
-- 미검증 항목 → GH-21 구현 PR 에서 Red 테스트를 만들 때 실제로 돌려 확인한다. 이번에는 문서 조사만 했다.
-  - HtmlUnit 이 `CSS.escape` 를 제공하는지 → 없으면 CSSOM 사양 알고리즘의 테스트 전용 대체 구현을 픽스처에 넣는다. 이때는 대체 구현을 검증하는 셈이므로 이스케이프의 WebView 동작은 TC#17 수동 재확인이 필요하다.
-  - `MutationObserver` 콜백이 DOM 변경 후 실행되는지 → 안 되면 최초 적용만 단위로 보고, 재적용은 수동으로 남긴다.
-  - Android 단위 테스트 클래스패스(`android.jar` 스텁)에서 HtmlUnit 과 그 전이 의존성이 충돌 없이 로드되는지.
-  - 버전: 5.x 는 Java 17 이상을 요구한다 ([HtmlUnit 5.0.0 공지](https://htmlunit.github.io/htmlunit-blog/2026/05/24/release-5-0-0.html)). 이 저장소의 테스트 바이트코드 대상은 17 이다 → 5.x 를 우선 시도하고 정확한 버전은 구현 PR 에서 고정한다.
-  - 위 셋 중 하나라도 해결되지 않으면 그 PR 에서 소유자에게 알리고, 해당 TC 를 수동으로 되돌린다.
+- 엔진 확인 결과 (HtmlUnit 5.6.0, `org.json:json` 20260814)
+  - `CSS.escape` 를 제공한다 → 대체 구현 없이 선택 스크립트를 그대로 실행한다.
+  - `MutationObserver` 는 `childList` 변경에 콜백을 호출하지 않는다 → 숨기기는 최초 적용만 단위로 보고, DOM 변경 후 재적용은 수동(TC#9, TC#28)으로 본다.
+  - CSS 파서가 `@supports` 블록을 버린다 → 색상 `<style>` 의 규칙 수는 엔진의 `cssRules` 와 CSS 텍스트의 최상위 블록 수를 함께 센다. `@supports` 동작은 수동(`spec_page_view.md` TC#28)으로 본다.
+  - Android 단위 테스트 클래스패스에서 충돌 없이 로드된다.
+  - 버전: 5.x 는 Java 17 이상을 요구한다 ([HtmlUnit 5.0.0 공지](https://htmlunit.github.io/htmlunit-blog/2026/05/24/release-5-0-0.html)). 이 저장소의 테스트 바이트코드 대상은 17 이다.
 
 ### 6.9 코드 삽입 경계 [NFR#7]
 

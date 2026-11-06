@@ -26,6 +26,7 @@ import com.hwanyu365.pagetune.databinding.ActivityPluginEditBinding
 import com.hwanyu365.pagetune.ui.view.ColorPickerDialog
 import com.hwanyu365.pagetune.util.EditSnapshot
 import com.hwanyu365.pagetune.util.JsScripts
+import com.hwanyu365.pagetune.util.UnstableId
 import com.hwanyu365.pagetune.util.enableDarkEdgeToEdge
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -273,7 +274,7 @@ class PluginEditActivity : AppCompatActivity() {
         binding.wvInspector.evaluateJavascript(JsScripts.ELEMENT_PICKER_SCRIPT, null)
     }
 
-    private fun onElementSelectedFromJs(detailsJson: String) {
+    private fun onElementSelectedFromJs(detailsJson: String, matchCount: Int) {
         selectedElementJson = detailsJson
         try {
             val json = JSONObject(detailsJson)
@@ -284,7 +285,15 @@ class PluginEditActivity : AppCompatActivity() {
             } else {
                 getString(R.string.edit_selected, selector)
             }
-            binding.tvSelectedSelector.text = displayText
+            val matchText = getString(
+                when (matchCount) {
+                    1 -> R.string.edit_match_count
+                    0 -> R.string.edit_match_none
+                    else -> R.string.edit_match_many
+                },
+                matchCount
+            )
+            binding.tvSelectedSelector.text = listOf(matchText, displayText).joinToString("\n")
             binding.layoutTraversalActions.visibility = View.VISIBLE
             binding.layoutActionConfig.visibility = View.VISIBLE
             sheet.state = BottomSheetBehavior.STATE_EXPANDED
@@ -320,11 +329,7 @@ class PluginEditActivity : AppCompatActivity() {
             binding.wvInspector.evaluateJavascript("(function() { if (window.webPluginObserver) { window.webPluginObserver.disconnect(); } })();", null)
             return
         }
-        val jsonArray = org.json.JSONArray()
-        hiddenActions.forEach {
-            jsonArray.put(it.targetSelector)
-        }
-        val script = JsScripts.getMutationObserverHideScript(jsonArray.toString())
+        val script = JsScripts.getMutationObserverHideScript(hiddenActions.map { it.targetSelector })
         binding.wvInspector.evaluateJavascript(script, null)
     }
 
@@ -469,7 +474,11 @@ class PluginEditActivity : AppCompatActivity() {
                 }
                 text1.text = getString(R.string.edit_rule_title, index + 1, typeDesc)
                 text1.setTextColor(textColorPrimary)
-                text2.text = if (action.actionType == "scroll") getString(R.string.edit_rule_start_note) else selector
+                text2.text = when {
+                    action.actionType == "scroll" -> getString(R.string.edit_rule_start_note)
+                    UnstableId.needsReselect(action.targetSelector) -> getString(R.string.edit_rule_select_again, selector)
+                    else -> selector
+                }
                 text2.setTextColor(textColorSecondary)
                 text2.textSize = 11f
             } catch (e: Exception) {
@@ -529,9 +538,9 @@ class PluginEditActivity : AppCompatActivity() {
     // Inner class bridge for element selection callback
     inner class AndroidInspectorBridge {
         @JavascriptInterface
-        fun onElementSelected(detailsJson: String) {
+        fun onElementSelected(detailsJson: String, matchCount: Int) {
             runOnUiThread {
-                onElementSelectedFromJs(detailsJson)
+                onElementSelectedFromJs(detailsJson, matchCount)
             }
         }
     }

@@ -240,7 +240,7 @@ class PluginEditActivity : AppCompatActivity() {
             }
         }
         binding.root.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
-            val max = (v.height * SHEET_MAX_RATIO).toInt()
+            val max = minOf((v.height * SHEET_MAX_RATIO).toInt(), v.height - binding.layoutEditTop.bottom)
             if (sheet.maxHeight != max) sheet.maxHeight = max
         }
 
@@ -534,7 +534,7 @@ class PluginEditActivity : AppCompatActivity() {
         const val EXTRA_LOAD_URL = "load_url"
         const val EXTRA_LINK_WEBPAGE_ID = "link_webpage_id"
         const val EXTRA_SAVED_PLUGIN_ID = "saved_plugin_id"
-        private const val SHEET_MAX_RATIO = 0.6f
+        private const val SHEET_MAX_RATIO = 0.8f
     }
 
     // Inner class bridge for element selection callback

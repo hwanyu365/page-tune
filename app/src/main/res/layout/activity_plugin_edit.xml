@@ -13,6 +13,7 @@
 
     <!-- Top bar: Plugin name & Test URL -->
     <LinearLayout
+        android:id="@+id/layout_edit_top"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -197,16 +198,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
-                <Button
-                    android:id="@+id/btn_set_scroll"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/edit_start_position_set"
-                    android:backgroundTint="@color/colorPrimary"
-                    android:textColor="@color/colorWhite"
-                    android:textSize="11sp" />
 
                 <!-- Parent / Child Traversal Buttons -->
                 <LinearLayout
@@ -417,6 +408,16 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:layout_marginTop="4dp" />
+
+                <Button
+                    android:id="@+id/btn_set_scroll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/edit_start_position_set"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="11sp" />
 
             </LinearLayout>
 

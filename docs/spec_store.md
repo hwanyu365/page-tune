@@ -112,7 +112,7 @@
 | `TC#12` | FR#1 | 적응형 background 가 `@color/ic_launcher_background`(`#171717`) | 단위 |
 | `TC#5` | FR#1 | API 36 에뮬레이터 런처에서 원형·사각 마스크와 테마 아이콘(monochrome)에서 잘림 없음 | 수동. 소유자 시안 확인 후 merge |
 | `TC#6` | FR#2 | API 24 에뮬레이터 런처에서 PNG 아이콘 표시 | 수동 |
-| `TC#13` | FR#5 | 매니페스트 `uses-permission` 이 `INTERNET` 뿐, `allowBackup="true"`, 백업 제외 규칙 없음, 방침에 Google 계정 백업 서술이 있고 "기기 밖으로 전송되지 않아요"류 단정이 없다 | 단위 (`StoreListingTest`) |
+| `TC#13` | FR#5 | 매니페스트 `uses-permission` 이 `INTERNET` 뿐, `allowBackup="true"`, 백업 제외 규칙 없음, 방침에 Google 계정 백업 서술이 있고 "기기 밖으로 전송되지 않아요"류 단정이 없다 | 단위 (`StoreListingTest`). 단정 문구 검사는 알려진 두 문구만 막는다 → 다른 표현은 리뷰로 확인 |
 | `TC#14` | FR#5 | 두 로케일 전체 설명에 백업 예외 서술("Google 계정"/"Google account")이 있다 | 단위 |
 | `TC#15` | FR#7 | listing 에 알려진 국내 커뮤니티 이름 목록과 URL 패턴(`www.`·`.com`·`.kr`·`http`, 이슈 URL 제외)이 없다 | 단위. 목록 밖 사이트 이름은 걸러내지 못한다 → 리뷰에서 본다 |
 | `TC#7` | FR#5 | 병합 매니페스트에 라이브러리가 더하는 권한이 있으면 방침에 필요한지 판단 | 로컬. TC#13 은 앱 매니페스트만 본다 |

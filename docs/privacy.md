@@ -22,8 +22,8 @@ PageTune(이하 "앱")은 웹페이지의 보이는 모습과 시작 위치를 �
 ## 인터넷 권한
 
 - 인터넷 권한은 사용자가 앱에서 연 웹페이지를 불러오는 데만 써요.
-- 페이지를 불러올 때 해당 사이트는 일반 브라우저와 같이 기기의 IP 주소 등 요청 정보를 받아요. 그 사이트의 정보 처리는 해당 사이트의 방침을 따라요.
-- 앱은 그 외의 서버와 통신하지 않아요.
+- 페이지를 불러올 때 해당 사이트와, 그 페이지가 불러오는 이미지·스크립트·광고 등의 제3자 서버는 일반 브라우저와 같이 기기의 IP 주소 등 요청 정보를 받아요. 그 정보 처리는 각 서버 운영자의 방침을 따라요.
+- 앱 자체는 이 웹페이지 로드 외에 다른 서버와 통신하지 않아요.
   - 예외: Android WebView 의 Safe Browsing 이 켜져 있어, 위험한 사이트를 판별하려고 방문하는 주소 정보를 Google 에 확인할 수 있어요. 이 동작은 Android 시스템 WebView 가 처리하며 개발자는 그 정보를 받지 않아요.
 - 앱은 암호화되지 않은 http 페이지와, https 페이지 안의 http 콘텐츠도 불러와요. 이런 페이지에서 주고받는 내용은 네트워크에서 암호화되지 않아요.
 
@@ -76,8 +76,8 @@ PageTune ("the app") saves per-site settings for how web pages look and where th
 ## Internet permission
 
 - The internet permission is used only to load the web pages you open in the app.
-- When a page loads, that site receives request information such as your IP address, as with any browser. How that site handles information is governed by its own policy.
-- The app does not communicate with any other server.
+- When a page loads, that site and any third-party servers the page loads images, scripts, or ads from receive request information such as your IP address, as with any browser. How they handle that information is governed by their own policies.
+- Apart from loading these pages, the app itself does not communicate with any other server.
   - Exception: Android WebView Safe Browsing is on, so information about the addresses you visit may be checked with Google to detect dangerous sites. This is handled by the Android system WebView, and the developer does not receive that information.
 - The app also loads unencrypted http pages and http content inside https pages. What these pages send and receive is not encrypted on the network.
 

@@ -197,7 +197,7 @@
   - 아이콘은 Material Symbols 의 벡터 XML 을 복사해 쓴다 (§6.6 D#6). 라이브러리 의존성이 아니다.
   - Apache 2.0 고지: 고지 원문을 `res/raw` 의 텍스트 파일 한 곳에 두고, 메인 화면 툴바 오버플로 메뉴의 "오픈소스 라이선스" 항목이 그 원문을 보여준다.
 - `NFR#5` 불안정 id 판정 규칙은 Kotlin 상수 한 곳에 두고 JS 에 주입한다 → JVM 단위 테스트로 고정하고, 선택 스크립트와 저장 규칙 판정이 같은 규칙을 쓴다 [요구사항] GH-21
-- `NFR#6` 런타임 의존성(APK 에 들어가는 것)을 추가하지 않는다. test 전용 의존성은 §6.8 의 JS 테스트 엔진만 허용한다 → 추가 이유는 D#10 [요구사항]
+- `NFR#6` 런타임 의존성(APK 에 들어가는 것)을 추가하지 않는다. test 전용 의존성은 §6.8 의 JS 테스트 엔진(HtmlUnit)과 `org.json:json` 만 허용한다 → 추가 이유는 D#10 [요구사항]
 - `NFR#7` 방문한 페이지가 정하는 문자열(요소 정보 JSON, 그 값으로 만든 CSS)은 Kotlin 의 JS 문자열 리터럴 함수 하나(§6.9)를 거쳐서만 스크립트에 들어간다 → 페이지가 만든 값이 JS 코드로 실행되지 않는다. 보안 경계이므로 이스케이프 조건마다 단위 TC 를 두고, 구현 PR 에서 조건을 하나씩 지워 해당 TC 가 실패하는지 확인해 결과를 PR 본문에 남긴다 [요구사항] GH-21
 
 ## 4. 데이터 및 API 스펙
@@ -323,7 +323,7 @@ UC2 가 이 형식을 읽어 요소를 찾는다 (`spec_page_view.md` §6).
 | `D#7` 매칭 수 0·2 이상 | 경고만 | 추가 차단 | 여러 개 숨기기가 의도인 경우가 있다 [FR#18] |
 | `D#8` 속성 단계 매칭 [FR#22] | 모든 경로에서 태그명 + 저장 속성 전부 일치 (M#3). 단 색상은 셀렉터가 무효일 때만 대체하고, 유효하지만 0개인 경우는 예외로 둔다 | 셀렉터 무효일 때만 전부 일치 / 색상도 0개일 때 대체: (a) 적용 시점에 JS 로 매칭 수를 세어 선택 (b) 색상에도 DOM 관찰 재적용 | 경로·조건마다 기준이 다르면 같은 규칙이 숨기기·클릭에서 다른 요소를 찾는다. 셀렉터가 유효하지만 0개를 찾은 경우도 과매칭 위험은 같다. 색상 예외 근거: CSS 는 "매칭이 0개일 때만" 을 조건으로 쓸 수 없다 (`@supports selector()` 는 셀렉터 문법 지원 여부만 본다). (a) 는 로드 시점의 0개로 고정돼, 숨기기처럼 DOM 변경마다 다시 판단하지 않으므로 여전히 일치하지 않는다. (b) 는 색상을 `<style>` 로 넣어 재적용 루프를 없앤 설계(`spec_page_view.md` §6.1)를 되돌린다 |
 | `D#9` 색상 대체 셀렉터 적용 방식 [FR#22] | `getColorScriptFor` 가 `buildColorCss` 결과 뒤에, 신규 함수가 만든 `@supports not selector(원래 셀렉터) { 대체 규칙 }` 블록을 이어 붙임. `buildColorCss` 는 시그니처·출력을 바꾸지 않음 | 셀렉터 검사·CSS 조립을 JS 로 옮김 | 조립이 Kotlin 에 남아 JVM 단위 테스트로 고정된다. `@supports selector()` 는 Chromium 83 이상 ([caniuse](https://caniuse.com/mdn-css_at-rules_supports_selector)) → 그보다 낮은 WebView 에서는 대체 규칙이 적용되지 않고 M#1 만 성립한다 |
-| `D#10` JS 테스트 엔진 [NFR#5] [NFR#6] [NFR#7] | HtmlUnit 을 `testImplementation` 으로만 추가 (APK 미포함) | 수동 확인만 유지, JS 엔진 + jsoup shim, 계측 테스트 | 셀렉터·매칭 규칙은 GH-21 의 핵심이고 경로마다 같은 규칙을 지켜야 한다(D#8) → 사람 손 확인으로는 회귀를 막지 못한다. 기술 스택 목록 밖 의존성이므로 이유를 여기 둔다. 비교와 미검증 항목은 §6.8 |
+| `D#10` JS 테스트 엔진 [NFR#5] [NFR#6] [NFR#7] | HtmlUnit 과 `org.json:json` 을 `testImplementation` 으로만 추가 (APK 미포함) | 수동 확인만 유지, JS 엔진 + jsoup shim, 계측 테스트 | 셀렉터·매칭 규칙은 GH-21 의 핵심이고 경로마다 같은 규칙을 지켜야 한다(D#8) → 사람 손 확인으로는 회귀를 막지 못한다. 기술 스택 목록 밖 의존성이므로 이유를 여기 둔다. 비교와 미검증 항목은 §6.8. `org.json:json` 은 JVM 단위 테스트의 `android.jar` `org.json` 이 스텁이라 `JSONObject` 를 쓰는 함수(e.g. `getColorScriptFor`)를 실행하려면 실제 구현이 필요해서 넣는다. 한계: JSON.org 구현이라 Android 런타임의 `org.json` 과 세부 동작(이스케이프·숫자 표기 등)이 다를 수 있다 |
 
 ### 6.7 요소 정보 소비 경로와 공통 규칙 [FR#18] [FR#22]
 
@@ -402,7 +402,7 @@ UC2 가 이 형식을 읽어 요소를 찾는다 (`spec_page_view.md` §6).
 | E6 | `<` | `\u003C` | 스크립트가 HTML 에 들어가는 경우의 `</script>` 종료를 막는다 |
 | E7 | 그 밖의 U+0000~U+001F | `\uXXXX` | 제어 문자가 리터럴을 깨거나 숨지 않게 한다 |
 
-- Android `org.json` 의 따옴표 처리에 기대지 않고 순수 Kotlin 함수로 둔다 → JVM 단위 테스트에서 `android.jar` 의 `org.json` 은 실제 구현이 아닌 스텁이라, 그것에 기대면 경계 함수를 JVM 에서 검증할 수 없다.
+- `org.json` 의 따옴표 처리에 기대지 않고 순수 Kotlin 함수로 둔다 → 테스트의 `org.json` 은 JSON.org 구현이고 런타임은 Android 구현이라(D#10), 그것에 기대면 테스트가 통과해도 실제 경계 동작을 보장하지 못한다.
 - 기존 색상 스크립트 테스트(`spec_page_view.md` TC#9)의 기대값(`\'`, 날 개행 없음)은 이 계약과 같다 → 그 테스트는 바꾸지 않는다.
 
 ## 7. 테스트 및 검증 기준
@@ -432,7 +432,7 @@ UC2 가 이 형식을 읽어 요소를 찾는다 (`spec_page_view.md` §6).
 | `TC#21` | 기기 언어 영어·한국어 각각 → Tunes 탭·편집 화면·다이얼로그·안내 문구가 해당 언어, 용어표와 일치 | [NFR#2] | 수동 |
 | `TC#22` | TalkBack → 아이콘 버튼마다 라벨 읽힘, Layout Inspector → 터치 타깃 48dp 이상, 글꼴 200% 잘림 없음, 주황 버튼 글자색 `#171717`·카드 강조 글자색 `#ff7347` | [NFR#3] [NFR#4] | 수동 |
 | `TC#23` | v3 DB 에 Tune·규칙을 둔 빌드에서 새 빌드로 덮어 설치 → 데이터 유지, 스키마 스냅샷 `3.json` 외 추가 없음 | [NFR#1] | 수동 + `app/schemas/` 확인 |
-| `TC#24` | `app/build.gradle` dependencies 변경이 §6.8 엔진의 `testImplementation` 추가뿐이고, release APK 에 엔진 클래스가 없음 | [NFR#6] | PR diff 확인 + APK 내용 확인 |
+| `TC#24` | `app/build.gradle` dependencies 변경이 HtmlUnit·`org.json:json` 의 `testImplementation` 추가뿐이고, release APK 에 두 라이브러리 클래스가 없음 | [NFR#6] | PR diff 확인 + APK 내용 확인 |
 | `TC#25` | 메인 화면 오버플로 → 오픈소스 라이선스 → Material Symbols 저작권 표시와 Apache 2.0 원문이 보임, `@android:drawable/` 참조가 레이아웃·메뉴에 0건 | [NFR#4] | 수동 + `grep` |
 | `TC#26` | 기존 Tune 을 로드 주소 인자로 열기 → 주소 칸 = 기존 `testUrl`, WebView = 로드 주소, 바로 뒤로가기 → 확인 없이 닫힘, 규칙 추가 후 저장 → `testUrl` 불변. 새 Tune 을 로드 주소 인자로 열기 → 주소 칸 = 로드 주소, 저장 → `testUrl` = 로드 주소 | [FR#11] [FR#13] [FR#20] | 수동, 에뮬레이터 |
 | `TC#27` | 결과·연결: 새 Tune + 연결할 웹페이지 id 로 저장 → 저장됨 + 새 Tune id, 웹페이지 `pluginId` = 새 id. 저장 직후 `adb shell am force-stop` → 재실행 시 Tune·규칙·연결이 모두 있거나 모두 없음. 기존 Tune 저장 → 저장됨 + 같은 id. 취소·뒤로가기 → 저장 안 됨, 연결 없음. 저장 직전 그 웹페이지 삭제 → Tune 만 저장 | [FR#11] [FR#21] | 수동, 에뮬레이터. 트랜잭션 경계는 PR 리뷰에서 DAO `@Transaction` 메서드 하나인지 함께 본다 |

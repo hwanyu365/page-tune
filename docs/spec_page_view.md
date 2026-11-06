@@ -178,7 +178,7 @@
 - `NFR#1` Room 스키마(v3)를 바꾸지 않는다. Tune 끄기 상태는 DB·SharedPreferences 어디에도 저장하지 않는다 [요구사항]
 - `NFR#2` 이 UC 화면의 사용자 노출 문자열은 모두 문자열 리소스에 두고 영어·한국어를 갖춘다 → `spec_tune_edit.md` NFR#2 와 같은 규칙 [요구사항] GH-18
 - `NFR#3` 이 UC 화면은 `spec_tune_edit.md` NFR#3·NFR#4 의 접근성·아이콘 기준을 지킨다. 빠른 메뉴 버튼도 포함한다 [요구사항] GH-20
-- `NFR#4` 런타임 의존성을 추가하지 않는다. test 전용 의존성은 `spec_tune_edit.md` §6.8 엔진만 허용한다 [요구사항]
+- `NFR#4` 런타임 의존성을 추가하지 않는다. test 전용 의존성은 `spec_tune_edit.md` NFR#6 의 HtmlUnit·`org.json:json` 만 허용한다 [요구사항]
 
 ## 4. 데이터 및 API 스펙
 
@@ -280,12 +280,12 @@
 | `TC#19` | 편집에서 숨기기 추가·저장 후 복귀 → 숨김 적용. 취소 후 복귀 → 변화 없음 | [FR#18] | 수동, 에뮬레이터 |
 | `TC#20` | Tune 없는 웹페이지에서 만들기 → 편집 화면 테스트 주소가 현재 주소, 숨기기 추가·저장 후 복귀 → 숨김 적용, 목록에 Tune 연결. 취소 → Tune 수·연결 변화 없음. 중단 시 원자성은 `spec_tune_edit.md` TC#27 | [FR#19] | 수동, 에뮬레이터 |
 | `TC#21` | 숨기기 2·색상 1 Tune 진입 → "숨기기 2, 색상 1" 류 표시 (0개 종류 없음), 끄기 → 꺼짐 표시, 규칙 0개 Tune 진입 → 규칙 없음 표시, Tune 없는 페이지 진입 → 표시 없음, 이전/다음 규칙이 있는 Tune 에서 상태 표시 중 이전·다음 버튼이 가려지지 않고 눌림 | [FR#20] | 수동, 에뮬레이터 |
-| `TC#22` | `getColorScriptFor`: `id` 필드와 무관하게 규칙 셀렉터 = 저장 `selector` (불안정 id + 구조 경로 → 구조 경로, `id`=`a` + selector `#a` → `#a`). 대체 블록 생성 함수(신규, `buildColorCss` 와 별도): 저장 속성이 있으면 `@supports not selector(…)` 블록을 만들고 없으면 빈 문자열. `getColorScriptFor` 출력 = `buildColorCss` 출력 + 대체 블록 | [FR#21] [FR#22] | 단위 |
+| `TC#22` | `getColorScriptFor`: `id` 필드와 무관하게 규칙 셀렉터 = 저장 `selector` (불안정 id + 구조 경로 → 구조 경로, `id`=`a` + selector `#a` → `#a`). 대체 블록 생성 함수(신규, `buildColorCss` 와 별도): 저장 속성이 있으면 `@supports not selector(…)` 블록을 만들고 없으면 빈 문자열. `getColorScriptFor` 출력 = `buildColorCss` 출력 + 대체 블록 | [FR#21] [FR#22] | 단위. `JSONObject` 파싱은 test 전용 `org.json:json` 으로 실행된다 (`spec_tune_edit.md` D#10) |
 | `TC#23` | 픽스처: 숨기기·클릭 연결 각각 (a) selector 무효 → 태그·속성 전부 일치 요소에만 동작, 속성 하나만 일치하는 요소는 영향 없음 (b) 속성값에 따옴표·`@click` 속성 → 예외 없이 동작 (c) 저장 속성 없음 → 아무 요소에도 동작 안 함 (d) 같은 Tune 의 정상 규칙은 그대로 동작 (e) 셀렉터는 유효하지만 0개 → 3단계도 전부 일치 기준 (색상은 이 경우 대체하지 않는 것이 의도된 예외 → TC#28) (f) 요소 정보가 JSON 이 아님 → 그 규칙만 건너뜀 | [FR#22] | 단위 (`spec_tune_edit.md` §6.8 엔진) |
 | `TC#24` | 기기 언어 영어·한국어 → 웹페이지 탭·다이얼로그·열람 화면·빠른 메뉴 문구가 해당 언어 | [NFR#2] | 수동. lint 검사는 `spec_tune_edit.md` TC#20 이 앱 전체를 덮는다 |
 | `TC#25` | TalkBack 라벨·48dp·글꼴 200%: 웹페이지 탭·다이얼로그·빠른 메뉴 | [NFR#3] | 수동 |
 | `TC#26` | 스키마 스냅샷 변경 없음, Tune 끄기 후 앱 재시작 시 DB 변화 없음 | [NFR#1] | 수동 + `app/schemas/` 확인 |
-| `TC#27` | `app/build.gradle` dependencies 변경이 `spec_tune_edit.md` §6.8 엔진의 `testImplementation` 추가뿐 | [NFR#4] | PR diff 확인 |
+| `TC#27` | `app/build.gradle` dependencies 변경이 HtmlUnit·`org.json:json` 의 `testImplementation` 추가뿐 | [NFR#4] | PR diff 확인 |
 | `TC#28` | 실제 WebView: 셀렉터 무효 색상 규칙에 대체 셀렉터가 적용되고 정상 색상 규칙은 그대로, 숨기기·클릭의 TC#23 (a)(b) 를 픽스처로 한 번 재현. 셀렉터가 유효하지만 0개인 색상 규칙 → 대체 셀렉터가 적용되지 않음 (`spec_tune_edit.md` D#8 의 색상 예외 고정) | [FR#22] | 수동, 에뮬레이터. `@supports selector()` 와 엔진·Chromium 차이를 실제 WebView 에서 확인 |
 
 ### 통합·실기기 확인

@@ -46,6 +46,9 @@
     <string name="edit_selected">선택: %s</string>
     <string name="edit_selected_with_text">선택: “%1$s” (%2$s)</string>
     <string name="edit_selected_error">요소를 읽지 못했어요</string>
+    <string name="edit_match_count">일치 %d</string>
+    <string name="edit_match_none">일치 %d · 다시 불러오면 찾지 못할 수 있어요</string>
+    <string name="edit_match_many">일치 %d · 의도보다 많은 요소에 적용될 수 있어요</string>
     <string name="edit_start_position_set">현재 위치를 시작 위치로</string>
     <string name="edit_select_parent">상위 ⇧</string>
     <string name="edit_select_child">하위 ⇩</string>
@@ -80,6 +83,7 @@
     <string name="edit_rule_type_click">이전/다음 이동 (%s)</string>
     <string name="edit_rule_start_note">페이지를 열 때마다 적용돼요</string>
     <string name="edit_rule_broken">요소를 찾을 수 없어요</string>
+    <string name="edit_rule_select_again">다시 선택 필요 · %s</string>
     <string name="edit_start_read_error">스크롤 위치를 읽지 못했어요</string>
     <string name="edit_start_set">시작 위치를 %s(으)로 설정했어요</string>
     <string name="edit_name_required">Tune 이름을 입력해 주세요</string>

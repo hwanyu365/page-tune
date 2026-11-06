@@ -21,7 +21,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
 import org.json.JSONObject
 
 class WebBrowserActivity : AppCompatActivity() {
@@ -229,14 +228,7 @@ class WebBrowserActivity : AppCompatActivity() {
 
     private fun applyHiddenActions() {
         if (hiddenActions.isEmpty()) return
-        
-        // Build JSON array of all selectors details to hide
-        val jsonArray = JSONArray()
-        hiddenActions.forEach {
-            jsonArray.put(it.targetSelector)
-        }
-        
-        val script = JsScripts.getMutationObserverHideScript(jsonArray.toString())
+        val script = JsScripts.getMutationObserverHideScript(hiddenActions.map { it.targetSelector })
         binding.wvBrowser.evaluateJavascript(script, null)
     }
 

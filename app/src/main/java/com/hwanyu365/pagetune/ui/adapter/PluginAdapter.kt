@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.hwanyu365.pagetune.util.Selection
 import com.hwanyu365.pagetune.databinding.ItemPluginBinding
 import com.hwanyu365.pagetune.db.Plugin
 
@@ -15,7 +16,7 @@ class PluginAdapter(
     private var items = listOf<Plugin>()
     var isDeleteMode = false
         private set
-    private val selectedIds = mutableSetOf<Long>()
+    private val selection = Selection()
 
     fun setItems(newItems: List<Plugin>) {
         items = newItems
@@ -24,22 +25,16 @@ class PluginAdapter(
 
     fun setDeleteMode(enabled: Boolean) {
         isDeleteMode = enabled
-        selectedIds.clear()
+        selection.clear()
         notifyDataSetChanged()
     }
 
     fun selectAll(select: Boolean) {
-        if (select) {
-            items.forEach { selectedIds.add(it.id) }
-        } else {
-            selectedIds.clear()
-        }
+        if (select) selection.selectAll(items.map { it.id }) else selection.clear()
         notifyDataSetChanged()
     }
 
-    fun getSelectedIds(): List<Long> {
-        return selectedIds.toList()
-    }
+    fun getSelectedIds(): List<Long> = selection.ids()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(ItemPluginBinding.inflate(LayoutInflater.from(parent.context), parent, false))
@@ -59,17 +54,13 @@ class PluginAdapter(
                 binding.chkDelete.visibility = View.VISIBLE
                 binding.btnEditPlugin.visibility = View.GONE
                 binding.btnCopyPlugin.visibility = View.GONE
-                binding.chkDelete.isChecked = selectedIds.contains(item.id)
+                binding.chkDelete.isChecked = selection.contains(item.id)
 
                 itemView.setOnClickListener {
-                    val id = item.id
-                    if (selectedIds.contains(id)) {
-                        selectedIds.remove(id)
-                    } else {
-                        selectedIds.add(id)
-                    }
+                    selection.toggle(item.id)
                     notifyItemChanged(adapterPosition)
                 }
+                binding.chkDelete.setOnClickListener { selection.set(item.id, binding.chkDelete.isChecked) }
             } else {
                 binding.chkDelete.visibility = View.GONE
                 binding.btnEditPlugin.visibility = View.VISIBLE

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -49,5 +50,104 @@
             android:layout_marginStart="16dp" />
 
     </LinearLayout>
+
+    <!-- Quick menu: handle, toolbar and Tune status share one top overlay -->
+    <RelativeLayout
+        android:id="@+id/layout_quick_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true">
+
+        <ImageButton
+            android:id="@+id/btn_quick_handle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="4dp"
+            android:background="@drawable/bg_quick_handle"
+            android:contentDescription="@string/quick_menu"
+            android:src="@drawable/ic_more_vert"
+            app:tint="@color/colorWhite" />
+
+        <LinearLayout
+            android:id="@+id/layout_quick_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@id/btn_quick_handle"
+            android:background="@color/colorOverlay"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+        <ImageButton
+            android:id="@+id/btn_quick_back"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/quick_back"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="@color/colorTextPrimary" />
+
+        <ImageButton
+            android:id="@+id/btn_quick_refresh"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/quick_refresh"
+            android:src="@drawable/ic_refresh"
+            app:tint="@color/colorTextPrimary" />
+
+        <ImageButton
+            android:id="@+id/btn_quick_share"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/quick_share"
+            android:src="@drawable/ic_share"
+            app:tint="@color/colorTextPrimary" />
+
+        <ImageButton
+            android:id="@+id/btn_quick_toggle"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/quick_tune_off"
+            android:src="@drawable/ic_toggle_on"
+            app:tint="@color/colorTextPrimary" />
+
+        <ImageButton
+            android:id="@+id/btn_quick_edit"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/quick_edit_tune"
+            android:src="@drawable/ic_edit"
+            app:tint="@color/colorTextPrimary" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_tune_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_quick_handle"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="4dp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:background="@color/colorOverlay"
+            android:textColor="@color/colorWhite"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+    </RelativeLayout>
 
 </RelativeLayout>

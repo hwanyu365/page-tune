@@ -1,6 +1,7 @@
 package com.hwanyu365.pagetune
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.MotionEvent
@@ -23,6 +24,9 @@ import com.hwanyu365.pagetune.db.AppDatabase
 import com.hwanyu365.pagetune.db.Plugin
 import com.hwanyu365.pagetune.db.PluginAction
 import com.hwanyu365.pagetune.databinding.ActivityPluginEditBinding
+import com.hwanyu365.pagetune.save.RoomTuneStore
+import com.hwanyu365.pagetune.save.executeSave
+import com.hwanyu365.pagetune.save.planSave
 import com.hwanyu365.pagetune.ui.view.ColorPickerDialog
 import com.hwanyu365.pagetune.util.EditSnapshot
 import com.hwanyu365.pagetune.util.JsScripts
@@ -41,6 +45,8 @@ class PluginEditActivity : AppCompatActivity() {
     private val mainScope = CoroutineScope(Dispatchers.Main)
 
     private var pluginId: Long = -1
+    private var loadUrl: String? = null
+    private var linkWebPageId: Long? = null
     private val tempActions = mutableListOf<PluginAction>()
     private var selectedElementJson: String? = null
     
@@ -66,6 +72,8 @@ class PluginEditActivity : AppCompatActivity() {
 
         db = AppDatabase.getDatabase(this)
         pluginId = intent.getLongExtra("plugin_id", -1)
+        loadUrl = intent.getStringExtra(EXTRA_LOAD_URL)?.takeIf { it.isNotBlank() }
+        linkWebPageId = intent.getLongExtra(EXTRA_LINK_WEBPAGE_ID, -1).takeIf { it != -1L }
 
         setupWebView()
         setupListeners()
@@ -76,6 +84,12 @@ class PluginEditActivity : AppCompatActivity() {
 
         if (pluginId != -1L) {
             loadPluginData()
+        } else {
+            loadUrl?.let {
+                binding.etInpTaddr.setText(it)
+                binding.wvInspector.loadUrl(it)
+            }
+            initialSnapshot = currentSnapshot()
         }
     }
 
@@ -259,10 +273,8 @@ class PluginEditActivity : AppCompatActivity() {
             }
             if (pluginWithActions != null) {
                 binding.etInpPname.setText(pluginWithActions.plugin.name)
-                pluginWithActions.plugin.testUrl?.let { testUrl ->
-                    binding.etInpTaddr.setText(testUrl)
-                    binding.wvInspector.loadUrl(testUrl)
-                }
+                pluginWithActions.plugin.testUrl?.let { binding.etInpTaddr.setText(it) }
+                (loadUrl ?: pluginWithActions.plugin.testUrl)?.let { binding.wvInspector.loadUrl(it) }
                 tempActions.addAll(pluginWithActions.actions)
                 refreshActionsListUI()
                 initialSnapshot = currentSnapshot()
@@ -501,38 +513,28 @@ class PluginEditActivity : AppCompatActivity() {
     }
 
     private fun savePlugin() {
-        val name = binding.etInpPname.text.toString().trim()
-        if (name.isEmpty()) {
+        val plan = planSave(
+            binding.etInpPname.text.toString(), binding.etInpTaddr.text.toString(), tempActions,
+            pluginId.takeIf { it != -1L }, linkWebPageId
+        )
+        if (plan == null) {
             Toast.makeText(this, R.string.edit_name_required, Toast.LENGTH_SHORT).show()
             return
         }
-        val testUrl = binding.etInpTaddr.text.toString().trim()
 
         mainScope.launch {
-            withContext(Dispatchers.IO) {
-                if (pluginId == -1L) {
-                    // Create new plugin
-                    val newId = db.pluginDao().insertPlugin(Plugin(name = name, testUrl = testUrl))
-                    // Re-assign new ID to actions and save
-                    val actionsToSave = tempActions.map { it.copy(pluginId = newId) }
-                    db.pluginDao().insertActions(actionsToSave)
-                } else {
-                    // Update existing plugin
-                    db.pluginDao().updatePlugin(Plugin(id = pluginId, name = name, testUrl = testUrl))
-                    // Delete old actions and insert new ones
-                    db.pluginDao().deleteActionsByPluginId(pluginId)
-                    val actionsToSave = tempActions.map { it.copy(pluginId = pluginId) }
-                    db.pluginDao().insertActions(actionsToSave)
-                }
-            }
+            val savedId = withContext(Dispatchers.IO) { executeSave(plan, RoomTuneStore(db)) }
             Toast.makeText(this@PluginEditActivity, R.string.edit_saved, Toast.LENGTH_SHORT).show()
+            setResult(RESULT_OK, Intent().putExtra(EXTRA_SAVED_PLUGIN_ID, savedId))
             finish()
         }
     }
 
-
-    private companion object {
-        const val SHEET_MAX_RATIO = 0.6f
+    companion object {
+        const val EXTRA_LOAD_URL = "load_url"
+        const val EXTRA_LINK_WEBPAGE_ID = "link_webpage_id"
+        const val EXTRA_SAVED_PLUGIN_ID = "saved_plugin_id"
+        private const val SHEET_MAX_RATIO = 0.6f
     }
 
     // Inner class bridge for element selection callback

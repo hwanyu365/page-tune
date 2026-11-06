@@ -31,4 +31,7 @@ interface WebPageDao {
 
     @Query("UPDATE webpages SET url = :newUrl WHERE id = :id")
     suspend fun updateUrl(id: Long, newUrl: String)
+
+    @Query("UPDATE webpages SET pluginId = :pluginId WHERE id = :id")
+    suspend fun updatePluginId(id: Long, pluginId: Long)
 }

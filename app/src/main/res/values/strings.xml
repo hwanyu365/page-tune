@@ -1,15 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PageTune</string>
-    <string name="tab_webpages">Web Pages</string>
-    <string name="tab_plugins">Tunes</string>
-    <string name="action_add">Add</string>
-    <string name="action_edit">Edit</string>
-    <string name="action_delete">Delete</string>
-    <string name="save">Save</string>
+    <string name="app_name" translatable="false">PageTune</string>
+
+    <string name="tab_webpages">Web pages</string>
+    <string name="tab_tunes">Tunes</string>
+
     <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
     <string name="delete">Delete</string>
-    <string name="confirm">Confirm</string>
     <string name="ok">OK</string>
     <string name="clear">Clear</string>
-    <string name="copy">Copy</string>
+
+    <string name="list_select_all">Select all</string>
+    <string name="list_none_selected">No items selected</string>
+
+    <string name="webpage_edit_cd">Edit web page</string>
+    <string name="webpage_item_tune">Tune: %s</string>
+    <string name="webpage_item_tune_none">No Tune</string>
+    <string name="webpage_tune_none">None</string>
+    <string name="webpage_delete_title">Delete web pages</string>
+    <plurals name="webpage_delete_message">
+        <item quantity="one">Delete %d web page?</item>
+        <item quantity="other">Delete %d web pages?</item>
+    </plurals>
+    <string name="webpage_dialog_add_title">Add web page</string>
+    <string name="webpage_dialog_edit_title">Edit web page</string>
+    <string name="webpage_dialog_hint_title">Title</string>
+    <string name="webpage_dialog_hint_url">Address (https://…)</string>
+    <string name="webpage_dialog_tune_label">Tune</string>
+    <string name="webpage_error_fill_all">Enter a title and address</string>
+
+    <string name="tune_edit_cd">Edit Tune</string>
+    <string name="tune_duplicate">Duplicate</string>
+    <string name="tune_duplicated">Tune duplicated</string>
+    <string name="tune_copy_name">%s (copy)</string>
+    <string name="tune_delete_title">Delete Tunes</string>
+    <plurals name="tune_delete_message">
+        <item quantity="one">Delete %d Tune?</item>
+        <item quantity="other">Delete %d Tunes?</item>
+    </plurals>
+
+    <string name="edit_hint_tune_name">Tune name</string>
+    <string name="edit_hint_url">Page address to pick from</string>
+    <string name="edit_load">Load</string>
+    <string name="edit_pick_banner">Tap an element on the page</string>
+    <string name="edit_pick_on">Picking element</string>
+    <string name="edit_pick_off">Pick element</string>
+    <string name="edit_selected_none">No element selected</string>
+    <string name="edit_selected">Selected: %s</string>
+    <string name="edit_selected_with_text">Selected: “%1$s” (%2$s)</string>
+    <string name="edit_selected_error">Couldn’t read the element</string>
+    <string name="edit_start_position_set">Use current scroll as start position</string>
+    <string name="edit_select_parent">Parent ⇧</string>
+    <string name="edit_select_child">Child ⇩</string>
+    <string name="edit_action_type">What to do</string>
+    <string name="edit_action_hide">Hide</string>
+    <string name="edit_action_click">Prev/Next navigation</string>
+    <string name="edit_action_color">Color</string>
+    <string name="edit_color_hint">Tap to pick. Clear keeps the original color</string>
+    <string name="edit_color_bg">Background: %s</string>
+    <string name="edit_color_text">Text: %s</string>
+    <string name="edit_color_none">none</string>
+    <string name="edit_color_bg_title">Background color</string>
+    <string name="edit_color_text_title">Text color</string>
+    <string name="edit_color_required">Pick at least one color</string>
+    <string name="edit_trigger_label">Trigger</string>
+    <string name="edit_trigger_double_top">Double tap top area</string>
+    <string name="edit_trigger_double_bottom">Double tap bottom area</string>
+    <string name="edit_trigger_button_prev">Prev button (◁)</string>
+    <string name="edit_trigger_button_next">Next button (▷)</string>
+    <string name="edit_area_label">Tap area height (1–50%)</string>
+    <string name="edit_area_hint">Default: 40%</string>
+    <string name="edit_area_error">Enter a value from 1 to 50</string>
+    <string name="edit_rule_add">Add rule</string>
+    <string name="edit_rule_added">Rule added</string>
+    <string name="edit_rule_removed">Rule removed</string>
+    <string name="edit_rules_title">Rules in this Tune</string>
+    <string name="edit_rules_empty">No rules yet</string>
+    <string name="edit_rule_title">Rule %1$s: %2$s</string>
+    <string name="edit_rule_type_hide">Hide</string>
+    <string name="edit_rule_type_color">Color (%s)</string>
+    <string name="edit_rule_type_start">Start position: %d</string>
+    <string name="edit_rule_type_click">Prev/Next navigation (%s)</string>
+    <string name="edit_rule_start_note">Applies every time the page loads</string>
+    <string name="edit_rule_broken">Element not found</string>
+    <string name="edit_start_read_error">Couldn’t read the scroll position</string>
+    <string name="edit_start_set">Start position set to %s</string>
+    <string name="edit_name_required">Enter a Tune name</string>
+    <string name="edit_saved">Tune saved</string>
+
+    <string name="color_channel_r" translatable="false">R</string>
+    <string name="color_channel_g" translatable="false">G</string>
+    <string name="color_channel_b" translatable="false">B</string>
+
+    <string name="browser_prev">◁ Prev</string>
+    <string name="browser_next">Next ▷</string>
+    <string name="browser_error_invalid_id">Couldn’t open this page</string>
+    <string name="browser_error_not_found">This page was removed</string>
 </resources>

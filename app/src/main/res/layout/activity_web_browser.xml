@@ -34,7 +34,7 @@
             android:id="@+id/btn_gnb_prev"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:text="◁ Prev"
+            android:text="@string/browser_prev"
             android:backgroundTint="@color/colorAccent"
             android:textColor="@color/colorWhite"
             android:layout_marginEnd="16dp" />
@@ -43,7 +43,7 @@
             android:id="@+id/btn_gnb_next"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:text="Next ▷"
+            android:text="@string/browser_next"
             android:backgroundTint="@color/colorAccent"
             android:textColor="@color/colorWhite"
             android:layout_marginStart="16dp" />

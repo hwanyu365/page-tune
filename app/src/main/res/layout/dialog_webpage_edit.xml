@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -13,14 +14,14 @@
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/colorPrimary"
-        android:text="Add Web Page"
+        tools:text="Add Web Page"
         android:layout_marginBottom="16dp" />
 
     <com.hwanyu365.pagetune.ui.view.NoAutofillEditText
         android:id="@+id/et_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Page Title"
+        android:hint="@string/webpage_dialog_hint_title"
         android:inputType="textNoSuggestions"
         android:layout_marginBottom="12dp"
         android:importantForAutofill="no"
@@ -31,7 +32,7 @@
         android:id="@+id/et_url"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="https://example.com"
+        android:hint="@string/webpage_dialog_hint_url"
         android:inputType="textUri|textNoSuggestions"
         android:layout_marginBottom="12dp"
         android:importantForAutofill="no"
@@ -43,7 +44,7 @@
         android:layout_height="wrap_content"
         android:textSize="12sp"
         android:textColor="@color/colorTextSecondary"
-        android:text="Select Plugin:"
+        android:text="@string/webpage_dialog_tune_label"
         android:layout_marginBottom="4dp" />
 
     <Spinner

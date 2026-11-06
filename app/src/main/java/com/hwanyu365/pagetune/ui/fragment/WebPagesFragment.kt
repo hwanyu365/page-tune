@@ -73,13 +73,13 @@ class WebPagesFragment : Fragment() {
         binding.btnConfirmDelete.setOnClickListener {
             val selectedIds = adapter.getSelectedIds()
             if (selectedIds.isEmpty()) {
-                Toast.makeText(requireContext(), "No items selected", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.list_none_selected, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             AlertDialog.Builder(requireContext())
-                .setTitle("Delete Pages")
-                .setMessage("Are you sure you want to delete ${selectedIds.size} pages?")
-                .setPositiveButton("Delete") { _, _ ->
+                .setTitle(R.string.webpage_delete_title)
+                .setMessage(resources.getQuantityString(R.plurals.webpage_delete_message, selectedIds.size, selectedIds.size))
+                .setPositiveButton(R.string.delete) { _, _ ->
                     mainScope.launch {
                         withContext(Dispatchers.IO) {
                             db.webPageDao().deleteWebPagesByIds(selectedIds)
@@ -88,7 +88,7 @@ class WebPagesFragment : Fragment() {
                         loadWebPages()
                     }
                 }
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show()
         }
 
@@ -154,7 +154,7 @@ class WebPagesFragment : Fragment() {
             }
 
             // Spinner setup
-            val spinnerItems = mutableListOf("None")
+            val spinnerItems = mutableListOf(getString(R.string.webpage_tune_none))
             plugins.forEach { spinnerItems.add(it.name) }
             val spinnerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, spinnerItems)
             spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -162,7 +162,7 @@ class WebPagesFragment : Fragment() {
 
             // Populate data if editing
             if (webPage != null) {
-                dialogBinding.tvDialogTitle.text = "Edit Web Page"
+                dialogBinding.tvDialogTitle.text = getString(R.string.webpage_dialog_edit_title)
                 dialogBinding.etTitle.setText(webPage.title)
                 dialogBinding.etUrl.setText(webPage.url)
                 
@@ -173,7 +173,7 @@ class WebPagesFragment : Fragment() {
                     dialogBinding.spPlugins.setSelection(0)
                 }
             } else {
-                dialogBinding.tvDialogTitle.text = "Add Web Page"
+                dialogBinding.tvDialogTitle.text = getString(R.string.webpage_dialog_add_title)
             }
 
             dialogBinding.btnDialogCancel.setOnClickListener {
@@ -185,7 +185,7 @@ class WebPagesFragment : Fragment() {
                 var url = dialogBinding.etUrl.text.toString().trim()
                 
                 if (title.isEmpty() || url.isEmpty()) {
-                    Toast.makeText(requireContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), R.string.webpage_error_fill_all, Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
 

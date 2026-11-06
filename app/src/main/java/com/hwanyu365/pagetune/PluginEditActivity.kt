@@ -134,15 +134,17 @@ class PluginEditActivity : AppCompatActivity() {
                 if (checkedId == R.id.rb_action_color) View.VISIBLE else View.GONE
         }
 
+        refreshColorButtons()
+
         binding.btnColorBg.setOnClickListener {
-            ColorPickerDialog.show(this, "Background", colorBg) { picked ->
+            ColorPickerDialog.show(this, getString(R.string.edit_color_bg_title), colorBg) { picked ->
                 colorBg = picked
                 refreshColorButtons()
             }
         }
 
         binding.btnColorText.setOnClickListener {
-            ColorPickerDialog.show(this, "Text", colorText) { picked ->
+            ColorPickerDialog.show(this, getString(R.string.edit_color_text_title), colorText) { picked ->
                 colorText = picked
                 refreshColorButtons()
             }
@@ -193,22 +195,22 @@ class PluginEditActivity : AppCompatActivity() {
             val selector = json.optString("selector")
             val textContent = json.optString("textContent")
             val displayText = if (textContent.isNotEmpty()) {
-                "Selected: \"$textContent\" ($selector)"
+                getString(R.string.edit_selected_with_text, textContent, selector)
             } else {
-                "Selected: $selector"
+                getString(R.string.edit_selected, selector)
             }
             binding.tvSelectedSelector.text = displayText
             binding.layoutTraversalActions.visibility = View.VISIBLE
             binding.layoutActionConfig.visibility = View.VISIBLE
         } catch (e: Exception) {
-            binding.tvSelectedSelector.text = "Error parsing element"
+            binding.tvSelectedSelector.setText(R.string.edit_selected_error)
         }
     }
 
     private fun hideActionConfigPanel() {
         binding.layoutTraversalActions.visibility = View.GONE
         binding.layoutActionConfig.visibility = View.GONE
-        binding.tvSelectedSelector.text = "Selected element: None"
+        binding.tvSelectedSelector.setText(R.string.edit_selected_none)
         selectedElementJson = null
         colorBg = null
         colorText = null
@@ -216,8 +218,8 @@ class PluginEditActivity : AppCompatActivity() {
     }
 
     private fun refreshColorButtons() {
-        binding.btnColorBg.text = "Background: ${colorBg ?: "none"}"
-        binding.btnColorText.text = "Text: ${colorText ?: "none"}"
+        binding.btnColorBg.text = getString(R.string.edit_color_bg, colorBg ?: getString(R.string.edit_color_none))
+        binding.btnColorText.text = getString(R.string.edit_color_text, colorText ?: getString(R.string.edit_color_none))
     }
 
     private fun applyCurrentActions() {
@@ -247,7 +249,7 @@ class PluginEditActivity : AppCompatActivity() {
             colorText?.let { "color:$it" }
         )
         if (declarations.isEmpty()) {
-            Toast.makeText(this, "Please pick at least one color", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.edit_color_required, Toast.LENGTH_SHORT).show()
             return null
         }
         return declarations.joinToString(";")
@@ -262,7 +264,7 @@ class PluginEditActivity : AppCompatActivity() {
         binding.wvInspector.evaluateJavascript("Math.round(window.pageYOffset)") { result ->
             val y = result?.trim('"')?.toDoubleOrNull()?.toInt()
             if (y == null) {
-                Toast.makeText(this, "Could not read scroll position", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.edit_start_read_error, Toast.LENGTH_SHORT).show()
                 return@evaluateJavascript
             }
             tempActions.removeAll { it.actionType == "scroll" }
@@ -274,7 +276,7 @@ class PluginEditActivity : AppCompatActivity() {
                 )
             )
             refreshActionsListUI()
-            Toast.makeText(this, "Start scroll position set to $y", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.edit_start_set, y), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -308,7 +310,7 @@ class PluginEditActivity : AppCompatActivity() {
                 if (areaText.isNotEmpty()) {
                     val value = areaText.toIntOrNull()
                     if (value == null || value <= 0 || value > 50) {
-                        Toast.makeText(this, "Please enter valid value (0 < value <= 50)", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, R.string.edit_area_error, Toast.LENGTH_SHORT).show()
                         return
                     }
                     areaPercent = value
@@ -337,14 +339,24 @@ class PluginEditActivity : AppCompatActivity() {
         // Apply instantly to the inspector WebView
         applyCurrentActions()
         
-        Toast.makeText(this, "Setup added successfully", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, R.string.edit_rule_added, Toast.LENGTH_SHORT).show()
     }
+
+    private fun triggerLabel(triggerType: String?): String = getString(
+        when (triggerType) {
+            "gesture_top" -> R.string.edit_trigger_double_top
+            "gesture_bottom" -> R.string.edit_trigger_double_bottom
+            "gnb_prev" -> R.string.edit_trigger_button_prev
+            "gnb_next" -> R.string.edit_trigger_button_next
+            else -> return triggerType.orEmpty()
+        }
+    )
 
     private fun refreshActionsListUI() {
         binding.layoutActionsList.removeAllViews()
         if (tempActions.isEmpty()) {
             val emptyTv = TextView(this).apply {
-                text = "No setups added yet."
+                setText(R.string.edit_rules_empty)
                 textSize = 12f
                 setTextColor(androidx.core.content.ContextCompat.getColor(this@PluginEditActivity, R.color.colorTextSecondary))
             }
@@ -364,20 +376,20 @@ class PluginEditActivity : AppCompatActivity() {
                 val json = JSONObject(action.targetSelector)
                 val selector = json.optString("selector")
                 val typeDesc = when (action.actionType) {
-                    "hidden" -> "Hide"
-                    "color" -> "Color (${action.styleCss})"
-                    "scroll" -> "Start scroll at y=${json.optInt("y")}"
-                    else -> "Click via ${action.triggerType}"
+                    "hidden" -> getString(R.string.edit_rule_type_hide)
+                    "color" -> getString(R.string.edit_rule_type_color, action.styleCss)
+                    "scroll" -> getString(R.string.edit_rule_type_start, json.optInt("y"))
+                    else -> getString(R.string.edit_rule_type_click, triggerLabel(action.triggerType))
                 }
-                text1.text = "Setup #${index + 1}: $typeDesc"
+                text1.text = getString(R.string.edit_rule_title, index + 1, typeDesc)
                 text1.setTextColor(textColorPrimary)
-                text2.text = if (action.actionType == "scroll") "Applied on every page load" else selector
+                text2.text = if (action.actionType == "scroll") getString(R.string.edit_rule_start_note) else selector
                 text2.setTextColor(textColorSecondary)
                 text2.textSize = 11f
             } catch (e: Exception) {
-                text1.text = "Setup #${index + 1}: ${action.actionType}"
+                text1.text = getString(R.string.edit_rule_title, index + 1, action.actionType)
                 text1.setTextColor(textColorPrimary)
-                text2.text = "Broken Selector"
+                text2.setText(R.string.edit_rule_broken)
                 text2.setTextColor(textColorSecondary)
             }
 
@@ -386,7 +398,7 @@ class PluginEditActivity : AppCompatActivity() {
                 tempActions.removeAt(index)
                 refreshActionsListUI()
                 binding.wvInspector.reload() // Reload page to restore deleted hidden item
-                Toast.makeText(this, "Setup removed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.edit_rule_removed, Toast.LENGTH_SHORT).show()
             }
 
             binding.layoutActionsList.addView(view)
@@ -396,7 +408,7 @@ class PluginEditActivity : AppCompatActivity() {
     private fun savePlugin() {
         val name = binding.etInpPname.text.toString().trim()
         if (name.isEmpty()) {
-            Toast.makeText(this, "Please enter a Tune name", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.edit_name_required, Toast.LENGTH_SHORT).show()
             return
         }
         val testUrl = binding.etInpTaddr.text.toString().trim()
@@ -418,7 +430,7 @@ class PluginEditActivity : AppCompatActivity() {
                     db.pluginDao().insertActions(actionsToSave)
                 }
             }
-            Toast.makeText(this@PluginEditActivity, "Tune saved successfully", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@PluginEditActivity, R.string.edit_saved, Toast.LENGTH_SHORT).show()
             finish()
         }
     }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -16,7 +17,7 @@
             android:id="@+id/et_inp_pname"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Tune Name"
+            android:hint="@string/edit_hint_tune_name"
             android:textColor="@color/colorWhite"
             android:textColorHint="@color/colorTextSecondary"
             android:backgroundTint="@color/colorWhite"
@@ -36,7 +37,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="https://example.com (URL to pick element)"
+                android:hint="@string/edit_hint_url"
                 android:textColor="@color/colorWhite"
                 android:textColorHint="@color/colorTextSecondary"
                 android:backgroundTint="@color/colorWhite"
@@ -49,7 +50,7 @@
                 android:id="@+id/btn_load_url"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Load"
+                android:text="@string/edit_load"
                 android:backgroundTint="@color/colorAccent"
                 android:textColor="@color/colorWhite" />
 
@@ -81,7 +82,7 @@
             android:textColor="@color/colorWhite"
             android:textStyle="bold"
             android:textSize="12sp"
-            android:text="INSPECTOR MODE: Tap web element to select"
+            android:text="@string/edit_pick_banner"
             android:visibility="gone" />
 
     </FrameLayout>
@@ -121,8 +122,8 @@
                         android:id="@+id/btn_toggle_inspect"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textOn="Pick Mode: ON"
-                        android:textOff="Pick Mode: OFF"
+                        android:textOn="@string/edit_pick_on"
+                        android:textOff="@string/edit_pick_off"
                         android:checked="false"
                         android:backgroundTint="@color/colorAccent"
                         android:textColor="@color/colorWhite" />
@@ -136,7 +137,7 @@
                         android:textSize="12sp"
                         android:textStyle="italic"
                         android:textColor="@color/colorTextPrimary"
-                        android:text="Selected element: None"
+                        android:text="@string/edit_selected_none"
                         android:maxLines="2"
                         android:ellipsize="end" />
 
@@ -147,7 +148,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="Set Current Scroll as Start Position"
+                    android:text="@string/edit_start_position_set"
                     android:backgroundTint="@color/colorPrimary"
                     android:textColor="@color/colorWhite"
                     android:textSize="11sp" />
@@ -167,7 +168,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginEnd="4dp"
-                        android:text="Select Parent ⇧"
+                        android:text="@string/edit_select_parent"
                         android:backgroundTint="@color/colorPrimary"
                         android:textColor="@color/colorWhite"
                         android:textSize="11sp" />
@@ -178,7 +179,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="4dp"
-                        android:text="Select Child ⇩"
+                        android:text="@string/edit_select_child"
                         android:backgroundTint="@color/colorPrimary"
                         android:textColor="@color/colorWhite"
                         android:textSize="11sp" />
@@ -197,7 +198,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Action Type:"
+                        android:text="@string/edit_action_type"
                         android:textStyle="bold"
                         android:textSize="12sp" />
 
@@ -212,20 +213,20 @@
                             android:id="@+id/rb_action_hidden"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Hidden"
+                            android:text="@string/edit_action_hide"
                             android:checked="true" />
 
                         <RadioButton
                             android:id="@+id/rb_action_click"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Click Event" />
+                            android:text="@string/edit_action_click" />
 
                         <RadioButton
                             android:id="@+id/rb_action_color"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Color" />
+                            android:text="@string/edit_action_color" />
 
                     </RadioGroup>
 
@@ -241,7 +242,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Colors (tap to pick, Clear to keep original):"
+                            android:text="@string/edit_color_hint"
                             android:textStyle="bold"
                             android:textSize="12sp" />
 
@@ -249,7 +250,7 @@
                             android:id="@+id/btn_color_bg"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Background: none"
+                            tools:text="Background: none"
                             android:backgroundTint="@color/colorPrimary"
                             android:textColor="@color/colorWhite"
                             android:textSize="11sp" />
@@ -259,7 +260,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="Text: none"
+                            tools:text="Text: none"
                             android:backgroundTint="@color/colorPrimary"
                             android:textColor="@color/colorWhite"
                             android:textSize="11sp" />
@@ -278,7 +279,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Click Trigger:"
+                            android:text="@string/edit_trigger_label"
                             android:textStyle="bold"
                             android:textSize="12sp" />
 
@@ -293,40 +294,40 @@
                                 android:id="@+id/rb_trigger_gesture_top"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Gesture: Top 50% Double Tap"
+                                android:text="@string/edit_trigger_double_top"
                                 android:checked="true" />
 
                             <RadioButton
                                 android:id="@+id/rb_trigger_gesture_bottom"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Gesture: Bottom 50% Double Tap" />
+                                android:text="@string/edit_trigger_double_bottom" />
 
                             <RadioButton
                                 android:id="@+id/rb_trigger_gnb_prev"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Floating GNB: Previous Button (◁)" />
+                                android:text="@string/edit_trigger_button_prev" />
 
                             <RadioButton
                                 android:id="@+id/rb_trigger_gnb_next"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Floating GNB: Next Button (▷)" />
+                                android:text="@string/edit_trigger_button_next" />
 
                         </RadioGroup>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Gesture Area Height Percent (1% - 50%):"
+                            android:text="@string/edit_area_label"
                             android:textSize="11sp" />
 
                         <com.hwanyu365.pagetune.ui.view.NoAutofillEditText
                             android:id="@+id/et_gesture_area"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Default: 40%"
+                            android:hint="@string/edit_area_hint"
                             android:textColor="@color/colorTextPrimary"
                             android:textColorHint="@color/colorTextSecondary"
                             android:inputType="number"
@@ -340,7 +341,7 @@
                         android:id="@+id/btn_add_action"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Add Setup to Tune"
+                        android:text="@string/edit_rule_add"
                         android:backgroundTint="@color/colorPrimary"
                         android:textColor="@color/colorWhite" />
 
@@ -350,7 +351,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tune Setups:"
+                    android:text="@string/edit_rules_title"
                     android:textStyle="bold"
                     android:textSize="12sp"
                     android:layout_marginTop="8dp" />

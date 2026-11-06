@@ -240,7 +240,8 @@ class PluginEditActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
             binding.layoutEditMain.updatePadding(left = bars.left, top = bars.top, right = bars.right)
-            container.updatePadding(left = sheetSide + bars.left, right = sheetSide + bars.right, bottom = sheetBottom + bars.bottom)
+            val bottomInset = maxOf(bars.bottom, insets.getInsets(WindowInsetsCompat.Type.ime()).bottom)
+            container.updatePadding(left = sheetSide + bars.left, right = sheetSide + bars.right, bottom = sheetBottom + bottomInset)
             insets
         }
 

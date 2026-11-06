@@ -31,6 +31,8 @@ import com.hwanyu365.pagetune.save.planSave
 import com.hwanyu365.pagetune.ui.view.ColorPickerDialog
 import com.hwanyu365.pagetune.util.EditSnapshot
 import com.hwanyu365.pagetune.util.JsScripts
+import com.hwanyu365.pagetune.util.SheetHeight
+import com.hwanyu365.pagetune.util.TriggerOptions
 import com.hwanyu365.pagetune.util.UnstableId
 import com.hwanyu365.pagetune.util.enableDarkEdgeToEdge
 import kotlinx.coroutines.CoroutineScope
@@ -165,9 +167,7 @@ class PluginEditActivity : AppCompatActivity() {
         }
 
         binding.spTriggerType.adapter = ArrayAdapter(
-            this, android.R.layout.simple_spinner_item,
-            listOf(R.string.edit_trigger_double_top, R.string.edit_trigger_double_bottom,
-                R.string.edit_trigger_button_prev, R.string.edit_trigger_button_next).map { getString(it) }
+            this, android.R.layout.simple_spinner_item, TriggerOptions.all.map { getString(it.labelRes) }
         ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
 
         refreshColorButtons()
@@ -220,9 +220,8 @@ class PluginEditActivity : AppCompatActivity() {
             .show()
     }
 
-    // 펼친 시트가 화면의 일정 비율을 넘거나 이름·주소 영역을 가리지 않게 한다.
     private fun updateSheetMaxHeight() {
-        val max = minOf((binding.root.height * SHEET_MAX_RATIO).toInt(), binding.root.height - binding.layoutEditTop.bottom)
+        val max = SheetHeight.max(binding.root.height, binding.layoutEditTop.bottom, sheet.peekHeight)
         if (sheet.maxHeight != max) sheet.maxHeight = max
     }
 
@@ -411,7 +410,7 @@ class PluginEditActivity : AppCompatActivity() {
         }
 
         if (actionType == "click") {
-            triggerType = TRIGGER_TYPES.getOrNull(binding.spTriggerType.selectedItemPosition)
+            triggerType = TriggerOptions.typeAt(binding.spTriggerType.selectedItemPosition)
             
             if (triggerType?.startsWith("gesture") == true) {
                 val areaText = binding.etGestureArea.text.toString().trim()
@@ -450,15 +449,8 @@ class PluginEditActivity : AppCompatActivity() {
         Toast.makeText(this, R.string.edit_rule_added, Toast.LENGTH_SHORT).show()
     }
 
-    private fun triggerLabel(triggerType: String?): String = getString(
-        when (triggerType) {
-            "gesture_top" -> R.string.edit_trigger_double_top
-            "gesture_bottom" -> R.string.edit_trigger_double_bottom
-            "gnb_prev" -> R.string.edit_trigger_button_prev
-            "gnb_next" -> R.string.edit_trigger_button_next
-            else -> return triggerType.orEmpty()
-        }
-    )
+    private fun triggerLabel(triggerType: String?): String =
+        TriggerOptions.labelResOf(triggerType)?.let { getString(it) } ?: triggerType.orEmpty()
 
     private fun refreshActionsListUI() {
         binding.layoutActionsList.removeAllViews()
@@ -539,8 +531,6 @@ class PluginEditActivity : AppCompatActivity() {
         const val EXTRA_LOAD_URL = "load_url"
         const val EXTRA_LINK_WEBPAGE_ID = "link_webpage_id"
         const val EXTRA_SAVED_PLUGIN_ID = "saved_plugin_id"
-        private val TRIGGER_TYPES = listOf("gesture_top", "gesture_bottom", "gnb_prev", "gnb_next")
-        private const val SHEET_MAX_RATIO = 0.8f
     }
 
     // Inner class bridge for element selection callback

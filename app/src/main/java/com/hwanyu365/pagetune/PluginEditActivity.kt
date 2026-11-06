@@ -11,6 +11,7 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -30,6 +31,8 @@ import com.hwanyu365.pagetune.save.planSave
 import com.hwanyu365.pagetune.ui.view.ColorPickerDialog
 import com.hwanyu365.pagetune.util.EditSnapshot
 import com.hwanyu365.pagetune.util.JsScripts
+import com.hwanyu365.pagetune.util.SheetHeight
+import com.hwanyu365.pagetune.util.TriggerOptions
 import com.hwanyu365.pagetune.util.UnstableId
 import com.hwanyu365.pagetune.util.enableDarkEdgeToEdge
 import kotlinx.coroutines.CoroutineScope
@@ -163,6 +166,10 @@ class PluginEditActivity : AppCompatActivity() {
                 if (checkedId == R.id.rb_action_color) View.VISIBLE else View.GONE
         }
 
+        binding.spTriggerType.adapter = ArrayAdapter(
+            this, android.R.layout.simple_spinner_item, TriggerOptions.all.map { getString(it.labelRes) }
+        ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+
         refreshColorButtons()
 
         binding.btnColorBg.setOnClickListener {
@@ -213,6 +220,11 @@ class PluginEditActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun updateSheetMaxHeight() {
+        val max = SheetHeight.max(binding.root.height, binding.layoutEditTop.bottom, sheet.peekHeight)
+        if (sheet.maxHeight != max) sheet.maxHeight = max
+    }
+
     // 시트 안과 WebView 의 스크롤이 시트 드래그로 바뀌지 않도록 기본 드래그를 끄고 핸들 제스처만 상태를 바꾼다.
     @SuppressLint("ClickableViewAccessibility")
     private fun setupBottomSheet() {
@@ -237,12 +249,11 @@ class PluginEditActivity : AppCompatActivity() {
             if (sheet.peekHeight != peek) {
                 sheet.peekHeight = peek
                 binding.layoutEditMain.updatePadding(bottom = peek)
+                updateSheetMaxHeight()
             }
         }
-        binding.root.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
-            val max = (v.height * SHEET_MAX_RATIO).toInt()
-            if (sheet.maxHeight != max) sheet.maxHeight = max
-        }
+        binding.root.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateSheetMaxHeight() }
+        binding.layoutEditTop.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateSheetMaxHeight() }
 
         val slop = ViewConfiguration.get(this).scaledTouchSlop
         var downY = 0f
@@ -400,13 +411,7 @@ class PluginEditActivity : AppCompatActivity() {
         }
 
         if (actionType == "click") {
-            triggerType = when {
-                binding.rbTriggerGestureTop.isChecked -> "gesture_top"
-                binding.rbTriggerGestureBottom.isChecked -> "gesture_bottom"
-                binding.rbTriggerGnbPrev.isChecked -> "gnb_prev"
-                binding.rbTriggerGnbNext.isChecked -> "gnb_next"
-                else -> null
-            }
+            triggerType = TriggerOptions.typeAt(binding.spTriggerType.selectedItemPosition)
             
             if (triggerType?.startsWith("gesture") == true) {
                 val areaText = binding.etGestureArea.text.toString().trim()
@@ -445,15 +450,8 @@ class PluginEditActivity : AppCompatActivity() {
         Toast.makeText(this, R.string.edit_rule_added, Toast.LENGTH_SHORT).show()
     }
 
-    private fun triggerLabel(triggerType: String?): String = getString(
-        when (triggerType) {
-            "gesture_top" -> R.string.edit_trigger_double_top
-            "gesture_bottom" -> R.string.edit_trigger_double_bottom
-            "gnb_prev" -> R.string.edit_trigger_button_prev
-            "gnb_next" -> R.string.edit_trigger_button_next
-            else -> return triggerType.orEmpty()
-        }
-    )
+    private fun triggerLabel(triggerType: String?): String =
+        TriggerOptions.labelResOf(triggerType)?.let { getString(it) } ?: triggerType.orEmpty()
 
     private fun refreshActionsListUI() {
         binding.layoutActionsList.removeAllViews()
@@ -534,7 +532,6 @@ class PluginEditActivity : AppCompatActivity() {
         const val EXTRA_LOAD_URL = "load_url"
         const val EXTRA_LINK_WEBPAGE_ID = "link_webpage_id"
         const val EXTRA_SAVED_PLUGIN_ID = "saved_plugin_id"
-        private const val SHEET_MAX_RATIO = 0.6f
     }
 
     // Inner class bridge for element selection callback

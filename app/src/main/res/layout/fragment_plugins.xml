@@ -60,7 +60,36 @@
             android:layout_weight="1"
             android:text="@string/delete"
             android:backgroundTint="@color/colorAccent"
-            android:textColor="@color/colorWhite" />
+            android:textColor="@color/colorOnAccent" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="32dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/empty_tunes_message"
+            android:textSize="16sp"
+            android:textColor="@color/colorTextPrimary" />
+
+        <Button
+            android:id="@+id/btn_empty_action"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/empty_tunes_action"
+            android:backgroundTint="@color/colorAccent"
+            android:textColor="@color/colorOnAccent" />
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -70,7 +99,8 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:layout_margin="16dp"
-        android:src="@android:drawable/ic_input_add"
+        android:src="@drawable/ic_add"
+        android:contentDescription="@string/empty_tunes_action"
         app:tint="@color/colorWhite"
         app:backgroundTint="@color/colorAccent" />
 

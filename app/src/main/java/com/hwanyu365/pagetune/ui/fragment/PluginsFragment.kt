@@ -62,6 +62,10 @@ class PluginsFragment : Fragment() {
             startActivity(intent)
         }
 
+        binding.btnEmptyAction.setOnClickListener {
+            startActivity(Intent(requireContext(), PluginEditActivity::class.java))
+        }
+
         binding.btnCancelDelete.setOnClickListener {
             exitDeleteMode()
         }
@@ -122,6 +126,8 @@ class PluginsFragment : Fragment() {
                 db.pluginDao().getAllPlugins()
             }
             adapter.setItems(plugins)
+            binding.layoutEmpty.visibility = if (plugins.isEmpty()) View.VISIBLE else View.GONE
+            binding.rvPlugins.visibility = if (plugins.isEmpty()) View.GONE else View.VISIBLE
         }
     }
 

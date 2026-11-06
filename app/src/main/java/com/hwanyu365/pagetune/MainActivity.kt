@@ -1,6 +1,8 @@
 package com.hwanyu365.pagetune
 
+import android.app.AlertDialog
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -25,6 +27,17 @@ class MainActivity : AppCompatActivity() {
 
         binding.viewPager.adapter = MainPagerAdapter(supportFragmentManager)
         binding.tabLayout.setupWithViewPager(binding.viewPager)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId != R.id.action_licenses) return super.onOptionsItemSelected(item)
+        val text = resources.openRawResource(R.raw.open_source_licenses).bufferedReader().use { it.readText() }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.menu_licenses)
+            .setMessage(text)
+            .setPositiveButton(R.string.ok, null)
+            .show()
+        return true
     }
 
     private inner class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {

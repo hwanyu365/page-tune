@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.hwanyu365.pagetune.util.Selection
 import com.hwanyu365.pagetune.R
 import com.hwanyu365.pagetune.databinding.ItemWebpageBinding
 import com.hwanyu365.pagetune.db.WebPageWithPlugin
@@ -16,7 +17,7 @@ class WebPageAdapter(
     private var items = listOf<WebPageWithPlugin>()
     var isDeleteMode = false
         private set
-    private val selectedIds = mutableSetOf<Long>()
+    private val selection = Selection()
 
     fun setItems(newItems: List<WebPageWithPlugin>) {
         items = newItems
@@ -25,22 +26,16 @@ class WebPageAdapter(
 
     fun setDeleteMode(enabled: Boolean) {
         isDeleteMode = enabled
-        selectedIds.clear()
+        selection.clear()
         notifyDataSetChanged()
     }
 
     fun selectAll(select: Boolean) {
-        if (select) {
-            items.forEach { selectedIds.add(it.webPage.id) }
-        } else {
-            selectedIds.clear()
-        }
+        if (select) selection.selectAll(items.map { it.webPage.id }) else selection.clear()
         notifyDataSetChanged()
     }
 
-    fun getSelectedIds(): List<Long> {
-        return selectedIds.toList()
-    }
+    fun getSelectedIds(): List<Long> = selection.ids()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(ItemWebpageBinding.inflate(LayoutInflater.from(parent.context), parent, false))
@@ -62,17 +57,13 @@ class WebPageAdapter(
             if (isDeleteMode) {
                 binding.chkDelete.visibility = View.VISIBLE
                 binding.btnEdit.visibility = View.GONE
-                binding.chkDelete.isChecked = selectedIds.contains(item.webPage.id)
+                binding.chkDelete.isChecked = selection.contains(item.webPage.id)
 
                 itemView.setOnClickListener {
-                    val id = item.webPage.id
-                    if (selectedIds.contains(id)) {
-                        selectedIds.remove(id)
-                    } else {
-                        selectedIds.add(id)
-                    }
+                    selection.toggle(item.webPage.id)
                     notifyItemChanged(adapterPosition)
                 }
+                binding.chkDelete.setOnClickListener { selection.set(item.webPage.id, binding.chkDelete.isChecked) }
             } else {
                 binding.chkDelete.visibility = View.GONE
                 binding.btnEdit.visibility = View.VISIBLE

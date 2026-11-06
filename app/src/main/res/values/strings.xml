@@ -112,4 +112,19 @@
     <string name="edit_leave_message">You have unsaved changes</string>
     <string name="edit_leave_discard">Leave without saving</string>
     <string name="edit_leave_keep">Keep editing</string>
+    <string name="quick_menu">Quick menu</string>
+    <string name="quick_back">Back</string>
+    <string name="quick_refresh">Refresh</string>
+    <string name="quick_share">Share address</string>
+    <string name="quick_tune_off">Turn Tune off</string>
+    <string name="quick_tune_on">Turn Tune on</string>
+    <string name="quick_edit_tune">Edit Tune on this page</string>
+    <string name="quick_create_tune">Create Tune for this page</string>
+    <string name="tune_status_on">Tune on: %s</string>
+    <string name="tune_status_no_rules">Tune on: no rules</string>
+    <string name="tune_status_off">Tune off</string>
+    <string name="tune_kind_hide">Hide %d</string>
+    <string name="tune_kind_color">Color %d</string>
+    <string name="tune_kind_click">Prev/Next navigation %d</string>
+    <string name="tune_kind_start">Start position %d</string>
 </resources>

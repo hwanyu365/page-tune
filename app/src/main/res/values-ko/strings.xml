@@ -104,4 +104,19 @@
     <string name="edit_leave_message">저장하지 않은 변경이 있어요</string>
     <string name="edit_leave_discard">저장하지 않고 나가기</string>
     <string name="edit_leave_keep">계속 편집</string>
+    <string name="quick_menu">빠른 메뉴</string>
+    <string name="quick_back">뒤로</string>
+    <string name="quick_refresh">새로고침</string>
+    <string name="quick_share">주소 공유</string>
+    <string name="quick_tune_off">Tune 끄기</string>
+    <string name="quick_tune_on">Tune 켜기</string>
+    <string name="quick_edit_tune">이 페이지에서 Tune 편집</string>
+    <string name="quick_create_tune">이 페이지에 Tune 만들기</string>
+    <string name="tune_status_on">Tune 켜짐: %s</string>
+    <string name="tune_status_no_rules">Tune 켜짐: 규칙 없음</string>
+    <string name="tune_status_off">Tune 꺼짐</string>
+    <string name="tune_kind_hide">숨기기 %d</string>
+    <string name="tune_kind_color">색상 %d</string>
+    <string name="tune_kind_click">이전/다음 이동 %d</string>
+    <string name="tune_kind_start">시작 위치 %d</string>
 </resources>

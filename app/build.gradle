@@ -51,6 +51,11 @@ android {
     buildFeatures {
         viewBinding true
     }
+
+    lint {
+        abortOnError true
+        error 'HardcodedText', 'MissingTranslation'
+    }
 }
 
 // 서명 값이 비면 AGP 는 패키징 단계에서 원인 없는 NPE 로 실패한다. 서명이 필요한 태스크에서만 빠진 키 이름을 알려준다.

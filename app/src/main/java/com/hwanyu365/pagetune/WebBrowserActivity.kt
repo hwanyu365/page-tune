@@ -69,7 +69,7 @@ class WebBrowserActivity : AppCompatActivity() {
         webPageId = intent.getLongExtra("webpage_id", -1)
 
         if (webPageId == -1L) {
-            Toast.makeText(this, "Invalid web page ID", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.browser_error_invalid_id, Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -155,7 +155,7 @@ class WebBrowserActivity : AppCompatActivity() {
                 db.webPageDao().getWebPageById(webPageId)
             }
             if (data == null) {
-                Toast.makeText(this@WebBrowserActivity, "Web page not found", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@WebBrowserActivity, R.string.browser_error_not_found, Toast.LENGTH_SHORT).show()
                 finish()
                 return@launch
             }

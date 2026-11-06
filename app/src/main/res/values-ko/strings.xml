@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tab_webpages">웹페이지</string>
+    <string name="tab_tunes">Tune</string>
+
+    <string name="cancel">취소</string>
+    <string name="save">저장</string>
+    <string name="delete">삭제</string>
+    <string name="ok">확인</string>
+    <string name="clear">지우기</string>
+
+    <string name="list_select_all">모두 선택</string>
+    <string name="list_none_selected">선택한 항목이 없어요</string>
+
+    <string name="webpage_edit_cd">웹페이지 편집</string>
+    <string name="webpage_item_tune">Tune: %s</string>
+    <string name="webpage_item_tune_none">Tune 없음</string>
+    <string name="webpage_tune_none">없음</string>
+    <string name="webpage_delete_title">웹페이지 삭제</string>
+    <plurals name="webpage_delete_message">
+        <item quantity="other">웹페이지 %d개를 삭제할까요?</item>
+    </plurals>
+    <string name="webpage_dialog_add_title">웹페이지 추가</string>
+    <string name="webpage_dialog_edit_title">웹페이지 편집</string>
+    <string name="webpage_dialog_hint_title">제목</string>
+    <string name="webpage_dialog_hint_url">주소 (https://…)</string>
+    <string name="webpage_dialog_tune_label">Tune</string>
+    <string name="webpage_error_fill_all">제목과 주소를 입력해 주세요</string>
+
+    <string name="tune_edit_cd">Tune 편집</string>
+    <string name="tune_duplicate">복제</string>
+    <string name="tune_duplicated">Tune을 복제했어요</string>
+    <string name="tune_copy_name">%s (복사본)</string>
+    <string name="tune_delete_title">Tune 삭제</string>
+    <plurals name="tune_delete_message">
+        <item quantity="other">Tune %d개를 삭제할까요?</item>
+    </plurals>
+
+    <string name="edit_hint_tune_name">Tune 이름</string>
+    <string name="edit_hint_url">요소를 고를 페이지 주소</string>
+    <string name="edit_load">불러오기</string>
+    <string name="edit_pick_banner">페이지에서 요소를 탭하세요</string>
+    <string name="edit_pick_on">요소 선택 중</string>
+    <string name="edit_pick_off">요소 선택</string>
+    <string name="edit_selected_none">선택한 요소가 없어요</string>
+    <string name="edit_selected">선택: %s</string>
+    <string name="edit_selected_with_text">선택: “%1$s” (%2$s)</string>
+    <string name="edit_selected_error">요소를 읽지 못했어요</string>
+    <string name="edit_start_position_set">현재 위치를 시작 위치로</string>
+    <string name="edit_select_parent">상위 ⇧</string>
+    <string name="edit_select_child">하위 ⇩</string>
+    <string name="edit_action_type">적용할 동작</string>
+    <string name="edit_action_hide">숨기기</string>
+    <string name="edit_action_click">이전/다음 이동</string>
+    <string name="edit_action_color">색상</string>
+    <string name="edit_color_hint">탭해서 고르세요. 지우면 원래 색이 유지돼요</string>
+    <string name="edit_color_bg">배경색: %s</string>
+    <string name="edit_color_text">글자색: %s</string>
+    <string name="edit_color_none">없음</string>
+    <string name="edit_color_bg_title">배경색</string>
+    <string name="edit_color_text_title">글자색</string>
+    <string name="edit_color_required">색을 하나 이상 골라 주세요</string>
+    <string name="edit_trigger_label">동작 방식</string>
+    <string name="edit_trigger_double_top">위쪽 영역 두 번 탭</string>
+    <string name="edit_trigger_double_bottom">아래쪽 영역 두 번 탭</string>
+    <string name="edit_trigger_button_prev">이전 버튼 (◁)</string>
+    <string name="edit_trigger_button_next">다음 버튼 (▷)</string>
+    <string name="edit_area_label">탭 영역 높이 (1~50%)</string>
+    <string name="edit_area_hint">기본값 40%</string>
+    <string name="edit_area_error">1~50 사이 값을 입력해 주세요</string>
+    <string name="edit_rule_add">규칙 추가</string>
+    <string name="edit_rule_added">규칙을 추가했어요</string>
+    <string name="edit_rule_removed">규칙을 삭제했어요</string>
+    <string name="edit_rules_title">이 Tune의 규칙</string>
+    <string name="edit_rules_empty">아직 규칙이 없어요</string>
+    <string name="edit_rule_title">규칙 %1$s: %2$s</string>
+    <string name="edit_rule_type_hide">숨기기</string>
+    <string name="edit_rule_type_color">색상 (%s)</string>
+    <string name="edit_rule_type_start">시작 위치: %d</string>
+    <string name="edit_rule_type_click">이전/다음 이동 (%s)</string>
+    <string name="edit_rule_start_note">페이지를 열 때마다 적용돼요</string>
+    <string name="edit_rule_broken">요소를 찾을 수 없어요</string>
+    <string name="edit_start_read_error">스크롤 위치를 읽지 못했어요</string>
+    <string name="edit_start_set">시작 위치를 %s(으)로 설정했어요</string>
+    <string name="edit_name_required">Tune 이름을 입력해 주세요</string>
+    <string name="edit_saved">Tune을 저장했어요</string>
+
+    <string name="browser_prev">◁ 이전</string>
+    <string name="browser_next">다음 ▷</string>
+    <string name="browser_error_invalid_id">페이지를 열 수 없어요</string>
+    <string name="browser_error_not_found">삭제된 페이지예요</string>
+</resources>

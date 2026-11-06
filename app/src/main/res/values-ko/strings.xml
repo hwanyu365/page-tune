@@ -95,4 +95,9 @@
     <string name="empty_webpages_message">아직 웹페이지가 없어요. 웹페이지를 추가하면 Tune 으로 볼 수 있어요.</string>
     <string name="empty_webpages_action">웹페이지 추가</string>
     <string name="menu_licenses">오픈소스 라이선스</string>
+    <string name="edit_sheet_handle_cd">패널 크기 조절</string>
+    <string name="edit_leave_title">변경 사항을 버릴까요?</string>
+    <string name="edit_leave_message">저장하지 않은 변경이 있어요</string>
+    <string name="edit_leave_discard">저장하지 않고 나가기</string>
+    <string name="edit_leave_keep">계속 편집</string>
 </resources>

@@ -103,4 +103,9 @@
     <string name="empty_webpages_message">No web pages yet. Add a page to view it with a Tune.</string>
     <string name="empty_webpages_action">Add web page</string>
     <string name="menu_licenses">Open source licenses</string>
+    <string name="edit_sheet_handle_cd">Drag to resize the panel</string>
+    <string name="edit_leave_title">Discard changes?</string>
+    <string name="edit_leave_message">You have unsaved changes</string>
+    <string name="edit_leave_discard">Leave without saving</string>
+    <string name="edit_leave_keep">Keep editing</string>
 </resources>

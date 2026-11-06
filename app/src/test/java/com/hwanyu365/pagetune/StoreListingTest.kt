@@ -1,6 +1,7 @@
 package com.hwanyu365.pagetune
 
 import java.io.File
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -36,6 +37,9 @@ class StoreListingTest {
         assertTrue("# PageTune 개인정보 처리방침" in text)
         assertTrue("# PageTune Privacy Policy" in text)
         assertTrue("https://github.com/hwanyu365/page-tune/issues" in text)
+        val dates = Regex("""(?:시행일|Effective date): (\d{4}-\d{2}-\d{2})""").findAll(text).map { it.groupValues[1] }.toList()
+        assertEquals(2, dates.size)
+        assertEquals(1, dates.toSet().size)
         assertFalse(Regex("""[\w.+-]+@[\w-]+\.[\w.]+""").containsMatchIn(text))
     }
 }

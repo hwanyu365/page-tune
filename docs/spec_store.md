@@ -41,8 +41,9 @@
 
 ### 기능 요구사항
 
-- **FR#1** 앱 아이콘은 적응형 아이콘이다. background 는 `#171717`, foreground 는 브랜드 색 `#ff4103` 의 벡터이고, `monochrome` 레이어를 가진다. `[요구사항]`
-  - foreground 는 108dp 캔버스의 중앙 지름 66dp 안에 들어온다 → 어떤 마스크 모양에서도 잘리지 않는다.
+- **FR#1** 앱 아이콘은 적응형 아이콘이다. background 는 아이콘 전용 색 리소스 `ic_launcher_background`(`#171717`), foreground 는 브랜드 색 `#ff4103` 의 벡터이고, `monochrome` 레이어를 가진다. `[요구사항]`
+  - foreground·monochrome 의 획은 끝(선 굵기 반 포함)까지 108dp 캔버스 중심 (54,54) 에서 반지름 33dp 이내다 → 어떤 마스크 모양에서도 잘리지 않는다.
+  - 배경을 앱 테마색(`colorBackground`)과 분리한다 → 테마색이 바뀌어도 아이콘과 API 24~25 PNG 가 어긋나지 않는다.
 - **FR#2** API 24~25 는 적응형 아이콘을 쓰지 못하므로 `mipmap-*dpi` 의 `ic_launcher.png`·`ic_launcher_round.png` 를 쓴다. 같은 도형이다. `[요구사항]`
 - **FR#3** 매니페스트의 `icon`·`roundIcon` 은 mipmap 리소스를 가리킨다. 기존 `drawable/ic_launcher.png` 는 쓰는 곳이 없으므로 제거한다. `[요구사항]`
 - **FR#4** `docs/privacy.md` 는 한국어·영어 본문을 함께 가지며 아래를 담는다. `[요구사항]`
@@ -51,6 +52,7 @@
   - 인터넷 권한은 사용자가 연 웹페이지를 불러오는 데만 쓴다.
   - 백업·공유·삭제 방법.
   - 문의처는 GitHub 이슈 URL 이다. 개인 이메일을 적지 않는다.
+  - 시행일은 한국어·영어가 같고, Pages 게시일에 맞춰 갱신한다 → 게시 전 값은 예정일이다 (#38 에서 게시 확인 시 확정).
 - **FR#5** 개인정보 처리방침의 서술은 코드·매니페스트의 실제 권한·데이터 흐름과 일치한다. 권한·저장·전송 경로가 바뀌는 변경은 이 문서를 함께 고친다. `[요구사항]`
 - **FR#6** listing 은 GPP 3.x 디렉터리 형식(`app/src/main/play/listings/{en-US,ko-KR}/`)에 `title.txt`(30자 이하)·`short-description.txt`(80자 이하)·`full-description.txt`(4000자 이하)를 둔다. `[요구사항]`
 - **FR#7** listing 문구는 "맞춤 보기 도구"로 쓴다. 광고 차단을 주 문구로 쓰지 않고, 특정 사이트·커뮤니티 이름을 넣지 않는다. 동작은 앱 안에서 연 페이지에만 적용됨을 밝힌다. `[요구사항]`
@@ -83,7 +85,7 @@
 ### 아이콘 [FR#1][FR#2]
 
 - 도형은 시작 위치에서 솟아 오른 선이 꼭짓점(A 의 윗부분)을 지나 물결로 이어지는 하나의 획이다 → 기존 아이콘의 A 와 파형 모티프를 단순화한 것이다.
-- 획 끝과 꺾임은 둥글게 한다. 작은 크기에서도 선이 뭉개지지 않는 굵기(6/108)로 한다.
+- 획 끝과 꺾임은 둥글게 한다. 작은 크기에서도 선이 뭉개지지 않는 굵기(5.5/108)로 한다.
 - monochrome 은 같은 path 를 단색으로 둔다. 색은 시스템이 입힌다.
 - 레거시 PNG 는 같은 path 를 렌더한 결과다. 배경 위에 도형을 그리고 사각형(모서리 둥글게)·원 마스크를 적용한다.
 
@@ -101,8 +103,11 @@
 | --- | --- | --- | --- |
 | `TC#1` | FR#6 | 모든 listing 파일이 존재하고 글자 수 제한 이하 | 단위 (`StoreListingTest`) |
 | `TC#2` | FR#7 | listing 에 "ad block"·"광고 차단" 이 없다 | 단위 |
-| `TC#3` | FR#4 | `docs/privacy.md` 에 한국어·영어 제목, GitHub 이슈 URL 이 있고 이메일 주소가 없다 | 단위 |
+| `TC#3` | FR#4 | `docs/privacy.md` 에 한국어·영어 제목, GitHub 이슈 URL 이 있고 이메일 주소가 없다. 한국어·영어 시행일이 같다 | 단위 |
 | `TC#4` | FR#1~FR#3 | `assembleDebug` 성공, 병합 매니페스트의 `icon`·`roundIcon` 이 mipmap | 로컬 |
+| `TC#10` | FR#1 | 획 끝 포함 최대 반지름 ≤ 33dp (foreground·monochrome) | 단위 (`IconSafeZoneTest`) |
+| `TC#11` | FR#1 | foreground 와 monochrome path 가 같다 | 단위 |
+| `TC#12` | FR#1 | 적응형 background 가 `@color/ic_launcher_background`(`#171717`) | 단위 |
 | `TC#5` | FR#1 | API 36 에뮬레이터 런처에서 원형·사각 마스크와 테마 아이콘(monochrome)에서 잘림 없음 | 수동. 소유자 시안 확인 후 merge |
 | `TC#6` | FR#2 | API 24 에뮬레이터 런처에서 PNG 아이콘 표시 | 수동 |
 | `TC#7` | FR#5 | 병합 매니페스트의 권한이 `INTERNET` 뿐이고 §4 근거 표와 일치 | 로컬 |

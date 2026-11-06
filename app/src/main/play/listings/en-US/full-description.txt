@@ -1,0 +1,21 @@
+PageTune is a viewing tool that lets you set up how a web page looks and where it starts, then applies your settings every time you open it.
+
+Save the web pages you visit often and attach a Tune to each one. A Tune is a set of rules for one site:
+• Hide - tap an element on the page, such as a banner or a title bar, and hide it.
+• Color - change the background color and the text color.
+• Start position - open the page at the scroll position you choose.
+• Prev/Next navigation - map a large on-screen button or a double tap on the top or bottom of the page to the site's own previous and next links.
+
+How it works
+1. Add a web page from the Web pages tab.
+2. In the Tunes tab, create a Tune, choose Pick element, and tap what you want to change on the page.
+3. Save the Tune and attach it to your web page. It is applied each time you open that page.
+4. Use the quick menu while reading to turn the Tune on or off, refresh, or share the link.
+
+Good to know
+• Tunes apply only to pages opened inside PageTune. They do not change other apps or your other browsers.
+• Your web pages and Tunes are stored on your device. PageTune has no account, and the developer does not collect or receive your data. If Android auto backup is enabled, it may be backed up to your Google account.
+• Sites can change their layout at any time. If a rule no longer finds its element, PageTune marks it so you can select the element again.
+• A dark theme is used throughout the app.
+
+Questions and feedback: https://github.com/hwanyu365/page-tune/issues

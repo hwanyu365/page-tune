@@ -11,6 +11,7 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -163,6 +164,12 @@ class PluginEditActivity : AppCompatActivity() {
                 if (checkedId == R.id.rb_action_color) View.VISIBLE else View.GONE
         }
 
+        binding.spTriggerType.adapter = ArrayAdapter(
+            this, android.R.layout.simple_spinner_item,
+            listOf(R.string.edit_trigger_double_top, R.string.edit_trigger_double_bottom,
+                R.string.edit_trigger_button_prev, R.string.edit_trigger_button_next).map { getString(it) }
+        ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
+
         refreshColorButtons()
 
         binding.btnColorBg.setOnClickListener {
@@ -213,6 +220,12 @@ class PluginEditActivity : AppCompatActivity() {
             .show()
     }
 
+    // 펼친 시트가 화면의 일정 비율을 넘거나 이름·주소 영역을 가리지 않게 한다.
+    private fun updateSheetMaxHeight() {
+        val max = minOf((binding.root.height * SHEET_MAX_RATIO).toInt(), binding.root.height - binding.layoutEditTop.bottom)
+        if (sheet.maxHeight != max) sheet.maxHeight = max
+    }
+
     // 시트 안과 WebView 의 스크롤이 시트 드래그로 바뀌지 않도록 기본 드래그를 끄고 핸들 제스처만 상태를 바꾼다.
     @SuppressLint("ClickableViewAccessibility")
     private fun setupBottomSheet() {
@@ -239,10 +252,8 @@ class PluginEditActivity : AppCompatActivity() {
                 binding.layoutEditMain.updatePadding(bottom = peek)
             }
         }
-        binding.root.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
-            val max = minOf((v.height * SHEET_MAX_RATIO).toInt(), v.height - binding.layoutEditTop.bottom)
-            if (sheet.maxHeight != max) sheet.maxHeight = max
-        }
+        binding.root.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateSheetMaxHeight() }
+        binding.layoutEditTop.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> updateSheetMaxHeight() }
 
         val slop = ViewConfiguration.get(this).scaledTouchSlop
         var downY = 0f
@@ -400,13 +411,7 @@ class PluginEditActivity : AppCompatActivity() {
         }
 
         if (actionType == "click") {
-            triggerType = when {
-                binding.rbTriggerGestureTop.isChecked -> "gesture_top"
-                binding.rbTriggerGestureBottom.isChecked -> "gesture_bottom"
-                binding.rbTriggerGnbPrev.isChecked -> "gnb_prev"
-                binding.rbTriggerGnbNext.isChecked -> "gnb_next"
-                else -> null
-            }
+            triggerType = TRIGGER_TYPES.getOrNull(binding.spTriggerType.selectedItemPosition)
             
             if (triggerType?.startsWith("gesture") == true) {
                 val areaText = binding.etGestureArea.text.toString().trim()
@@ -534,6 +539,7 @@ class PluginEditActivity : AppCompatActivity() {
         const val EXTRA_LOAD_URL = "load_url"
         const val EXTRA_LINK_WEBPAGE_ID = "link_webpage_id"
         const val EXTRA_SAVED_PLUGIN_ID = "saved_plugin_id"
+        private val TRIGGER_TYPES = listOf("gesture_top", "gesture_bottom", "gnb_prev", "gnb_next")
         private const val SHEET_MAX_RATIO = 0.8f
     }
 

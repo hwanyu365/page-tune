@@ -31,9 +31,10 @@
 
 ## 기술 스택
 
-- Kotlin 2.3 / Android (minSdk 24, targetSdk 36), AGP 8.13, Gradle 8.14, JDK 21 → Play 의 target API 요건과 AGP 8.x 최신 라인
+- Kotlin 2.4 / Android (minSdk 24, targetSdk 36), AGP 8.13, Gradle 8.14, JDK 21 → Play 의 target API 요건과 AGP 8.x 최신 라인
 - AndroidX AppCompat·Material·RecyclerView, ViewBinding → 기존 View 기반 화면 유지
 - Room 2.8 (kapt) → 로컬 저장소. 스키마 스냅샷 `app/schemas/` 로 마이그레이션 대조
+  - kapt 의 `kotlin-metadata-jvm` 은 Kotlin 버전에 맞춘다 → Room processor 가 내장한 버전은 더 새 Kotlin metadata 를 읽지 못한다
 - WebView + JS 주입 (`JavascriptInterface`) → 페이지 요소 숨기기·색상·클릭 매핑
 - 배포: Gradle Play Publisher 3.13 → 태그 시 Play internal 트랙. AGP 9 로 올리면 GPP 4.x 로 함께 올린다
 - 버전·서명 로직: `buildSrc` (태그 → versionName/versionCode)

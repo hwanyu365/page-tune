@@ -66,6 +66,10 @@ class WebPagesFragment : Fragment() {
             showWebPageEditDialog(null)
         }
 
+        binding.btnEmptyAction.setOnClickListener {
+            showWebPageEditDialog(null)
+        }
+
         binding.btnCancelDelete.setOnClickListener {
             exitDeleteMode()
         }
@@ -110,6 +114,8 @@ class WebPagesFragment : Fragment() {
                 db.webPageDao().getAllWebPagesWithPlugin()
             }
             adapter.setItems(pages)
+            binding.layoutEmpty.visibility = if (pages.isEmpty()) View.VISIBLE else View.GONE
+            binding.rvWebpages.visibility = if (pages.isEmpty()) View.GONE else View.VISIBLE
         }
     }
 

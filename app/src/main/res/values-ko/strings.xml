@@ -89,4 +89,10 @@
     <string name="browser_next">다음 ▷</string>
     <string name="browser_error_invalid_id">페이지를 열 수 없어요</string>
     <string name="browser_error_not_found">삭제된 페이지예요</string>
+
+    <string name="empty_tunes_message">아직 Tune 이 없어요. Tune 은 페이지의 일부를 숨기고 색상을 바꿔요.</string>
+    <string name="empty_tunes_action">Tune 만들기</string>
+    <string name="empty_webpages_message">아직 웹페이지가 없어요. 웹페이지를 추가하면 Tune 으로 볼 수 있어요.</string>
+    <string name="empty_webpages_action">웹페이지 추가</string>
+    <string name="menu_licenses">오픈소스 라이선스</string>
 </resources>

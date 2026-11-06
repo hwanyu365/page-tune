@@ -3,22 +3,30 @@ package com.hwanyu365.pagetune
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.hwanyu365.pagetune.db.AppDatabase
 import com.hwanyu365.pagetune.db.Plugin
 import com.hwanyu365.pagetune.db.PluginAction
 import com.hwanyu365.pagetune.databinding.ActivityPluginEditBinding
 import com.hwanyu365.pagetune.ui.view.ColorPickerDialog
+import com.hwanyu365.pagetune.util.EditSnapshot
 import com.hwanyu365.pagetune.util.JsScripts
 import com.hwanyu365.pagetune.util.enableDarkEdgeToEdge
-import com.hwanyu365.pagetune.util.padForInsets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,6 +45,9 @@ class PluginEditActivity : AppCompatActivity() {
     
     private var isInspectMode = false
 
+    private lateinit var sheet: BottomSheetBehavior<View>
+    private var initialSnapshot = EditSnapshot.of("", "", emptyList())
+
     // "color" 액션의 입력값. picker 만 이 값을 만들므로 항상 "#RRGGBB" 이거나 null 이다.
     private var colorBg: String? = null
     private var colorText: String? = null
@@ -46,7 +57,6 @@ class PluginEditActivity : AppCompatActivity() {
         enableDarkEdgeToEdge()
         binding = ActivityPluginEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.root.padForInsets()
 
         // Programmatically exclude all views in this Activity from Android Autofill Service
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -58,6 +68,10 @@ class PluginEditActivity : AppCompatActivity() {
 
         setupWebView()
         setupListeners()
+        setupBottomSheet()
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() = requestExit()
+        })
 
         if (pluginId != -1L) {
             loadPluginData()
@@ -163,7 +177,77 @@ class PluginEditActivity : AppCompatActivity() {
         }
 
         binding.btnPluginCancel.setOnClickListener {
+            requestExit()
+        }
+    }
+
+    private fun currentSnapshot() = EditSnapshot.of(
+        binding.etInpPname.text.toString(), binding.etInpTaddr.text.toString(), tempActions
+    )
+
+    private fun requestExit() {
+        if (!currentSnapshot().differsFrom(initialSnapshot)) {
             finish()
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.edit_leave_title)
+            .setMessage(R.string.edit_leave_message)
+            .setPositiveButton(R.string.edit_leave_discard) { _, _ -> finish() }
+            .setNegativeButton(R.string.edit_leave_keep, null)
+            .show()
+    }
+
+    // 시트 안과 WebView 의 스크롤이 시트 드래그로 바뀌지 않도록 기본 드래그를 끄고 핸들 제스처만 상태를 바꾼다.
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupBottomSheet() {
+        val container = binding.layoutBottomConfigContainer
+        sheet = BottomSheetBehavior.from(container)
+        sheet.isDraggable = false
+        sheet.state = BottomSheetBehavior.STATE_COLLAPSED
+
+        // BottomSheetBehavior 는 부모 padding 을 반영하지 않으므로 시스템 바 inset 을 루트가 아닌 각 자식에 나눠 준다.
+        val density = resources.displayMetrics.density
+        val sheetSide = (12 * density).toInt()
+        val sheetBottom = (8 * density).toInt()
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            binding.layoutEditMain.updatePadding(left = bars.left, top = bars.top, right = bars.right)
+            container.updatePadding(left = sheetSide + bars.left, right = sheetSide + bars.right, bottom = sheetBottom + bars.bottom)
+            insets
+        }
+
+        binding.layoutSheetPeekEnd.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, _ ->
+            val peek = bottom + container.paddingBottom
+            if (sheet.peekHeight != peek) {
+                sheet.peekHeight = peek
+                binding.layoutEditMain.updatePadding(bottom = peek)
+            }
+        }
+        binding.root.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
+            val max = (v.height * SHEET_MAX_RATIO).toInt()
+            if (sheet.maxHeight != max) sheet.maxHeight = max
+        }
+
+        val slop = ViewConfiguration.get(this).scaledTouchSlop
+        var downY = 0f
+        binding.sheetHandle.setOnClickListener {
+            sheet.state = if (sheet.state == BottomSheetBehavior.STATE_EXPANDED)
+                BottomSheetBehavior.STATE_COLLAPSED else BottomSheetBehavior.STATE_EXPANDED
+        }
+        binding.sheetHandle.setOnTouchListener { v, e ->
+            when (e.actionMasked) {
+                MotionEvent.ACTION_DOWN -> downY = e.rawY
+                MotionEvent.ACTION_UP -> {
+                    val dy = e.rawY - downY
+                    when {
+                        dy > slop -> sheet.state = BottomSheetBehavior.STATE_COLLAPSED
+                        dy < -slop -> sheet.state = BottomSheetBehavior.STATE_EXPANDED
+                        else -> v.performClick()
+                    }
+                }
+            }
+            true
         }
     }
 
@@ -180,6 +264,7 @@ class PluginEditActivity : AppCompatActivity() {
                 }
                 tempActions.addAll(pluginWithActions.actions)
                 refreshActionsListUI()
+                initialSnapshot = currentSnapshot()
             }
         }
     }
@@ -202,6 +287,7 @@ class PluginEditActivity : AppCompatActivity() {
             binding.tvSelectedSelector.text = displayText
             binding.layoutTraversalActions.visibility = View.VISIBLE
             binding.layoutActionConfig.visibility = View.VISIBLE
+            sheet.state = BottomSheetBehavior.STATE_EXPANDED
         } catch (e: Exception) {
             binding.tvSelectedSelector.setText(R.string.edit_selected_error)
         }
@@ -435,6 +521,10 @@ class PluginEditActivity : AppCompatActivity() {
         }
     }
 
+
+    private companion object {
+        const val SHEET_MAX_RATIO = 0.6f
+    }
 
     // Inner class bridge for element selection callback
     inner class AndroidInspectorBridge {

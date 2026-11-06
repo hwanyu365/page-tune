@@ -1,21 +1,30 @@
 package com.hwanyu365.pagetune
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import android.view.accessibility.AccessibilityManager
 import android.webkit.WebViewClient
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.updatePadding
 import androidx.core.view.WindowInsetsCompat
 import com.hwanyu365.pagetune.db.AppDatabase
 import com.hwanyu365.pagetune.db.PluginAction
 import com.hwanyu365.pagetune.databinding.ActivityWebBrowserBinding
 import com.hwanyu365.pagetune.util.JsScripts
+import com.hwanyu365.pagetune.util.TuneRuleCounts
 import com.hwanyu365.pagetune.util.padForInsets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +43,17 @@ class WebBrowserActivity : AppCompatActivity() {
     private var mGestureDetector: GestureDetector? = null
     private val mHitRect = Rect()
     private var originalUrlHost: String? = null
+
+    private var tuneEnabled = true
+    private var hasTune = false
+    private var ruleCounts = TuneRuleCounts()
+    private var pluginId: Long? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private val hideToolbar = Runnable { binding.layoutQuickToolbar.visibility = View.GONE }
+    private val hideStatus = Runnable { binding.tvTuneStatus.visibility = View.GONE }
+    private val editLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) onTuneEdited()
+    }
 
     // Cached actions for quick access
     private val hiddenActions = mutableListOf<PluginAction>()
@@ -98,9 +118,11 @@ class WebBrowserActivity : AppCompatActivity() {
                 // Cloudflare 통과 쿠키(cf_clearance)는 앱이 죽으면 날아간다. 페이지마다 디스크로 내려 재방문 시 챌린지를 건너뛴다.
                 android.webkit.CookieManager.getInstance().flush()
                 binding.pbBrowserLoading.visibility = View.GONE
-                applyColorActions()
-                applyHiddenActions()
-                applyScrollAction()
+                if (tuneEnabled) {
+                    applyColorActions()
+                    applyHiddenActions()
+                    applyScrollAction()
+                }
             }
 
             override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
@@ -150,11 +172,12 @@ class WebBrowserActivity : AppCompatActivity() {
         binding.btnGnbNext.setOnClickListener {
             triggerClickAction(gnbNextAction)
         }
+
+        setupQuickMenu()
     }
 
     private fun loadWebPageData() {
         mainScope.launch {
-            // Load page with plugin relations
             val data = withContext(Dispatchers.IO) {
                 db.webPageDao().getWebPageById(webPageId)
             }
@@ -164,28 +187,155 @@ class WebBrowserActivity : AppCompatActivity() {
                 return@launch
             }
 
-            // Get plugin actions if plugin is mapped
-            val pluginId = data.pluginId
-            if (pluginId != null) {
-                val pluginWithActions = withContext(Dispatchers.IO) {
-                    db.pluginDao().getPluginWithActions(pluginId)
-                }
-                
-                if (pluginWithActions != null) {
-                    classifyActions(pluginWithActions.actions)
-                }
-            }
-
+            readTune(data.pluginId)
             try {
                 originalUrlHost = java.net.URL(data.url).host
             } catch (e: Exception) {
                 originalUrlHost = null
             }
             binding.wvBrowser.loadUrl(data.url)
-            
-            setupGestureControls()
-            setupGnbControls()
+            showTuneStatus()
         }
+    }
+
+    /** 연결된 Tune 의 규칙을 읽어 분류하고, 규칙에 의존하는 화면 요소를 갱신한다. */
+    private suspend fun readTune(linkedPluginId: Long?) {
+        val pluginWithActions = linkedPluginId?.let {
+            withContext(Dispatchers.IO) { db.pluginDao().getPluginWithActions(it) }
+        }
+        pluginId = pluginWithActions?.plugin?.id
+        hasTune = pluginWithActions != null
+        classifyActions(pluginWithActions?.actions.orEmpty())
+        ruleCounts = TuneRuleCounts.of(pluginWithActions?.actions.orEmpty())
+        setupGestureControls()
+        refreshTuneUi()
+    }
+
+    private fun refreshTuneUi() {
+        val hasGnb = tuneEnabled && (gnbPrevAction != null || gnbNextAction != null)
+        binding.layoutFloatingGnb.visibility = if (hasGnb) View.VISIBLE else View.GONE
+        binding.btnGnbPrev.visibility = if (gnbPrevAction != null) View.VISIBLE else View.GONE
+        binding.btnGnbNext.visibility = if (gnbNextAction != null) View.VISIBLE else View.GONE
+
+        binding.btnQuickToggle.isEnabled = hasTune
+        binding.btnQuickToggle.alpha = if (hasTune) 1f else 0.4f
+        binding.btnQuickToggle.contentDescription =
+            getString(if (tuneEnabled) R.string.quick_tune_off else R.string.quick_tune_on)
+        binding.btnQuickToggle.setImageResource(if (tuneEnabled) R.drawable.ic_toggle_on else R.drawable.ic_toggle_off)
+        binding.btnQuickEdit.contentDescription =
+            getString(if (hasTune) R.string.quick_edit_tune else R.string.quick_create_tune)
+        binding.btnQuickEdit.setImageResource(if (hasTune) R.drawable.ic_edit else R.drawable.ic_add)
+    }
+
+    private fun showTuneStatus() {
+        val text = when {
+            !hasTune -> return
+            !tuneEnabled -> getString(R.string.tune_status_off)
+            else -> {
+                val parts = ruleCounts.nonZero().map { (kind, n) ->
+                    getString(
+                        when (kind) {
+                            TuneRuleCounts.Kind.HIDE -> R.string.tune_kind_hide
+                            TuneRuleCounts.Kind.COLOR -> R.string.tune_kind_color
+                            TuneRuleCounts.Kind.CLICK -> R.string.tune_kind_click
+                            TuneRuleCounts.Kind.START -> R.string.tune_kind_start
+                        }, n
+                    )
+                }
+                if (parts.isEmpty()) getString(R.string.tune_status_no_rules)
+                else getString(R.string.tune_status_on, parts.joinToString(", "))
+            }
+        }
+        binding.tvTuneStatus.text = text
+        binding.tvTuneStatus.visibility = View.VISIBLE
+        handler.removeCallbacks(hideStatus)
+        handler.postDelayed(hideStatus, STATUS_MILLIS)
+    }
+
+    private fun setupQuickMenu() {
+        // 상태바는 숨겨도 컷아웃·둥근 모서리 안쪽에 둔다.
+        ViewCompat.setOnApplyWindowInsetsListener(binding.layoutQuickOverlay) { v, insets ->
+            val safe = insets.getInsets(
+                WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.systemBars()
+            )
+            v.updatePadding(left = safe.left, top = safe.top, right = safe.right)
+            insets
+        }
+        binding.btnQuickHandle.setOnClickListener {
+            if (binding.layoutQuickToolbar.visibility == View.VISIBLE) {
+                handler.removeCallbacks(hideToolbar)
+                binding.layoutQuickToolbar.visibility = View.GONE
+            } else {
+                binding.layoutQuickToolbar.visibility = View.VISIBLE
+                scheduleToolbarHide()
+            }
+        }
+        binding.btnQuickBack.setOnClickListener {
+            scheduleToolbarHide()
+            onBackPressedDispatcher.onBackPressed()
+        }
+        binding.btnQuickRefresh.setOnClickListener {
+            scheduleToolbarHide()
+            binding.wvBrowser.reload()
+        }
+        binding.btnQuickShare.setOnClickListener {
+            scheduleToolbarHide()
+            val url = binding.wvBrowser.url ?: return@setOnClickListener
+            val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, url)
+            startActivity(Intent.createChooser(send, getString(R.string.quick_share)))
+        }
+        binding.btnQuickToggle.setOnClickListener {
+            scheduleToolbarHide()
+            tuneEnabled = !tuneEnabled
+            refreshTuneUi()
+            showTuneStatus()
+            binding.wvBrowser.reload()
+        }
+        binding.btnQuickEdit.setOnClickListener {
+            scheduleToolbarHide()
+            openTuneEdit()
+        }
+    }
+
+    private fun scheduleToolbarHide() {
+        val timeout = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            getSystemService(AccessibilityManager::class.java)
+                .getRecommendedTimeoutMillis(TOOLBAR_MILLIS, AccessibilityManager.FLAG_CONTENT_CONTROLS)
+        } else {
+            TOOLBAR_MILLIS
+        }
+        handler.removeCallbacks(hideToolbar)
+        handler.postDelayed(hideToolbar, timeout.toLong())
+    }
+
+    private fun openTuneEdit() {
+        val intent = Intent(this, PluginEditActivity::class.java)
+            .putExtra(PluginEditActivity.EXTRA_LOAD_URL, binding.wvBrowser.url)
+        val current = pluginId
+        if (current != null) intent.putExtra("plugin_id", current)
+        else intent.putExtra(PluginEditActivity.EXTRA_LINK_WEBPAGE_ID, webPageId)
+        editLauncher.launch(intent)
+    }
+
+    /** 저장하고 돌아오면 웹페이지·Tune 을 DB 에서 다시 읽어 켠 상태로 적용한다. */
+    private fun onTuneEdited() {
+        mainScope.launch {
+            val data = withContext(Dispatchers.IO) { db.webPageDao().getWebPageById(webPageId) } ?: return@launch
+            tuneEnabled = true
+            readTune(data.pluginId)
+            binding.wvBrowser.reload()
+            showTuneStatus()
+        }
+    }
+
+    override fun onDestroy() {
+        handler.removeCallbacksAndMessages(null)
+        super.onDestroy()
+    }
+
+    private companion object {
+        const val TOOLBAR_MILLIS = 4000
+        const val STATUS_MILLIS = 3000L
     }
 
     private fun classifyActions(actions: List<PluginAction>) {
@@ -253,6 +403,7 @@ class WebBrowserActivity : AppCompatActivity() {
 
         mGestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent): Boolean {
+                if (!tuneEnabled) return false
                 binding.wvBrowser.getHitRect(mHitRect)
                 val areaPercent = areaPercentVal / 100f
                 val prevHitY = mHitRect.bottom * areaPercent
@@ -272,19 +423,6 @@ class WebBrowserActivity : AppCompatActivity() {
 
         binding.wvBrowser.setOnTouchListener { _, motionEvent ->
             mGestureDetector?.onTouchEvent(motionEvent) ?: false
-        }
-    }
-
-    private fun setupGnbControls() {
-        val hasGnb = (gnbPrevAction != null || gnbNextAction != null)
-        if (hasGnb) {
-            binding.layoutFloatingGnb.visibility = View.VISIBLE
-            
-            // Adjust buttons visibility
-            binding.btnGnbPrev.visibility = if (gnbPrevAction != null) View.VISIBLE else View.GONE
-            binding.btnGnbNext.visibility = if (gnbNextAction != null) View.VISIBLE else View.GONE
-        } else {
-            binding.layoutFloatingGnb.visibility = View.GONE
         }
     }
 

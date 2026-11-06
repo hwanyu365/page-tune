@@ -69,13 +69,13 @@ class PluginsFragment : Fragment() {
         binding.btnConfirmDelete.setOnClickListener {
             val selectedIds = adapter.getSelectedIds()
             if (selectedIds.isEmpty()) {
-                Toast.makeText(requireContext(), "No items selected", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.list_none_selected, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             AlertDialog.Builder(requireContext())
-                .setTitle("Delete Tunes")
-                .setMessage("Are you sure you want to delete " + selectedIds.size + " Tunes?")
-                .setPositiveButton("Delete") { _, _ ->
+                .setTitle(R.string.tune_delete_title)
+                .setMessage(resources.getQuantityString(R.plurals.tune_delete_message, selectedIds.size, selectedIds.size))
+                .setPositiveButton(R.string.delete) { _, _ ->
                     mainScope.launch {
                         withContext(Dispatchers.IO) {
                             db.pluginDao().deletePluginsByIds(selectedIds)
@@ -84,7 +84,7 @@ class PluginsFragment : Fragment() {
                         loadPlugins()
                     }
                 }
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(R.string.cancel, null)
                 .show()
         }
 
@@ -107,12 +107,12 @@ class PluginsFragment : Fragment() {
                 val source = db.pluginDao().getPluginWithActions(plugin.id) ?: return@withContext
                 // id 를 0 으로 비워야 Room 이 새 행으로 넣는다. 그대로 두면 REPLACE 정책 때문에 원본을 덮어쓴다.
                 val newId = db.pluginDao().insertPlugin(
-                    source.plugin.copy(id = 0, name = source.plugin.name + " (copy)")
+                    source.plugin.copy(id = 0, name = getString(R.string.tune_copy_name, source.plugin.name))
                 )
                 db.pluginDao().insertActions(source.actions.map { it.copy(id = 0, pluginId = newId) })
             }
             loadPlugins()
-            Toast.makeText(requireContext(), "Tune duplicated", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), R.string.tune_duplicated, Toast.LENGTH_SHORT).show()
         }
     }
 

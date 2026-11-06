@@ -34,6 +34,6 @@ class MainActivity : AppCompatActivity() {
             if (position == 0) WebPagesFragment() else PluginsFragment()
 
         override fun getPageTitle(position: Int): CharSequence =
-            getString(if (position == 0) R.string.tab_webpages else R.string.tab_plugins)
+            getString(if (position == 0) R.string.tab_webpages else R.string.tab_tunes)
     }
 }

@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.hwanyu365.pagetune.R
 import com.hwanyu365.pagetune.databinding.ItemWebpageBinding
 import com.hwanyu365.pagetune.db.WebPageWithPlugin
 
@@ -55,7 +56,8 @@ class WebPageAdapter(
         fun bind(item: WebPageWithPlugin) {
             binding.tvTitle.text = item.webPage.title
             binding.tvUrl.text = item.webPage.url
-            binding.tvPlugin.text = "Tune: ${item.plugin?.name ?: "None"}"
+            binding.tvPlugin.text = item.plugin?.name?.let { binding.root.context.getString(R.string.webpage_item_tune, it) }
+                ?: binding.root.context.getString(R.string.webpage_item_tune_none)
 
             if (isDeleteMode) {
                 binding.chkDelete.visibility = View.VISIBLE

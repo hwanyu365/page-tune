@@ -20,7 +20,7 @@
             android:id="@+id/chk_select_all"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Select All" />
+            android:text="@string/list_select_all" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -58,7 +58,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/confirm"
+            android:text="@string/delete"
             android:backgroundTint="@color/colorAccent"
             android:textColor="@color/colorWhite" />
     </LinearLayout>

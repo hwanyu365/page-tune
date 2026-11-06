@@ -222,6 +222,7 @@ class PluginEditActivity : AppCompatActivity() {
     }
 
     // 키보드 높이는 시트 접힌 높이에만 더하고 WebView 하단 padding 에서는 뺀다. WebView 는 줄지 않고 시트만 올라온다.
+    // 창이 키보드만큼 줄어드는 API 30 미만에서는 IME inset 이 창 크기에 이미 반영돼 imeExtra 가 0 이 된다.
     private fun updateSheetPeek() {
         val peek = binding.layoutSheetPeekEnd.bottom + binding.layoutBottomConfigContainer.paddingBottom
         if (sheet.peekHeight != peek) sheet.peekHeight = peek

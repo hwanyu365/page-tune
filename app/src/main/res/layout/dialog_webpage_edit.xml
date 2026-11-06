@@ -73,7 +73,7 @@
             android:layout_height="wrap_content"
             android:text="@string/save"
             android:backgroundTint="@color/colorAccent"
-            android:textColor="@color/colorWhite"
+            android:textColor="@color/colorOnAccent"
             android:layout_marginStart="8dp" />
 
     </LinearLayout>

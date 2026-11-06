@@ -97,4 +97,10 @@
     <string name="browser_next">Next ▷</string>
     <string name="browser_error_invalid_id">Couldn’t open this page</string>
     <string name="browser_error_not_found">This page was removed</string>
+
+    <string name="empty_tunes_message">No Tunes yet. A Tune hides parts of a page and sets its colors.</string>
+    <string name="empty_tunes_action">Create Tune</string>
+    <string name="empty_webpages_message">No web pages yet. Add a page to view it with a Tune.</string>
+    <string name="empty_webpages_action">Add web page</string>
+    <string name="menu_licenses">Open source licenses</string>
 </resources>

@@ -50,6 +50,9 @@
     <string name="edit_selected">Selected: %s</string>
     <string name="edit_selected_with_text">Selected: “%1$s” (%2$s)</string>
     <string name="edit_selected_error">Couldn’t read the element</string>
+    <string name="edit_match_count">Matches %d</string>
+    <string name="edit_match_none">Matches %d · May not be found after reload</string>
+    <string name="edit_match_many">Matches %d · May apply to more elements than intended</string>
     <string name="edit_start_position_set">Use current scroll as start position</string>
     <string name="edit_select_parent">Parent ⇧</string>
     <string name="edit_select_child">Child ⇩</string>
@@ -84,6 +87,7 @@
     <string name="edit_rule_type_click">Prev/Next navigation (%s)</string>
     <string name="edit_rule_start_note">Applies every time the page loads</string>
     <string name="edit_rule_broken">Element not found</string>
+    <string name="edit_rule_select_again">Select again · %s</string>
     <string name="edit_start_read_error">Couldn’t read the scroll position</string>
     <string name="edit_start_set">Start position set to %s</string>
     <string name="edit_name_required">Enter a Tune name</string>

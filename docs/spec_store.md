@@ -48,7 +48,7 @@
 - **FR#3** 매니페스트의 `icon`·`roundIcon` 은 mipmap 리소스를 가리킨다. 기존 `drawable/ic_launcher.png` 는 쓰는 곳이 없으므로 제거한다. `[요구사항]`
 - **FR#4** `docs/privacy.md` 는 한국어·영어 본문을 함께 가지며 아래를 담는다. `[요구사항]`
   - 개발자가 수집·전송하는 데이터가 없다.
-  - 저장되는 데이터(웹페이지 제목·주소, Tune)는 기기 안에만 있다.
+  - 저장되는 데이터(웹페이지 제목·주소, Tune)를 개발자·제3자에게 전송하지 않는다. 단 Android 자동 백업(사용자 Google 계정)은 예외로 밝힌다.
   - 인터넷 권한은 사용자가 연 웹페이지를 불러오는 데만 쓴다.
   - 백업·공유·삭제 방법.
   - 문의처는 GitHub 이슈 URL 이다. 개인 이메일을 적지 않는다.
@@ -111,7 +111,8 @@
 | `TC#5` | FR#1 | API 36 에뮬레이터 런처에서 원형·사각 마스크와 테마 아이콘(monochrome)에서 잘림 없음 | 수동. 소유자 시안 확인 후 merge |
 | `TC#6` | FR#2 | API 24 에뮬레이터 런처에서 PNG 아이콘 표시 | 수동 |
 | `TC#13` | FR#5 | 매니페스트 `uses-permission` 이 `INTERNET` 뿐, `allowBackup="true"`, 백업 제외 규칙 없음, 방침에 Google 계정 백업 서술이 있고 "기기 밖으로 전송되지 않아요"류 단정이 없다 | 단위 (`StoreListingTest`) |
-| `TC#14` | FR#5, FR#7 | 전체 설명에 "기기에만 저장"류 표현이 없다 | 단위 |
+| `TC#14` | FR#5 | 두 로케일 전체 설명에 백업 예외 서술("Google 계정"/"Google account")이 있다 | 단위 |
+| `TC#15` | FR#7 | listing 에 알려진 국내 커뮤니티 이름 목록과 URL 패턴(`www.`·`.com`·`.kr`·`http`, 이슈 URL 제외)이 없다 | 단위. 목록 밖 사이트 이름은 걸러내지 못한다 → 리뷰에서 본다 |
 | `TC#7` | FR#5 | 병합 매니페스트에 라이브러리가 더하는 권한이 있으면 방침에 필요한지 판단 | 로컬. TC#13 은 앱 매니페스트만 본다 |
 | `TC#8` | FR#8 | `./gradlew publishReleaseBundle --dry-run` 에 `publishReleaseListing` 이 없다 | 로컬 |
 | `TC#9` | §4 | Pages 활성화 후 게시 URL 이 열린다 | 소유자 설정 후 확인 |

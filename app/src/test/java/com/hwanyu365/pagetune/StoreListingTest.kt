@@ -59,10 +59,21 @@ class StoreListingTest {
     }
 
     @Test
-    fun `TC#14 listing 은 백업과 어긋나는 기기에만 저장 표현을 쓰지 않는다`() {
-        for (locale in locales) {
+    fun `TC#14 listing 은 백업 예외를 밝힌다`() {
+        for ((locale, phrase) in listOf("ko-KR" to "Google 계정", "en-US" to "Google account")) {
             val text = File(listings, "$locale/full-description.txt").readText()
-            assertFalse("$locale", "기기에만" in text || "only on your device" in text)
+            assertTrue("$locale 전체 설명에 '$phrase' 없음", phrase in text)
+        }
+    }
+
+    @Test
+    fun `TC#15 listing 은 특정 사이트·커뮤니티를 가리키지 않는다`() {
+        val issues = "https://github.com/hwanyu365/page-tune/issues"
+        val names = listOf("ruliweb", "dcinside", "clien", "ppomppu", "fmkorea", "theqoo", "inven", "bobaedream", "mlbpark", "todayhumor", "instiz", "naver", "daum")
+        val urlPatterns = listOf("www.", ".com", ".co.kr", ".net", ".kr", "http")
+        for (locale in locales) for (name in limits.keys) {
+            val text = File(listings, "$locale/$name").readText().replace(issues, "").lowercase()
+            for (w in names + urlPatterns) assertFalse("$locale/$name 에 '$w'", w in text)
         }
     }
 }

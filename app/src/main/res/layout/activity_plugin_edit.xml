@@ -13,6 +13,7 @@
 
     <!-- Top bar: Plugin name & Test URL -->
     <LinearLayout
+        android:id="@+id/layout_edit_top"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -198,23 +199,13 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <Button
-                    android:id="@+id/btn_set_scroll"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/edit_start_position_set"
-                    android:backgroundTint="@color/colorPrimary"
-                    android:textColor="@color/colorWhite"
-                    android:textSize="11sp" />
-
                 <!-- Parent / Child Traversal Buttons -->
                 <LinearLayout
                     android:id="@+id/layout_traversal_actions"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="4dp"
                     android:visibility="gone">
 
                     <Button
@@ -248,7 +239,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:visibility="gone"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginBottom="0dp">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -262,10 +253,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="4dp">
 
                         <RadioButton
                             android:id="@+id/rb_action_hidden"
+                            android:minHeight="48dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/edit_action_hide"
@@ -273,12 +265,14 @@
 
                         <RadioButton
                             android:id="@+id/rb_action_click"
+                            android:minHeight="48dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/edit_action_click" />
 
                         <RadioButton
                             android:id="@+id/rb_action_color"
+                            android:minHeight="48dp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/edit_action_color" />
@@ -292,7 +286,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:visibility="gone"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="4dp">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -329,7 +323,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:visibility="gone"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="4dp">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -338,39 +332,12 @@
                             android:textStyle="bold"
                             android:textSize="12sp" />
 
-                        <RadioGroup
-                            android:id="@+id/rg_trigger_type"
+                        <Spinner
+                            android:id="@+id/sp_trigger_type"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_marginBottom="8dp">
-
-                            <RadioButton
-                                android:id="@+id/rb_trigger_gesture_top"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/edit_trigger_double_top"
-                                android:checked="true" />
-
-                            <RadioButton
-                                android:id="@+id/rb_trigger_gesture_bottom"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/edit_trigger_double_bottom" />
-
-                            <RadioButton
-                                android:id="@+id/rb_trigger_gnb_prev"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/edit_trigger_button_prev" />
-
-                            <RadioButton
-                                android:id="@+id/rb_trigger_gnb_next"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/edit_trigger_button_next" />
-
-                        </RadioGroup>
+                            android:minHeight="48dp"
+                            android:layout_marginBottom="4dp" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -417,6 +384,16 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:layout_marginTop="4dp" />
+
+                <Button
+                    android:id="@+id/btn_set_scroll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/edit_start_position_set"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="11sp" />
 
             </LinearLayout>
 

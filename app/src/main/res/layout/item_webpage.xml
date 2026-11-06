@@ -19,6 +19,7 @@
         <!-- Checkbox for multi-delete mode -->
         <CheckBox
             android:id="@+id/chk_delete"
+            android:minHeight="48dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"

@@ -53,7 +53,7 @@
   - 백업·공유·삭제 방법.
   - 문의처는 GitHub 이슈 URL 이다. 개인 이메일을 적지 않는다.
   - 시행일은 한국어·영어가 같고, Pages 게시일에 맞춰 갱신한다 → 게시 전 값은 예정일이다 (#38 에서 게시 확인 시 확정).
-- **FR#5** 개인정보 처리방침의 서술은 코드·매니페스트의 실제 권한·데이터 흐름과 일치한다. 권한·저장·전송 경로가 바뀌는 변경은 이 문서를 함께 고친다. `[요구사항]`
+- **FR#5** 개인정보 처리방침과 스토어 문구의 서술은 코드·매니페스트의 실제 권한·데이터 흐름과 일치한다. 권한·저장·전송 경로가 바뀌는 변경은 이 문서를 함께 고친다. `[요구사항]`
 - **FR#6** listing 은 GPP 3.x 디렉터리 형식(`app/src/main/play/listings/{en-US,ko-KR}/`)에 `title.txt`(30자 이하)·`short-description.txt`(80자 이하)·`full-description.txt`(4000자 이하)를 둔다. `[요구사항]`
 - **FR#7** listing 문구는 "맞춤 보기 도구"로 쓴다. 광고 차단을 주 문구로 쓰지 않고, 특정 사이트·커뮤니티 이름을 넣지 않는다. 동작은 앱 안에서 연 페이지에만 적용됨을 밝힌다. `[요구사항]`
 - **FR#8** 태그 배포 workflow 는 listing 을 게시하지 않는다. `[요구사항]`
@@ -74,7 +74,7 @@
 | 웹 데이터 | WebView 의 쿠키·캐시·DOM 저장소는 Android WebView 가 기기에 보관한다 | `util/WebViewConfig.kt` |
 | 외부 전송 | 사용자가 연 페이지의 요청 외 없음. 분석·광고·크래시 SDK 가 의존성에 없다 | `app/build.gradle` dependencies |
 | 공유 | 빠른 메뉴의 주소 공유는 시스템 공유 시트로 사용자가 고른 앱에만 주소를 넘긴다 | `WebBrowserActivity` |
-| 백업 | `allowBackup="true"` → 기기의 Android 자동 백업이 사용자 Google 계정에 앱 데이터를 보관할 수 있다 | 매니페스트 |
+| 백업 | `allowBackup="true"` 이고 `dataExtractionRules`·`fullBackupContent` 가 없다 → 기본 규칙에 따라 Android 자동 백업이 앱 데이터 디렉터리(Room DB, WebView 쿠키·사이트 저장소 포함, 캐시 제외)를 사용자 Google 계정에 보관할 수 있다. 개발자는 접근하지 않는다 | 매니페스트 |
 
 ### 게시 경로
 
@@ -110,7 +110,9 @@
 | `TC#12` | FR#1 | 적응형 background 가 `@color/ic_launcher_background`(`#171717`) | 단위 |
 | `TC#5` | FR#1 | API 36 에뮬레이터 런처에서 원형·사각 마스크와 테마 아이콘(monochrome)에서 잘림 없음 | 수동. 소유자 시안 확인 후 merge |
 | `TC#6` | FR#2 | API 24 에뮬레이터 런처에서 PNG 아이콘 표시 | 수동 |
-| `TC#7` | FR#5 | 병합 매니페스트의 권한이 `INTERNET` 뿐이고 §4 근거 표와 일치 | 로컬 |
+| `TC#13` | FR#5 | 매니페스트 `uses-permission` 이 `INTERNET` 뿐, `allowBackup="true"`, 백업 제외 규칙 없음, 방침에 Google 계정 백업 서술이 있고 "기기 밖으로 전송되지 않아요"류 단정이 없다 | 단위 (`StoreListingTest`) |
+| `TC#14` | FR#5, FR#7 | 전체 설명에 "기기에만 저장"류 표현이 없다 | 단위 |
+| `TC#7` | FR#5 | 병합 매니페스트에 라이브러리가 더하는 권한이 있으면 방침에 필요한지 판단 | 로컬. TC#13 은 앱 매니페스트만 본다 |
 | `TC#8` | FR#8 | `./gradlew publishReleaseBundle --dry-run` 에 `publishReleaseListing` 이 없다 | 로컬 |
 | `TC#9` | §4 | Pages 활성화 후 게시 URL 이 열린다 | 소유자 설정 후 확인 |
 

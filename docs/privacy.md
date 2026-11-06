@@ -16,7 +16,7 @@ PageTune(이하 "앱")은 웹페이지의 보이는 모습과 시작 위치를 �
 ## 기기에 저장하는 정보
 
 - 사용자가 등록한 웹페이지의 제목과 주소, 그리고 Tune(이름, 규칙, 테스트 주소)을 기기의 앱 저장소에 저장해요.
-- 이 정보는 기기 밖으로 전송되지 않아요.
+- 개발자의 서버나 제3자에게 이 정보를 전송하지 않아요. 단 아래 "백업" 항목의 Android 자동 백업은 예외예요.
 - 앱에서 연 웹페이지의 쿠키, 캐시, 사이트 저장소는 Android WebView 가 기기에 보관해요.
 
 ## 인터넷 권한
@@ -31,7 +31,8 @@ PageTune(이하 "앱")은 웹페이지의 보이는 모습과 시작 위치를 �
 
 ## 백업
 
-- Android 의 자동 백업이 켜져 있으면 기기 설정에 따라 앱 데이터가 사용자의 Google 계정에 백업될 수 있어요.
+- Android 의 자동 백업이 켜져 있으면 기기 설정에 따라 앱 데이터(웹페이지, Tune, WebView 쿠키·사이트 저장소 포함)가 사용자의 Google 계정에 백업될 수 있어요.
+- 앱은 백업에서 제외하는 항목을 따로 지정하지 않아요.
 - 이는 사용자 계정의 기능이며 개발자는 백업 내용에 접근하지 않아요.
 
 ## 삭제
@@ -67,7 +68,7 @@ PageTune ("the app") saves per-site settings for how web pages look and where th
 ## Information stored on your device
 
 - The titles and addresses of the web pages you add, and your Tunes (names, rules, test addresses), are stored in the app's storage on your device.
-- This information is not sent off your device.
+- The developer does not send this information to any server or third party. The Android auto backup described under "Backup" is the one exception.
 - Cookies, cache, and site storage of the pages you open in the app are kept on your device by Android WebView.
 
 ## Internet permission
@@ -82,7 +83,8 @@ PageTune ("the app") saves per-site settings for how web pages look and where th
 
 ## Backup
 
-- If Android auto backup is enabled, your device settings may back up app data to your Google account.
+- If Android auto backup is enabled, your device settings may back up app data (including web pages, Tunes, and WebView cookies and site storage) to your Google account.
+- The app does not specify any items to exclude from backup.
 - This is a feature of your account. The developer cannot access backup contents.
 
 ## Deletion

@@ -14,7 +14,7 @@ How it works
 
 Good to know
 • Tunes apply only to pages opened inside PageTune. They do not change other apps or your other browsers.
-• Your web pages and Tunes are stored only on your device. PageTune has no account and does not collect or send your data to the developer.
+• Your web pages and Tunes are stored on your device. PageTune has no account, and the developer does not collect or receive your data. If Android auto backup is enabled, it may be backed up to your Google account.
 • Sites can change their layout at any time. If a rule no longer finds its element, PageTune marks it so you can select the element again.
 • A dark theme is used throughout the app.
 

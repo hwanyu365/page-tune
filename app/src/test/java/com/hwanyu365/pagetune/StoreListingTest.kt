@@ -42,4 +42,27 @@ class StoreListingTest {
         assertEquals(1, dates.toSet().size)
         assertFalse(Regex("""[\w.+-]+@[\w-]+\.[\w.]+""").containsMatchIn(text))
     }
+
+    @Test
+    fun `TC#13 매니페스트의 권한·백업 설정이 방침 서술과 맞는다`() {
+        val manifest = File("src/main/AndroidManifest.xml").readText()
+        val permissions = Regex("""<uses-permission android:name="([^"]+)"""").findAll(manifest).map { it.groupValues[1] }.toList()
+        assertEquals(listOf("android.permission.INTERNET"), permissions)
+
+        assertTrue("allowBackup=\"true\"" in manifest)
+        assertFalse("백업 제외 규칙이 생기면 방침 백업 항목을 고친다", "dataExtractionRules" in manifest || "fullBackupContent" in manifest)
+
+        val policy = File("../docs/privacy.md").readText()
+        assertTrue("Google 계정" in policy && "Google account" in policy)
+        assertFalse("기기 밖으로 전송되지 않아요" in policy)
+        assertFalse("not sent off your device" in policy)
+    }
+
+    @Test
+    fun `TC#14 listing 은 백업과 어긋나는 기기에만 저장 표현을 쓰지 않는다`() {
+        for (locale in locales) {
+            val text = File(listings, "$locale/full-description.txt").readText()
+            assertFalse("$locale", "기기에만" in text || "only on your device" in text)
+        }
+    }
 }

@@ -66,11 +66,6 @@ class WebBrowserActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (binding.wvBrowser.canGoBack()) binding.wvBrowser.goBack() else finish()
-            }
-        })
         
         // Extend layout into notch / status bar area (Android P+)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
@@ -272,7 +267,7 @@ class WebBrowserActivity : AppCompatActivity() {
         }
         binding.btnQuickBack.setOnClickListener {
             scheduleToolbarHide()
-            onBackPressedDispatcher.onBackPressed()
+            if (binding.wvBrowser.canGoBack()) binding.wvBrowser.goBack() else finish()
         }
         binding.btnQuickRefresh.setOnClickListener {
             scheduleToolbarHide()

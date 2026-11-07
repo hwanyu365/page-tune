@@ -96,6 +96,6 @@ dependencies {
     implementation "androidx.room:room-ktx:$room_version"
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.htmlunit:htmlunit:5.6.0'
+    testImplementation 'org.htmlunit:htmlunit:5.7.0'
     testImplementation 'org.json:json:20260814'
 }

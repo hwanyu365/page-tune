@@ -215,9 +215,9 @@ class JsScriptsTest {
     }
 
     @Test
-    fun `TC#22 대체 블록은 저장 속성이 있으면 supports not selector 블록이고 없으면 빈 문자열이다`() {
+    fun `TC#22 대체 블록은 저장 속성이 있으면 selector 지원과 원래 셀렉터 무효를 함께 요구하는 supports 블록이고 없으면 빈 문자열이다`() {
         assertEquals(
-            """@supports not selector(div.x) { div[role="banner"], div[role="banner"] * { color:#ffffff !important; } }""",
+            """@supports selector(*) and (not selector(div.x)) { div[role="banner"], div[role="banner"] * { color:#ffffff !important; } }""",
             JsScripts.buildColorFallbackCss("div.x", """div[role="banner"]""", "color:#ffffff"),
         )
         assertEquals("", JsScripts.buildColorFallbackCss("div.x", null, "color:#ffffff"))

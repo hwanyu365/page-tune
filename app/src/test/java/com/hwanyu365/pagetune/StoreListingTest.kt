@@ -1,5 +1,6 @@
 package com.hwanyu365.pagetune
 
+import java.io.DataInputStream
 import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -74,6 +75,52 @@ class StoreListingTest {
         for (locale in locales) for (name in limits.keys) {
             val text = File(listings, "$locale/$name").readText().replace(issues, "").lowercase()
             for (w in names + urlPatterns) assertFalse("$locale/$name 에 '$w'", w in text)
+        }
+    }
+
+    private data class Png(val width: Int, val height: Int, val bitDepth: Int, val colorType: Int)
+
+    private fun png(f: File): Png = DataInputStream(f.inputStream()).use { input ->
+        val signature = ByteArray(8).also { input.readFully(it) }
+        assertTrue("$f PNG 아님", signature.contentEquals(byteArrayOf(-119, 80, 78, 71, 13, 10, 26, 10)))
+        input.readInt()
+        assertEquals("$f 첫 청크", "IHDR", String(ByteArray(4).also { input.readFully(it) }, Charsets.US_ASCII))
+        Png(input.readInt(), input.readInt(), input.readUnsignedByte(), input.readUnsignedByte())
+    }
+
+    private fun graphics(locale: String, type: String): List<File> =
+        File(listings, "$locale/graphics/$type").listFiles().orEmpty().filter { it.isFile }.sortedBy { it.name }
+
+    @Test
+    fun `TC#16 스토어 아이콘은 언어마다 512x512 RGBA PNG 한 장이다`() {
+        for (locale in locales) {
+            val files = graphics(locale, "icon")
+            assertEquals("$locale icon", 1, files.size)
+            assertEquals(Png(512, 512, 8, 6), png(files.single()))
+        }
+    }
+
+    @Test
+    fun `TC#17 대표 이미지는 언어마다 1024x500 알파 없는 PNG 한 장이다`() {
+        for (locale in locales) {
+            val files = graphics(locale, "feature-graphic")
+            assertEquals("$locale feature-graphic", 1, files.size)
+            assertEquals(Png(1024, 500, 8, 2), png(files.single()))
+        }
+    }
+
+    @Test
+    fun `TC#18 폰 스크린샷은 언어마다 4~8장이고 Play 크기·비율 제한 안이다`() {
+        for (locale in locales) {
+            val files = graphics(locale, "phone-screenshots")
+            assertTrue("$locale 스크린샷 ${files.size}장", files.size in 4..8)
+            for (f in files) {
+                val p = png(f)
+                assertEquals("$f 색 형식", 2, p.colorType)
+                assertEquals("$f 비트 깊이", 8, p.bitDepth)
+                val (short, long) = listOf(p.width, p.height).sorted()
+                assertTrue("$f ${p.width}x${p.height}", short >= 320 && long <= 3840 && long <= short * 2)
+            }
         }
     }
 }

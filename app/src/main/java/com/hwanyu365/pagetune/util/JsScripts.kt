@@ -262,11 +262,12 @@ object JsScripts {
     /**
      * 대체 셀렉터 규칙. [selector] 가 있으면 그 셀렉터를 브라우저가 해석하지 못할 때만 동작하게 감싼다.
      * CSS 는 "매칭이 0개일 때" 를 조건으로 쓸 수 없어, 유효하지만 0개인 셀렉터에는 대체 규칙이 적용되지 않는다.
+     * `selector()` 를 모르는 WebView 는 `not selector(…)` 를 참으로 보므로 `selector(*)` 지원을 함께 요구한다.
      */
     fun buildColorFallbackCss(selector: String?, fallback: String?, declarations: String): String {
         val rule = fallback?.let { buildColorCss(listOf(it to declarations)) }.orEmpty()
         if (rule.isEmpty()) return ""
-        return if (selector == null) rule else "@supports not selector($selector) { $rule }"
+        return if (selector == null) rule else "@supports selector(*) and (not selector($selector)) { $rule }"
     }
 
     /** 태그명 + 저장 속성 전부 일치를 속성 셀렉터로 표현한다. 저장 속성이 없으면 태그만으로 찾지 않으므로 null. */

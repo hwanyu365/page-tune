@@ -35,6 +35,7 @@ import com.hwanyu365.pagetune.util.EditSnapshot
 import com.hwanyu365.pagetune.util.EditStep
 import com.hwanyu365.pagetune.util.ElementLabel
 import com.hwanyu365.pagetune.util.JsScripts
+import com.hwanyu365.pagetune.util.RequestGeneration
 import com.hwanyu365.pagetune.util.LoadErrorKind
 import com.hwanyu365.pagetune.util.SafeWebViewClient
 import com.hwanyu365.pagetune.util.UrlPolicy
@@ -74,6 +75,7 @@ class PluginEditActivity : AppCompatActivity() {
     private var failedUrl: String? = null
     private var detailsOpen = false
     private var highlightedIndex: Int? = null
+    private val highlightRequests = RequestGeneration()
     private val handler = Handler(Looper.getMainLooper())
     private val clearHighlightLater = Runnable { clearRuleHighlight() }
 
@@ -129,6 +131,7 @@ class PluginEditActivity : AppCompatActivity() {
                 pageLoaded = false
                 errorThisLoad = false
                 highlightedIndex = null
+                highlightRequests.invalidate()
                 handler.removeCallbacks(clearHighlightLater)
                 updateStep()
             }
@@ -438,6 +441,7 @@ class PluginEditActivity : AppCompatActivity() {
     private fun clearRuleHighlight() {
         handler.removeCallbacks(clearHighlightLater)
         highlightedIndex = null
+        highlightRequests.invalidate()
         binding.wvInspector.evaluateJavascript(JsScripts.CLEAR_HIGHLIGHT_SCRIPT, null)
     }
 
@@ -451,7 +455,9 @@ class PluginEditActivity : AppCompatActivity() {
                 ?.let { binding.wvInspector.evaluateJavascript(JsScripts.getScrollScript(it), null) }
             return
         }
+        val token = highlightRequests.next()
         binding.wvInspector.evaluateJavascript(JsScripts.getHighlightScript(action.actionType, action.targetSelector)) { result ->
+            if (!highlightRequests.isCurrent(token)) return@evaluateJavascript
             if ((result?.toDoubleOrNull() ?: 0.0) < 1) {
                 Toast.makeText(this, R.string.edit_rule_not_found, Toast.LENGTH_SHORT).show()
                 return@evaluateJavascript

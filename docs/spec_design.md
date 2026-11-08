@@ -100,7 +100,7 @@
 | `background`, `surface` | `#171717` | 화면 배경 |
 | `surfaceContainerLow` | `#1e1e1e` | 툴바·탭 바 |
 | `surfaceContainer` | `#242424` | 카드 |
-| `surfaceContainerHigh` | `#2a2a2a` | 다이얼로그, 편집 하단 시트 |
+| `surfaceContainerHigh` | `#2a2a2a` | 다이얼로그, 편집 하단 시트, 칩 배경 |
 | `onSurface` | `#E0E0E0` | 본문 글자·아이콘 |
 | `onSurfaceVariant` | `#9E9E9E` | 보조 글자 (주소, 설명, 일치 수) |
 | `outline` | `#8a8a8a` | 입력칸 테두리, 외곽선 버튼 |
@@ -116,6 +116,8 @@
 | `onPrimary` | `primary` | 5.13 | 4.5 |
 | `onSurface` | `surface` / `surfaceContainerLow` / `surfaceContainer` / `surfaceContainerHigh` | 13.58 / 12.63 / 11.76 / 10.87 | 4.5 |
 | `onSurfaceVariant` | 같은 순서 | 6.69 / 6.22 / 5.79 / 5.36 | 4.5 |
+| `brandOnSurface` (연결된 Tune 칩 글자) | `surfaceContainerHigh` (칩 배경) | 5.33 | 4.5 |
+| `onSurfaceVariant` ("Tune 없음" 칩 글자) | `surfaceContainerHigh` (칩 배경) | 5.36 | 4.5 |
 | `brandOnSurface` | 같은 순서 | 6.65 / 6.19 / 5.76 / 5.33 | 4.5 |
 | `outline` | 같은 순서 | 5.19 / 4.83 / 4.50 / 4.16 | 3 (비텍스트) |
 | `error` | 같은 순서 | 10.56 / 9.82 / 9.14 / 8.45 | 4.5 |
@@ -124,6 +126,7 @@
 | `onPrimary` | `avatar1`~`avatar8` | 최소 6.65 (`avatar1`) | 4.5 |
 
 - `primary` 를 표면 위 글자색으로 쓰지 않는다 → `primary` / `surfaceContainer` = 4.44:1 로 4.5:1 미달 (D#1).
+- 칩·보조 글자를 투명도로 흐리게 하지 않는다 → 투명도는 배경에 따라 대비가 바뀐다. "흐림" 은 `onSurfaceVariant` 글자로 나타낸다.
 
 ### 4.2 타이포 스케일
 

@@ -11,14 +11,18 @@ class ExternalPromptTest {
     private fun intent(data: String?, pkg: String?, fallback: String?) = ExternalTarget.IntentTarget(data, pkg, fallback)
 
     @Test
-    fun `TC#59 intent 는 앱 라벨을 우선하고 없으면 package 를 보이며 대체 주소 유무를 담는다`() {
+    fun `TC#59 intent 는 앱 라벨을 우선하고 없으면 package 를 보이며 넘길 주소와 대체 주소 유무를 담는다`() {
         assertEquals(
-            ExternalPrompt(Kind.APP, "Chrome", "https://f/", intent = true),
+            ExternalPrompt(Kind.APP, "Chrome", "https://f/", intent = true, address = "https://x"),
             ExternalPrompt.describe(intent("https://x", "com.android.chrome", "https://f/")) { "Chrome" },
         )
         assertEquals(
-            ExternalPrompt(Kind.APP, "com.not.installed", null, intent = true),
+            ExternalPrompt(Kind.APP, "com.not.installed", null, intent = true, address = "myapp://x"),
             ExternalPrompt.describe(intent("myapp://x", "com.not.installed", null)) { null },
+        )
+        assertEquals(
+            ExternalPrompt(Kind.APP, "com.x", null, intent = true, address = null),
+            ExternalPrompt.describe(intent(null, "com.x", null)) { null },
         )
     }
 
@@ -46,6 +50,9 @@ class ExternalPromptTest {
         assertTrue(shown.startsWith("market://details?id="))
         val fallback = ExternalPrompt.describe(intent("a://b", "com.x", "https://f/" + "y".repeat(200))) { null }.fallback!!
         assertEquals(ExternalPrompt.MAX_LENGTH, fallback.length)
+        val address = ExternalPrompt.describe(intent("a://" + "z".repeat(200), "com.x", null)) { null }.address!!
+        assertEquals(ExternalPrompt.MAX_LENGTH, address.length)
+        assertTrue(address.endsWith("…"))
         val exact = "tel:" + "1".repeat(ExternalPrompt.MAX_LENGTH)
         assertEquals("1".repeat(ExternalPrompt.MAX_LENGTH), ExternalPrompt.describe(ExternalTarget.View(exact)) { null }.subject)
     }

@@ -47,6 +47,8 @@ class SourceRulesTest {
         val confirm = Regex("""fun confirmExternal\((.*?)\n    }""", RegexOption.DOT_MATCHES_ALL).find(src)!!.groupValues[1]
         assertTrue("대상 표시 없음", "ExternalPrompt.describe(" in confirm && "setMessage(" in confirm)
         assertTrue("중복·수명 가드 없음", "ExternalPrompt.canShow(" in confirm)
+        val message = Regex("""fun promptMessage\((.*?)\n    }""", RegexOption.DOT_MATCHES_ALL).find(src)!!.groupValues[1]
+        for (field in listOf("prompt.subject", "prompt.address", "prompt.fallback")) assertTrue("문구에 $field 없음", field in message)
     }
 
     @Test

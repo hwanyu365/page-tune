@@ -144,6 +144,8 @@ class UrlPolicyTest {
         assertNull(UrlPolicy.parseIntent("intent://x#Intent;scheme=myapp;S.browser_fallback_url=https%3A%2F%2Fa%ZZ;end", appId)?.fallbackUrl)
         assertNull(UrlPolicy.parseIntent("intent://x#Intent;scheme=https;package=com%E0x;end", appId)?.pkg)
         assertNull(UrlPolicy.parseIntent("intent://x#Intent;scheme=ht%tps;end", appId)?.data)
+        assertNull(UrlPolicy.parseIntent("intent://x#Intent;scheme=https;package=com%+ax;end", appId)?.pkg)
+        assertNull(UrlPolicy.parseIntent("intent://x#Intent;scheme=https;package=com%-1x;end", appId)?.pkg)
     }
 
     @Test

@@ -82,7 +82,9 @@ object UrlPolicy {
             val c = value[i]
             if (c == '%') {
                 if (i + 2 >= value.length) return null
-                bytes.write(value.substring(i + 1, i + 3).toIntOrNull(16) ?: return null)
+                val hex = value.substring(i + 1, i + 3)
+                if (!hex.all { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' }) return null
+                bytes.write(hex.toInt(16))
                 i += 3
             } else {
                 bytes.write(c.toString().toByteArray(Charsets.UTF_8))

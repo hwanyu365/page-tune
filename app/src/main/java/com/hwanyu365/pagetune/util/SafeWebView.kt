@@ -113,9 +113,10 @@ open class SafeWebViewClient(
             ExternalPrompt.Kind.UNKNOWN -> activity.getString(R.string.external_target_unknown)
         }
         if (!prompt.intent) return target
+        val address = prompt.address?.let { "\n" + activity.getString(R.string.external_target_address, it) }.orEmpty()
         val fallback = prompt.fallback?.let { activity.getString(R.string.external_fallback, it) }
             ?: activity.getString(R.string.external_no_fallback)
-        return target + "\n" + fallback
+        return target + address + "\n" + fallback
     }
 
     private fun openExternal(view: WebView, target: ExternalTarget) {

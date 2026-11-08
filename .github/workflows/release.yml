@@ -11,7 +11,10 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      # 쓰기 토큰이 git 설정에 남으면 빌드 스크립트가 읽을 수 있다. gh 는 GH_TOKEN 으로 동작한다.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-java@v6
         with:
           distribution: temurin

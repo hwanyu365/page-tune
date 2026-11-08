@@ -38,18 +38,18 @@
 
 ### 사용자 스토리
 
-- **US#1** 사용자로서 런처에서 앱을 알아보고, 시스템 테마 아이콘에서도 어울리기를 원한다.
-- **US#2** 사용자로서 앱이 내 정보를 어떻게 다루는지 스토어에서 링크로 확인하기를 원한다.
-- **US#3** 저장소 소유자로서 스토어 문구를 PR 로 리뷰하고 버전 관리하기를 원한다.
+- `US#1` 사용자로서 런처에서 앱을 알아보고, 시스템 테마 아이콘에서도 어울리기를 원한다.
+- `US#2` 사용자로서 앱이 내 정보를 어떻게 다루는지 스토어에서 링크로 확인하기를 원한다.
+- `US#3` 저장소 소유자로서 스토어 문구를 PR 로 리뷰하고 버전 관리하기를 원한다.
 
 ### 기능 요구사항
 
-- **FR#1** 앱 아이콘은 적응형 아이콘이다. background 는 아이콘 전용 색 리소스 `ic_launcher_background`(`#171717`), foreground 는 브랜드 색 `#ff4103` 의 벡터이고, `monochrome` 레이어를 가진다. `[요구사항]`
+- `FR#1` 앱 아이콘은 적응형 아이콘이다. background 는 아이콘 전용 색 리소스 `ic_launcher_background`(`#171717`), foreground 는 브랜드 색 `#ff4103` 의 벡터이고, `monochrome` 레이어를 가진다. `[요구사항]`
   - foreground·monochrome 의 획은 끝(선 굵기 반 포함)까지 108dp 캔버스 중심 (54,54) 에서 반지름 33dp 이내다 → 어떤 마스크 모양에서도 잘리지 않는다.
   - 배경을 앱 테마색(`colorBackground`)과 분리한다 → 테마색이 바뀌어도 아이콘과 API 24~25 PNG 가 어긋나지 않는다.
-- **FR#2** API 24~25 는 적응형 아이콘을 쓰지 못하므로 `mipmap-*dpi` 의 `ic_launcher.png`·`ic_launcher_round.png` 를 쓴다. 같은 도형이다. `[요구사항]`
-- **FR#3** 매니페스트의 `icon`·`roundIcon` 은 mipmap 리소스를 가리킨다. 기존 `drawable/ic_launcher.png` 는 쓰는 곳이 없으므로 제거한다. `[요구사항]`
-- **FR#4** `docs/privacy.md` 는 한국어·영어 본문을 함께 가지며 아래를 담는다. `[요구사항]`
+- `FR#2` API 24~25 는 적응형 아이콘을 쓰지 못하므로 `mipmap-*dpi` 의 `ic_launcher.png`·`ic_launcher_round.png` 를 쓴다. 같은 도형이다. `[요구사항]`
+- `FR#3` 매니페스트의 `icon`·`roundIcon` 은 mipmap 리소스를 가리킨다. 기존 `drawable/ic_launcher.png` 는 쓰는 곳이 없으므로 제거한다. `[요구사항]`
+- `FR#4` `docs/privacy.md` 는 한국어·영어 본문을 함께 가지며 아래를 담는다. `[요구사항]`
   - 개발자가 수집·전송하는 데이터가 없다.
   - 저장되는 데이터(웹페이지 제목·주소, Tune)를 개발자·제3자에게 전송하지 않는다. 단 Android 자동 백업(사용자 Google 계정)은 예외로 밝힌다.
   - 앱은 사용자가 연 웹페이지 외의 서버와 통신하지 않는다. 단 시스템 WebView 의 Safe Browsing(기본 켜짐)이 방문 주소 정보를 Google 에 확인할 수 있음을 예외로 밝힌다.
@@ -58,17 +58,17 @@
   - 백업·공유·삭제 방법.
   - 문의처는 GitHub 이슈 URL 이다. 개인 이메일을 적지 않는다.
   - 시행일은 한국어·영어가 같고, Pages 게시일에 맞춰 갱신한다 → 게시 전 값은 예정일이다 (#38 에서 게시 확인 시 확정).
-- **FR#5** 개인정보 처리방침과 스토어 문구의 서술은 코드·매니페스트의 실제 권한·데이터 흐름과 일치한다. 권한·저장·전송 경로가 바뀌는 변경은 이 문서를 함께 고친다. `[요구사항]`
-- **FR#6** listing 은 GPP 3.x 디렉터리 형식(`app/src/main/play/listings/{en-US,ko-KR}/`)에 `title.txt`(30자 이하)·`short-description.txt`(80자 이하)·`full-description.txt`(4000자 이하)를 둔다. `[요구사항]`
-- **FR#7** listing 문구는 "맞춤 보기 도구"로 쓴다. 광고 차단을 주 문구로 쓰지 않고, 특정 사이트·커뮤니티 이름을 넣지 않는다. 동작은 앱 안에서 연 페이지에만 적용됨을 밝힌다. `[요구사항]`
-- **FR#8** 태그 배포 workflow 는 listing 을 게시하지 않는다. 그래픽도 listing 에 포함된다. `[요구사항]`
-- **FR#9** 스토어 아이콘은 `graphics/icon/` 의 512x512 32-bit PNG(RGBA) 한 장이다. 배경 `#171717` 정사각 위에 FR#1 의 foreground path 를 그린 것이다. `[요구사항]`
+- `FR#5` 개인정보 처리방침과 스토어 문구의 서술은 코드·매니페스트의 실제 권한·데이터 흐름과 일치한다. 권한·저장·전송 경로가 바뀌는 변경은 이 문서를 함께 고친다. `[요구사항]`
+- `FR#6` listing 은 GPP 3.x 디렉터리 형식(`app/src/main/play/listings/{en-US,ko-KR}/`)에 `title.txt`(30자 이하)·`short-description.txt`(80자 이하)·`full-description.txt`(4000자 이하)를 둔다. `[요구사항]`
+- `FR#7` listing 문구는 "맞춤 보기 도구"로 쓴다. 광고 차단을 주 문구로 쓰지 않고, 특정 사이트·커뮤니티 이름을 넣지 않는다. 동작은 앱 안에서 연 페이지에만 적용됨을 밝힌다. `[요구사항]`
+- `FR#8` 태그 배포 workflow 는 listing 을 게시하지 않는다. 그래픽도 listing 에 포함된다. `[요구사항]`
+- `FR#9` 스토어 아이콘은 `graphics/icon/` 의 512x512 32-bit PNG(RGBA) 한 장이다. 배경 `#171717` 정사각 위에 FR#1 의 foreground path 를 그린 것이다. `[요구사항]`
   - 배율은 108dp 캔버스의 가운데 72dp 를 512px 에 맞춘다 → 런처가 적응형 아이콘에서 보여주는 영역과 같은 크기로 보인다.
   - 모서리를 둥글게 자르지 않는다 → Play 가 마스크를 입힌다.
-- **FR#10** 대표 이미지는 `graphics/feature-graphic/` 의 1024x500 24-bit PNG(알파 없음) 한 장이다. `[요구사항]`
+- `FR#10` 대표 이미지는 `graphics/feature-graphic/` 의 1024x500 24-bit PNG(알파 없음) 한 장이다. `[요구사항]`
   - 배경 `#171717`, 왼쪽에 아이콘 도형, 오른쪽에 앱 이름 "PageTune" 과 언어별 문구.
   - 문구는 짧은 설명의 첫 구절이다: en-US "View web pages your way", ko-KR "웹페이지를 내 방식대로". FR#7 을 따른다.
-- **FR#11** 폰 스크린샷은 언어마다 `graphics/phone-screenshots/` 에 4~8장 둔다. 24-bit PNG(알파 없음), 각 변 320~3840px, 긴 변은 짧은 변의 2배 이하다. `[요구사항]`
+- `FR#11` 폰 스크린샷은 언어마다 `graphics/phone-screenshots/` 에 4~8장 둔다. 24-bit PNG(알파 없음), 각 변 320~3840px, 긴 변은 짧은 변의 2배 이하다. `[요구사항]`
   - 파일 이름은 `{순서}_{화면}.png` → GPP 는 파일 이름 순서로 올린다.
   - 화면: 웹페이지 목록, Tune 편집의 요소 선택(일치 수), Tune 편집의 규칙 목록, 열람 화면의 빠른 메뉴와 Tune 상태 표시, 빈 상태.
   - 화면에 나오는 웹 콘텐츠는 문서 예시용 도메인(`example.com`·`example.org`·`example.net`)만 쓴다. 특정 사이트·커뮤니티 이름·로고가 보이지 않는다.
@@ -76,9 +76,9 @@
 
 ### 비기능 요구사항
 
-- **NFR#1** 의존성을 추가하지 않는다. `[요구사항]`
-- **NFR#2** 아이콘 정의에 비밀값·외부 에셋이 없다. 도형은 벡터 path 하나다. `[요구사항]`
-- **NFR#3** 그래픽의 글꼴은 재배포·상업 이용이 허용된 것만 쓴다: Roboto(Apache 2.0), Noto Sans CJK KR(SIL OFL 1.1). `[요구사항]`
+- `NFR#1` 의존성을 추가하지 않는다. `[요구사항]`
+- `NFR#2` 아이콘 정의에 비밀값·외부 에셋이 없다. 도형은 벡터 path 하나다. `[요구사항]`
+- `NFR#3` 그래픽의 글꼴은 재배포·상업 이용이 허용된 것만 쓴다: Roboto(Apache 2.0), Noto Sans CJK KR(SIL OFL 1.1). `[요구사항]`
 
 ## 4. 데이터 및 API 스펙
 
@@ -137,8 +137,8 @@
 | `TC#10` | FR#1 | 획 끝 포함 최대 반지름 ≤ 33dp (foreground·monochrome) | 단위 (`IconSafeZoneTest`) |
 | `TC#11` | FR#1 | foreground 와 monochrome path 가 같다 | 단위 |
 | `TC#12` | FR#1 | 적응형 background 가 `@color/ic_launcher_background`(`#171717`) | 단위 |
-| `TC#5` | FR#1 | API 36 에뮬레이터 런처에서 원형·사각 마스크와 테마 아이콘(monochrome)에서 잘림 없음 | 수동. 소유자 시안 확인 후 merge |
-| `TC#6` | FR#2 | API 24 에뮬레이터 런처에서 PNG 아이콘 표시 | 수동 |
+| `TC#5` | FR#1 | API 36 에뮬레이터 런처에서 원형·사각 마스크와 테마 아이콘(monochrome)에서 잘림 없음 | (수동) 소유자 시안 확인 후 merge |
+| `TC#6` | FR#2 | API 24 에뮬레이터 런처에서 PNG 아이콘 표시 | (수동) |
 | `TC#13` | FR#5 | 매니페스트 `uses-permission` 이 `INTERNET` 뿐, `allowBackup="true"`, 백업 제외 규칙 없음, 방침에 Google 계정 백업 서술이 있고 "기기 밖으로 전송되지 않아요"류 단정이 없다 | 단위 (`StoreListingTest`). 단정 문구 검사는 알려진 두 문구만 막는다 → 다른 표현은 리뷰로 확인 |
 | `TC#14` | FR#5 | 두 로케일 전체 설명에 백업 예외 서술("Google 계정"/"Google account")이 있다 | 단위 |
 | `TC#15` | FR#7 | listing 에 알려진 국내 커뮤니티 이름 목록과 URL 패턴(`www.`·`.com`·`.kr`·`http`, 이슈 URL 제외)이 없다 | 단위. 목록 밖 사이트 이름은 걸러내지 못한다 → 리뷰에서 본다 |
@@ -148,7 +148,7 @@
 | `TC#16` | FR#9 | 언어마다 `graphics/icon/` 에 PNG 한 장, 512x512, 색 형식 RGBA(6), 8-bit | 단위 (`StoreListingTest`), PNG IHDR |
 | `TC#17` | FR#10 | 언어마다 `graphics/feature-graphic/` 에 PNG 한 장, 1024x500, 색 형식 RGB(2), 8-bit | 단위 |
 | `TC#18` | FR#11 | 언어마다 `graphics/phone-screenshots/` 에 PNG 4~8장, 색 형식 RGB(2), 각 변 320~3840, 긴 변 ≤ 짧은 변 x2 | 단위 |
-| `TC#19` | FR#9~FR#11 | 그래픽을 직접 열어 도형이 foreground 와 같고, 화면에 example 도메인 외 사이트 이름이 없고, 문구가 해당 언어인지 확인 | 수동. PR 에 확인한 파일 목록을 남긴다 |
+| `TC#19` | FR#9~FR#11 | 그래픽을 직접 열어 도형이 foreground 와 같고, 화면에 example 도메인 외 사이트 이름이 없고, 문구가 해당 언어인지 확인 | (수동) PR 에 확인한 파일 목록을 남긴다 |
 
 ## 부록. 변경 이력
 

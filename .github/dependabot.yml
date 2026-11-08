@@ -1,15 +1,22 @@
 version: 2
 updates:
-  # 스택의 패키지 생태계(gradle, npm, pip 등)는 /add:init 에서 추가한다.
+  # 스택의 패키지 생태계(gradle, npm, pip 등)는 /add:init 에서 같은 형식으로 추가한다.
+  # 월 1회, 생태계마다 PR 하나로 묶는다 → 버전 따라가기는 merge 부담을 줄이고, 취약점은 보안 업데이트가 따로 바로 올린다.
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    groups:
+      github-actions:
+        patterns: ["*"]
 
   - package-ecosystem: gradle
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    groups:
+      gradle:
+        patterns: ["*"]
     # AGP 8.x 라인 유지 결정(docs/spec_release.md §6) → AGP 9 로 올릴 때 이 제외를 함께 지운다
     ignore:
       - dependency-name: "com.android.tools.build:gradle"

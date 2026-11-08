@@ -192,10 +192,10 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 | `TC#4` | `layout` 에 `android:textSize` 0건, Kotlin 에 `textSize =` 0건 | [FR#3] | 단위 (레이아웃) + `grep` (Kotlin) |
 | `TC#5` | `layout` 의 `layout_margin*`·`padding*` 값이 0dp 또는 §4.3 값 | [FR#4] | 단위 |
 | `TC#6` | `layout` 에 `androidx.appcompat.widget.Toolbar`·`androidx.cardview.widget.CardView`·단독 편집칸(부모가 `TextInputLayout` 이 아닌 `EditText`/`NoAutofillEditText`) 0건. Kotlin 에 `android.app.AlertDialog`·`androidx.appcompat.app.AlertDialog` import 0건 | [FR#5] | 단위 (레이아웃) + `grep` (Kotlin) |
-| `TC#7` | 자동완성 서비스를 켠 기기에서 편집 화면·웹페이지 다이얼로그 입력칸에 자동완성 제안이 뜨지 않음. Layout Inspector 에서 버튼이 `MaterialButton`, 체크박스가 `MaterialCheckBox` | [FR#5] | 수동, 에뮬레이터 |
-| `TC#8` | 흰 배경 페이지에서 빠른 메뉴·Tune 상태·이전/다음 버튼을 띄워 글자·아이콘이 읽힘 | [FR#6] | 수동. 비율은 TC#3 |
-| `TC#9` | 탭 누르기·밀기로 전환, 각 탭 툴바 삭제가 그 탭에만 작용, Tunes 탭에서 Tune 을 지운 뒤 웹페이지 탭으로 밀면 연결 표시 갱신, 회전 후 보던 탭 유지, 선택 모드 중 탭 전환 → 선택 모드·되돌리기 창 닫힘 | [FR#7] | 수동, 에뮬레이터 |
-| `TC#10` | 시각 회귀: §5 의 화면 × 영어·한국어 × 글꼴 100%·200% 를 변경 전후로 찍어 잘림·겹침이 없고 역할별 모양이 같음 | [NFR#2] [US#1] | 수동, 에뮬레이터. 확인한 화면 목록을 PR 본문에 남긴다 |
+| `TC#7` | 자동완성 서비스를 켠 기기에서 편집 화면·웹페이지 다이얼로그 입력칸에 자동완성 제안이 뜨지 않음. Layout Inspector 에서 버튼이 `MaterialButton`, 체크박스가 `MaterialCheckBox` | [FR#5] | (수동) 에뮬레이터 |
+| `TC#8` | 흰 배경 페이지에서 빠른 메뉴·Tune 상태·이전/다음 버튼을 띄워 글자·아이콘이 읽힘 | [FR#6] | (수동) 비율은 TC#3 |
+| `TC#9` | 탭 누르기·밀기로 전환, 각 탭 툴바 삭제가 그 탭에만 작용, Tunes 탭에서 Tune 을 지운 뒤 웹페이지 탭으로 밀면 연결 표시 갱신, 회전 후 보던 탭 유지, 선택 모드 중 탭 전환 → 선택 모드·되돌리기 창 닫힘 | [FR#7] | (수동) 에뮬레이터 |
+| `TC#10` | 시각 회귀: §5 의 화면 × 영어·한국어 × 글꼴 100%·200% 를 변경 전후로 찍어 잘림·겹침이 없고 역할별 모양이 같음 | [NFR#2] [US#1] | (수동) 에뮬레이터. 확인한 화면 목록을 PR 본문에 남긴다 |
 | `TC#11` | `./gradlew :app:dependencies --configuration releaseRuntimeClasspath` 의 아티팩트 집합이 변경 전과 같음, `app/build.gradle` 에 compose 0건 | [NFR#3] | 로컬. 결과를 PR 본문에 남긴다 |
 | `TC#12` | 검증 명령 통과. `ResourceRulesTest` 의 `spec_tune_edit.md` TC#22 테스트는 리소스 이름만 `onPrimary`·`brandOnSurface` 로 바꾸고 값 단언(`#171717`, `#ff7347`)은 그대로 둔다 | [NFR#4] | 자동 (검증 명령). Red 테스트의 이름 변경은 저장소 소유자 승인을 받았다 (2026-11-08 세션). 값 단언을 바꾸거나 지우는 것은 승인 범위 밖이다 |
 | `TC#13` | 앱 스타일이 `materialThemeOverlay` 로 지정한 overlay 는 그 위젯의 Material3 기본 overlay 를 부모로 둔다: `Widget.Material3.Button.*` 계열 → `ThemeOverlay.Material3.Button.*`, `Widget.Material3.TextInputLayout.*` 계열 → `ThemeOverlay.Material3.TextInputEditText.*`, `Widget.Material3.TabLayout` 계열 → `ThemeOverlay.Material3.TabLayout` | [FR#5] [D#1] | 단위 (리소스 XML 파싱). 부모가 빈 overlay 는 M3 위젯의 컨테이너 속성을 지워 버튼 배경이 마젠타로 그려진다. mutation: 버튼 overlay 부모를 빈 값으로 바꿔 실패하는지 확인 |

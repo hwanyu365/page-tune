@@ -36,6 +36,7 @@
     <string name="intro_3_body">페이지를 보는 중 오른쪽 위 빠른 메뉴로 Tune 을 켜고 끄거나 편집해요.</string>
     <string name="whats_new_title">새 소식</string>
     <string name="whats_new_version">버전 %s</string>
+    <string name="whats_new_10200">• 어두운 Material 디자인으로 새 단장\n• 웹페이지·Tune 카드, 삭제 후 실행취소\n• 단계별 Tune 편집과 색상 프리셋\n• 열람 중 오류 화면·외부 링크·설정</string>
 
     <string name="webpage_item_tune_none">Tune 없음</string>
     <string name="webpage_tune_none">없음</string>

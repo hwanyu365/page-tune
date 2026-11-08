@@ -41,6 +41,7 @@
     <string name="intro_3_body">While viewing a page, open the quick menu at the top right to turn the Tune on or off or edit it.</string>
     <string name="whats_new_title">What\'s new</string>
     <string name="whats_new_version">Version %s</string>
+    <string name="whats_new_10200">• New look with a dark Material design\n• Web page and Tune cards, undo after delete\n• Step-by-step Tune editing and color presets\n• Error screens, external links, and Settings while viewing</string>
 
     <string name="webpage_item_tune_none">No Tune</string>
     <string name="webpage_tune_none">None</string>

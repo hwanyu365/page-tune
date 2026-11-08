@@ -115,12 +115,10 @@
 | --- | --- | --- | --- |
 | `onPrimary` | `primary` | 5.13 | 4.5 |
 | `onSurface` | `surface` / `surfaceContainerLow` / `surfaceContainer` / `surfaceContainerHigh` | 13.58 / 12.63 / 11.76 / 10.87 | 4.5 |
-| `onSurfaceVariant` | 같은 순서 | 6.69 / 6.22 / 5.79 / 5.36 | 4.5 |
-| `brandOnSurface` (연결된 Tune 칩 글자) | `surfaceContainerHigh` (칩 배경) | 5.33 | 4.5 |
-| `onSurfaceVariant` ("Tune 없음" 칩 글자) | `surfaceContainerHigh` (칩 배경) | 5.36 | 4.5 |
-| `brandOnSurface` | 같은 순서 | 6.65 / 6.19 / 5.76 / 5.33 | 4.5 |
-| `outline` | 같은 순서 | 5.19 / 4.83 / 4.50 / 4.16 | 3 (비텍스트) |
-| `error` | 같은 순서 | 10.56 / 9.82 / 9.14 / 8.45 | 4.5 |
+| `onSurfaceVariant` ("Tune 없음" 칩 글자 포함) | `surface` / `surfaceContainerLow` / `surfaceContainer` / `surfaceContainerHigh` | 6.69 / 6.22 / 5.79 / 5.36 | 4.5 |
+| `brandOnSurface` (연결된 Tune 칩 글자 포함) | `surface` / `surfaceContainerLow` / `surfaceContainer` / `surfaceContainerHigh` | 6.65 / 6.19 / 5.76 / 5.33 | 4.5 |
+| `outline` | `surface` / `surfaceContainerLow` / `surfaceContainer` / `surfaceContainerHigh` | 5.19 / 4.83 / 4.50 / 4.16 | 3 (비텍스트) |
+| `error` | `surface` / `surfaceContainerLow` / `surfaceContainer` / `surfaceContainerHigh` | 10.56 / 9.82 / 9.14 / 8.45 | 4.5 |
 | `onError` | `error` | 7.72 | 4.5 |
 | `primary` (아이콘·막대) | `surface` / `surfaceContainerHigh` | 5.13 / 4.11 | 3 (비텍스트) |
 | `onSurface` | `scrim`(`#D9171717`)을 흰 배경에 합성한 `#3a3a3a` | 8.62 | 4.5 |

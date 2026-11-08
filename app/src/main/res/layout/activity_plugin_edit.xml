@@ -18,49 +18,53 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="8dp"
-        android:background="@color/colorPrimary">
+        android:background="@color/surfaceContainerLow">
 
-        <com.hwanyu365.pagetune.ui.view.NoAutofillEditText
-            android:id="@+id/et_inp_pname"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/edit_hint_tune_name"
-            android:textColor="@color/colorWhite"
-            android:textColorHint="@color/colorTextSecondary"
-            android:backgroundTint="@color/colorWhite"
-            android:inputType="textNoSuggestions"
-            android:importantForAutofill="no"
-            android:privateImeOptions="com.samsung.android.inputmethod.disableAutofill=true,disableAutofill=true"
-            android:autofillHints="" />
+            android:hint="@string/edit_hint_tune_name">
+
+            <com.hwanyu365.pagetune.ui.view.NoAutofillEditText
+                android:id="@+id/et_inp_pname"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textNoSuggestions"
+                android:importantForAutofill="no"
+                android:privateImeOptions="com.samsung.android.inputmethod.disableAutofill=true,disableAutofill=true"
+                android:autofillHints="" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:gravity="center_vertical"
             android:layout_marginTop="4dp">
 
-            <com.hwanyu365.pagetune.ui.view.NoAutofillEditText
-                android:id="@+id/et_inp_taddr"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="@string/edit_hint_url"
-                android:textColor="@color/colorWhite"
-                android:textColorHint="@color/colorTextSecondary"
-                android:backgroundTint="@color/colorWhite"
-                android:inputType="textUri|textNoSuggestions"
-                android:importantForAutofill="no"
-                android:privateImeOptions="com.samsung.android.inputmethod.disableAutofill=true,disableAutofill=true"
-                android:autofillHints="" />
+                android:hint="@string/edit_hint_url">
+
+                <com.hwanyu365.pagetune.ui.view.NoAutofillEditText
+                    android:id="@+id/et_inp_taddr"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textUri|textNoSuggestions"
+                    android:importantForAutofill="no"
+                    android:privateImeOptions="com.samsung.android.inputmethod.disableAutofill=true,disableAutofill=true"
+                    android:autofillHints="" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <Button
                 android:id="@+id/btn_load_url"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:minHeight="48dp"
-                android:text="@string/edit_load"
-                android:backgroundTint="@color/colorAccent"
-                android:textColor="@color/colorOnAccent" />
+                android:text="@string/edit_load" />
 
         </LinearLayout>
 
@@ -77,7 +81,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <!-- Floating Indicator when Inspector Mode is ON (Semi-transparent Orange) -->
         <TextView
             android:id="@+id/tv_inspector_status"
             android:layout_width="wrap_content"
@@ -85,11 +88,10 @@
             android:layout_gravity="top|center_horizontal"
             android:layout_marginTop="8dp"
             android:paddingHorizontal="12dp"
-            android:paddingVertical="6dp"
-            android:background="#B3FF9800"
-            android:textColor="@color/colorWhite"
-            android:textStyle="bold"
-            android:textSize="12sp"
+            android:paddingVertical="4dp"
+            android:background="@color/scrim"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="@color/onSurface"
             android:text="@string/edit_pick_banner"
             android:visibility="gone" />
 
@@ -102,7 +104,7 @@
         android:id="@+id/layout_bottom_config_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorGrayLight"
+        android:background="@color/surfaceContainerHigh"
         android:orientation="vertical"
         android:paddingHorizontal="12dp"
         android:paddingBottom="8dp"
@@ -120,7 +122,7 @@
                 android:layout_width="40dp"
                 android:layout_height="4dp"
                 android:layout_gravity="center"
-                android:background="@color/colorTextSecondary" />
+                android:background="@color/onSurfaceVariant" />
         </FrameLayout>
 
     <!-- Pick Mode Toggle & Selector Display -->
@@ -131,16 +133,13 @@
         android:gravity="center_vertical"
         android:layout_marginBottom="4dp">
 
-        <ToggleButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_toggle_inspect"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minHeight="48dp"
-            android:textOn="@string/edit_pick_on"
-            android:textOff="@string/edit_pick_off"
-            android:checked="false"
-            android:backgroundTint="@color/colorAccent"
-            android:textColor="@color/colorOnAccent" />
+            android:checkable="true"
+            android:text="@string/edit_pick_off" />
 
         <TextView
             android:id="@+id/tv_selected_selector"
@@ -148,9 +147,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:textSize="12sp"
+            android:textAppearance="?attr/textAppearanceBodySmall"
             android:textStyle="italic"
-            android:textColor="@color/colorTextPrimary"
+            android:textColor="@color/onSurface"
             android:text="@string/edit_selected_none"
             android:maxLines="2"
             android:ellipsize="end" />
@@ -166,13 +165,12 @@
 
             <Button
                 android:id="@+id/btn_plugin_cancel"
+                style="?attr/borderlessButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:minHeight="48dp"
                 android:text="@string/cancel"
-                android:backgroundTint="@color/colorPrimary"
-                android:textColor="@color/colorWhite"
                 android:layout_marginEnd="8dp" />
 
             <Button
@@ -181,9 +179,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:minHeight="48dp"
-                android:text="@string/save"
-                android:backgroundTint="@color/colorAccent"
-                android:textColor="@color/colorOnAccent" />
+                android:text="@string/save" />
 
         </LinearLayout>
 
@@ -210,25 +206,21 @@
 
                     <Button
                         android:id="@+id/btn_select_parent"
+                        style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginEnd="4dp"
-                        android:text="@string/edit_select_parent"
-                        android:backgroundTint="@color/colorPrimary"
-                        android:textColor="@color/colorWhite"
-                        android:textSize="11sp" />
+                        android:text="@string/edit_select_parent" />
 
                     <Button
                         android:id="@+id/btn_select_child"
+                        style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="4dp"
-                        android:text="@string/edit_select_child"
-                        android:backgroundTint="@color/colorPrimary"
-                        android:textColor="@color/colorWhite"
-                        android:textSize="11sp" />
+                        android:text="@string/edit_select_child" />
 
                 </LinearLayout>
 
@@ -245,8 +237,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/edit_action_type"
-                        android:textStyle="bold"
-                        android:textSize="12sp" />
+                        android:textAppearance="?attr/textAppearanceLabelLarge" />
 
                     <RadioGroup
                         android:id="@+id/rg_action_type"
@@ -292,27 +283,22 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/edit_color_hint"
-                            android:textStyle="bold"
-                            android:textSize="12sp" />
+                            android:textAppearance="?attr/textAppearanceLabelLarge" />
 
                         <Button
                             android:id="@+id/btn_color_bg"
+                            style="?attr/materialButtonOutlinedStyle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            tools:text="Background: none"
-                            android:backgroundTint="@color/colorPrimary"
-                            android:textColor="@color/colorWhite"
-                            android:textSize="11sp" />
+                            tools:text="Background: none" />
 
                         <Button
                             android:id="@+id/btn_color_text"
+                            style="?attr/materialButtonOutlinedStyle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            tools:text="Text: none"
-                            android:backgroundTint="@color/colorPrimary"
-                            android:textColor="@color/colorWhite"
-                            android:textSize="11sp" />
+                            tools:text="Text: none" />
 
                     </LinearLayout>
 
@@ -329,8 +315,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/edit_trigger_label"
-                            android:textStyle="bold"
-                            android:textSize="12sp" />
+                            android:textAppearance="?attr/textAppearanceLabelLarge" />
 
                         <Spinner
                             android:id="@+id/sp_trigger_type"
@@ -339,23 +324,21 @@
                             android:minHeight="48dp"
                             android:layout_marginBottom="4dp" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/edit_area_label"
-                            android:textSize="11sp" />
-
-                        <com.hwanyu365.pagetune.ui.view.NoAutofillEditText
-                            android:id="@+id/et_gesture_area"
+                        <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/edit_area_hint"
-                            android:textColor="@color/colorTextPrimary"
-                            android:textColorHint="@color/colorTextSecondary"
-                            android:inputType="number"
-                            android:importantForAutofill="no"
-                            android:privateImeOptions="com.samsung.android.inputmethod.disableAutofill=true,disableAutofill=true"
-                            android:autofillHints="" />
+                            android:hint="@string/edit_area_label"
+                            app:placeholderText="@string/edit_area_hint">
+
+                            <com.hwanyu365.pagetune.ui.view.NoAutofillEditText
+                                android:id="@+id/et_gesture_area"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number"
+                                android:importantForAutofill="no"
+                                android:privateImeOptions="com.samsung.android.inputmethod.disableAutofill=true,disableAutofill=true"
+                                android:autofillHints="" />
+                        </com.google.android.material.textfield.TextInputLayout>
 
                     </LinearLayout>
 
@@ -363,9 +346,7 @@
                         android:id="@+id/btn_add_action"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/edit_rule_add"
-                        android:backgroundTint="@color/colorPrimary"
-                        android:textColor="@color/colorWhite" />
+                        android:text="@string/edit_rule_add" />
 
                 </LinearLayout>
 
@@ -374,8 +355,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/edit_rules_title"
-                    android:textStyle="bold"
-                    android:textSize="12sp"
+                    android:textAppearance="?attr/textAppearanceLabelLarge"
                     android:layout_marginTop="8dp" />
 
                 <LinearLayout
@@ -387,13 +367,11 @@
 
                 <Button
                     android:id="@+id/btn_set_scroll"
+                    style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="@string/edit_start_position_set"
-                    android:backgroundTint="@color/colorPrimary"
-                    android:textColor="@color/colorWhite"
-                    android:textSize="11sp" />
+                    android:text="@string/edit_start_position_set" />
 
             </LinearLayout>
 

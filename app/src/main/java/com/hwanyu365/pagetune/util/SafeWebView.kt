@@ -49,9 +49,18 @@ open class SafeWebViewClient(
             }
             LinkDecision.Block -> true
             is LinkDecision.External -> {
-                if (decision.confirm) confirmExternal(view, decision.target) else openExternal(view, decision.target)
+                confirmExternal(view, decision.target)
                 true
             }
+        }
+    }
+
+    /** 사용자가 누른 버튼이 새 창으로 열려던 주소는 WebView 이동 판정을 거치지 않으므로 같은 분류를 여기서 적용한다. */
+    fun openUserLink(view: WebView, url: String) {
+        when (val decision = UrlPolicy.classifyLink(url, isMainFrame = true, hasGesture = true, isRedirect = false, activity.packageName)) {
+            LinkDecision.InWebView -> loadChecked(view, url) {}
+            LinkDecision.Block -> Unit
+            is LinkDecision.External -> confirmExternal(view, decision.target)
         }
     }
 

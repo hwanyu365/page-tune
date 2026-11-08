@@ -194,6 +194,10 @@
   - 버튼은 지름 56dp 원이고 `scrim` 배경에 방향 아이콘을 둔다 (`spec_design.md` FR#6). 접근성 라벨은 이전/다음이다.
   - 버튼 사이는 비워 둔다 → 화면 폭 전체를 덮는 바가 없어 그 사이 페이지를 그대로 누를 수 있다.
   - 내비게이션 바 위에 두고(FR#6), 빠른 메뉴·Tune 상태 표시와 겹치지 않는다.
+  - 연결된 요소가 새 창 링크(`target` 이 `_self`·`_top`·`_parent` 밖, `<base target>` 포함)이면 클릭하지 않고 그 주소를, 클릭 처리기가 `window.open` 을 부르면 새 창을 열지 않고 그 주소를 받아 §6.11 링크 분류로 현재 WebView 에서 연다 [요구사항] GH-55 (소유자 결정 2026-11-08)
+    - 분류 입력은 주 프레임·사용자 조작 있음·리다이렉트 아님이다 → 사용자가 버튼을 누른 것이다.
+    - 근거: 버튼은 주입 스크립트로 `click()` 하므로 사용자 활성화가 없다 → N2 에서 새 창이 팝업으로 막혀 아무것도 열리지 않는다 (에뮬레이터 실측, GH-55 PR).
+    - 두 번 탭(FR#10)은 이 처리를 쓰지 않는다 → 결정 범위가 이전/다음 버튼이다.
 - `FR#10` 위/아래 두 번 탭 클릭 연결이 있으면, 화면 위쪽 N% 또는 아래쪽 N% 에서 두 번 탭할 때 연결된 요소를 클릭한다 [as-built]
   - N 은 위쪽 규칙의 값을 우선하고, 없으면 아래쪽 규칙의 값이다.
 - `FR#28` 사용자가 페이지를 아래로 스크롤하면 이전/다음 버튼을 숨기고, 위로 스크롤하거나 페이지 끝에 닿거나 페이지 로드가 끝나면 다시 보인다 [요구사항] GH-55
@@ -345,7 +349,13 @@
   ```
   Given 페이지에 mailto: 링크가 있다
   When  사용자가 그 링크를 누른다
-  Then  메일 앱(또는 앱 선택 창)이 열리고 열람 화면은 그대로다
+  Then  "외부 앱으로 열까요?" 확인이 보이고, 열기를 고르면 메일 앱(또는 앱 선택 창)이 열리고 열람 화면은 그대로다
+  ```
+
+  ```
+  Given 버튼의 클릭 처리기가 location 을 intent: 주소로 바꾼다
+  When  사용자가 그 버튼을 누른다
+  Then  "외부 앱으로 열까요?" 확인이 보이고, 취소하면 아무것도 열리지 않는다
   ```
 
   ```
@@ -432,7 +442,7 @@
 - 변경 안내 목록: versionCode 오름차순 상수 목록과 버전별 문자열 리소스 (FR#34) [요구사항] GH-53
 - 링크 분류 함수 입력·출력 (§6.11) [요구사항] GH-55
   - 입력: 이동할 주소 문자열, 주 프레임 여부(`WebResourceRequest.isForMainFrame`), 사용자 제스처 여부(`hasGesture`), 서버 리다이렉트 여부(`isRedirect`), 앱 id.
-  - 출력: WebView 에 열기 / 외부 앱(보기 주소 또는 intent 구성 결과) / 확인 후 외부 앱(같은 대상, L7) / 막기.
+  - 출력: WebView 에 열기 / 확인 후 외부 앱(보기 주소 또는 intent 구성 결과) / 막기.
 
 ## 5. 화면 및 UI/UX
 
@@ -513,7 +523,7 @@
 | `D#9` 삭제 확인 다이얼로그 [FR#3] [FR#26] | 선택 모드·오버플로 모두 확인 다이얼로그 + 삭제 후 실행취소 | 확인 없이 삭제 + 실행취소, 여러 개 삭제만 확인 | 소유자 결정 (2026-11-08). 확인은 누르기 전 실수를, 실행취소는 확인한 뒤 바로 알아챈 실수를 막는다 |
 | `D#10` 목록 아이콘 [FR#24] | 도메인 글자 아바타, 색은 호스트 해시로 8색 중 하나 | 파비콘, 단색 아바타 | 파비콘은 목록을 그릴 때 사이트로 요청을 보낸다 → 처리방침의 "연 페이지 외 통신 없음" 과 충돌 (소유자 결정 #51). 단색이면 같은 글자의 다른 사이트를 구분할 수 없다 |
 | `D#11` 이전/다음 버튼 형태 [FR#9] [FR#28] | 하단 양쪽 56dp 원, 사용자 스크롤 방향으로 숨김/표시 | 폭 전체 바 유지, 위치 설정, 시간 경과로 숨김 | 폭 전체 바는 버튼 사이 화면까지 가린다. 위치 설정은 설정 범위 밖(#55). 시간 경과로 숨기면 다음 글로 가려는 순간 버튼이 없다 → 아래로 읽는 동안만 숨기고 위로 스크롤·페이지 끝에서 다시 보인다 |
-| `D#12` 외부 앱 실행 조건 [FR#31] | 주 프레임 + 사용자 제스처면 실행. 그중 서버 리다이렉트로 도달한 주소는 "외부 앱으로 열까요?" 확인 후 사용자가 고를 때만. 주 프레임 아님·제스처 없음은 막기 (L5, L6, L7) | 조건 없이 실행, 외부 앱마다 확인 다이얼로그, `intent:` 만 확인, 리다이렉트 도달 주소 전부 막기 | 소유자 결정 (2026-11-08). 조건 없이 실행하면 광고 iframe·자동 이동이 스토어·다른 앱을 연다. 사용자가 직접 누른 링크는 확인을 더하지 않는다. 리다이렉트 도달 주소는 사용자가 누른 http(s) 링크에서 시작했지만 누른 주소와 다르다 → 막으면 지도·메신저 공유처럼 리다이렉트로 앱을 여는 정상 링크가 안 열리고, 확인 없이 열면 사용자가 모르는 앱이 열린다 → 확인을 거친다. 잔여 위험: 클릭 처리기 안에서 스크립트가 바꾼 주소는 WebView 가 제스처 있음·리다이렉트 아님으로 알린다 → 투명 오버레이처럼 사용자가 그 링크라고 알고 탭하지 않은 요소로도 외부 앱이 확인 없이 열릴 수 있다. 사용자 조작 없는 스크립트 이동은 제스처 없음으로 막힌다 |
+| `D#12` 외부 앱 실행 조건 [FR#31] | 주 프레임 + (사용자 조작 있음 또는 서버 리다이렉트) 이면 항상 "외부 앱으로 열까요?" 확인 후 사용자가 고를 때만 실행. 주 프레임 아님, 사용자 조작·리다이렉트 모두 없음은 막기 (L5, L6, L7) | 조건 없이 실행, 사용자가 직접 누른 링크는 확인 없이 실행하고 리다이렉트만 확인, 리다이렉트 도달 주소 전부 막기 | 소유자 결정 (2026-11-08, 실측 후 재결정). 실측(GH-55 PR, Android 36 WebView): 사용자가 누른 http(s) 링크의 302 대상은 `hasGesture=false`, `isRedirect=true` 로 온다 → 제스처를 조건으로 두면 리다이렉트로 앱을 여는 정상 링크(지도·메신저 공유)가 열리지 않는다. 클릭 처리기 안에서 스크립트가 바꾼 주소는 `hasGesture=true`, `isRedirect=false` 로 온다 → 투명 오버레이처럼 사용자가 그 링크라고 알고 누르지 않은 요소로 외부 앱이 열릴 수 있다 (#57). 확인을 항상 거치면 두 경우 모두 사용자가 고른 때만 열린다. 사용자 조작 없는 자동 이동이 리다이렉트를 거치면 확인 창이 뜰 수 있다 → 열리지는 않고 취소로 닫힌다 |
 | `D#13` 인증서 오류 [FR#30] | 항상 중단, 진행 수단 없음 | 사용자가 위험을 확인하고 진행 | 진행은 중간자 공격에 쿠키·입력을 노출한다. Play 는 `onReceivedSslError` 에서 `proceed()` 를 호출하는 앱을 안전하지 않은 구현으로 경고한다 ([Play 고객센터](https://support.google.com/faqs/answer/7071387)) |
 | `D#14` 안내 기록 [FR#27] [FR#34] | SharedPreferences 의 마지막으로 본 versionCode 정수 | 완료 boolean, Room 테이블 | boolean 은 "처음 설치" 만 구분하고 업데이트 뒤 무엇을 보였는지는 담지 못한다. versionCode 하나로 시작 안내 완료와 새 소식 범위를 함께 정한다. Room 은 스키마 변경이 필요하다 [NFR#1]. Tune 끄기 상태와 달리 화면을 넘어 유지해야 하는 값이라 NFR#1 의 저장 금지 대상이 아니다 |
 | `D#15` 시작 안내·새 소식 대상 [FR#27] [FR#34] | 기록 없음 + 데이터 없음 → 시작 안내. 기록 없음 + 데이터 있음 → 새 소식. 기록이 현재보다 작음 → 그 사이 새 소식 | 기록이 없으면 누구나 시작 안내, 데이터 없을 때만 시작 안내하고 기존 사용자는 표시 없음 | 소유자 결정 (2026-11-08). 업데이트한 사용자는 Tune 만드는 순서를 이미 알고, 알아야 하는 것은 바뀐 점이다. 이 기능 이전 버전은 기록을 남기지 않았다 → 기록 없음만으로는 첫 설치와 업데이트를 가를 수 없어 데이터 유무로 가른다 |
@@ -631,10 +641,10 @@ DB 연쇄 [as-built]
 | L3 | `about:blank`, `about:srcdoc` | WebView | 사이트가 빈 창·프레임을 여는 데 쓴다 |
 | L4 | `javascript` `data` `file` `content` `blob` `filesystem` `about`(L3 밖) `chrome` `view-source` | 막기 | `file`·`content` 는 기기 파일·다른 앱 데이터를 앱 WebView 에 연다. 나머지는 페이지가 만든 문서·브라우저 내부 화면을 최상위 문서로 연다 |
 | L5 | L2~L4 밖 scheme 인데 주 프레임이 아님 | 막기 | 광고 iframe 이 사용자 모르게 다른 앱·스토어를 연다 |
-| L6 | L2~L4 밖 scheme 인데 사용자 제스처가 없음 | 막기 | 사용자 조작 없는 이동으로 다른 앱이 열리는 것을 막는다 |
-| L7 | L2~L4 밖 scheme, 제스처 있음, 서버 리다이렉트(`isRedirect`)로 도달함 | 아래 L8·L9 의 결과에 "확인 후" 를 붙인다. 결과가 막기면 확인 없이 막기 | 리다이렉트는 사용자가 누른 http(s) 링크의 제스처를 이어받는다 → 누른 주소와 다른 앱이 열릴 수 있어 "외부 앱으로 열까요?" 를 거친다 (D#12). 취소하면 아무것도 하지 않는다 |
+| L6 | L2~L4 밖 scheme 인데 사용자 제스처(`hasGesture`)도 서버 리다이렉트(`isRedirect`)도 아님 | 막기 | 사용자 조작 없는 이동으로 다른 앱이 열리는 것을 막는다 |
+| L7 | L2~L4 밖 scheme, 제스처 있음 또는 리다이렉트 | L8·L9 의 결과를 "외부 앱으로 열까요?" 확인 후 연다. L8 이 막기면 확인 없이 막기 | 실측상 리다이렉트는 제스처 없음으로, 클릭 처리기 안 스크립트 이동은 제스처 있음으로 온다 → 어느 쪽도 사용자가 고른 앱인지 알 수 없어 항상 확인한다 (D#12). 취소하면 아무것도 하지 않는다 |
 | L8 | `intent` (`intent:` 와 `intent://` 모두) | I1~I7 의 결과 | |
-| L9 | `market` 및 그 밖 scheme (`mailto` `tel` `sms` 앱 전용 scheme) | 외부 앱: `ACTION_VIEW` + `CATEGORY_BROWSABLE`, data = 원래 주소, component 없음 | 시스템이 웹 링크로 열 수 있다고 선언한(browsable) 화면만 고른다 |
+| L9 | `market` 및 그 밖 scheme (`mailto` `tel` `sms` 앱 전용 scheme) | 외부 앱 대상: `ACTION_VIEW` + `CATEGORY_BROWSABLE`, data = 원래 주소, component 없음 | 시스템이 웹 링크로 열 수 있다고 선언한(browsable) 화면만 고른다 |
 | L10 | 외부 앱 실행이 `ActivityNotFoundException` 으로 실패 | intent 면 I6 대체 주소, 아니면 열 수 있는 앱이 없다는 안내 | 미리 조회하지 않는다 [NFR#6]. 어댑터 동작이라 단위 범위 밖 (NFR#5) |
 
 다운로드 분류 (`DownloadListener` 진입, FR#33)
@@ -763,14 +773,16 @@ intent 구성 (`intent://나머지#Intent;키=값;…;end`)
 | `TC#42` | 비행기 모드 열람 → 연결할 수 없음 화면, 복구 후 다시 시도 → 페이지. `https://nonexistent.invalid` → 같은 연결할 수 없음 화면. 두 경우에 받은 오류 코드를 기록해 PR 에 남김 (다른 코드면 §6.10 표에 그 코드를 같은 종류로 추가). 이미지 하나가 404 인 페이지·HTTP 404 페이지 → 오류 화면 없음. 오류 화면에서 빠른 메뉴 새로고침 동작, 이전/다음 버튼 없음 | [FR#29] | 수동, 에뮬레이터 |
 | `TC#43` | `app/src/main/java` 아래 Kotlin·Java 소스에 `.proceed(` 호출 0건, `onReceivedSslError` 구현이 있는 클래스마다 `cancel()` 호출 있음 | [FR#30] [NFR#5] | 단위 (소스 읽기). mutation: 구현 PR 에서 `proceed()` 를 넣어 실패하는지 확인 |
 | `TC#44` | `https://expired.badssl.com/` 웹페이지 열람 → 보안 연결 오류 화면, 진행 수단 없음, 다시 시도 → 같은 화면. 편집 화면에서 같은 주소 → 같은 종류. TC#47 픽스처 서버의 302 응답이 `https://expired.badssl.com/` 로 리다이렉트하는 주소를 등록해 열람 → 같은 오류 화면(빈 화면 아님), 이때 리다이렉트 주소가 어느 콜백으로 왔는지 PR 에 기록 | [FR#30] | 수동. 외부 테스트 사이트라 접속 불가 시 날짜와 함께 PR 에 미확인으로 남긴다 |
-| `TC#45` | 링크 분류 L1~L9 조건마다, 모든 사례는 주 프레임 + 제스처로 준다(L4 를 지우면 L9 외부로 새어 실패하도록): L1 빈 문자열·`:abc`·`abc` → 막기. L2 `https://a`·`HTTPS://a`·`Http://a` → WebView. L3 `about:blank`·`about:srcdoc` → WebView. L4 `javascript:x`·`data:text/html,x`·`file:///sdcard/a`·`content://x`·`blob:https://a/1`·`filesystem:https://a/t/x`·`about:config`·`chrome://settings`·`view-source:https://a` 각각 → 막기, 대소문자 변형 `FILE:///a`·`JavaScript:x`·`Content://x` → 막기. L5 `mailto:a@b`·`intent://x#Intent;scheme=https;end` 주 프레임 아님 → 막기. L6 같은 둘 제스처 없음 → 막기(`isRedirect` 값과 무관). L7 `mailto:a@b`·`market://details?id=x`·`intent://x#Intent;scheme=https;end` 제스처 있음 + `isRedirect=true` → 확인 후 외부 앱(대상은 리다이렉트가 아닐 때와 같음), `intent:` 가 I5 로 막히는 주소 + 리다이렉트 → 확인 없이 막기, 제스처 없음 + 리다이렉트 → 막기(L6 우선). L8 `intent:`·`intent://` → intent 구성으로 위임. L9 `mailto:`·`tel:1`·`market://details?id=x`·`myapp://x` → 확인 없이 외부. 새 창 N1·N2: `app/src/main/java` 소스에 `setSupportMultipleWindows(true)`·`onCreateWindow` 0건, `javaScriptCanOpenWindowsAutomatically = true` 0건 | [FR#31] [NFR#5] | 단위. mutation: 구현 PR 에서 L1~L9 조건과 L4 목록 항목을 하나씩 지우기, 소문자 정규화 지우기, L7 지우기(리다이렉트가 확인 없이 열림), L7 의 결과를 막기로 바꾸기, L6·L7 순서 바꾸기, L5~L7 을 L8 뒤로 옮기기, N1·N2 설정을 되돌리기를 각각 해 실패하는지 확인해 PR 본문에 남긴다. L10 은 TC#47 |
+| `TC#45` | 링크 분류 L1~L9 조건마다, 모든 사례는 주 프레임 + 제스처로 준다(L4 를 지우면 L9 외부로 새어 실패하도록): L1 빈 문자열·`:abc`·`abc` → 막기. L2 `https://a`·`HTTPS://a`·`Http://a` → WebView. L3 `about:blank`·`about:srcdoc` → WebView. L4 `javascript:x`·`data:text/html,x`·`file:///sdcard/a`·`content://x`·`blob:https://a/1`·`filesystem:https://a/t/x`·`about:config`·`chrome://settings`·`view-source:https://a` 각각 → 막기, 대소문자 변형 `FILE:///a`·`JavaScript:x`·`Content://x` → 막기. L5 `mailto:a@b`·`intent://x#Intent;scheme=https;end` 주 프레임 아님 → 제스처·리다이렉트와 무관하게 막기. L6 `mailto:a@b`·`market://details?id=x`·`intent://…` 제스처 없음 + 리다이렉트 아님 → 막기. L7 `mailto:a@b`·`market://details?id=x` 제스처만·리다이렉트만·둘 다 → 같은 외부 대상, `intent:` 리다이렉트 → intent 구성 대상, I5 로 막히는 `intent:` + 리다이렉트 → 막기. L8 `intent:`·`intent://` → intent 구성으로 위임. L9 `mailto:`·`tel:1`·`market://details?id=x`·`myapp://x` → 외부 보기 대상. 외부 대상은 모두 확인 창을 거친다: `app/src/main/java` 에서 외부 앱 실행 함수 호출이 확인 창의 열기 버튼 한 곳뿐 (소스 검사). 새 창 N1·N2: `app/src/main/java` 소스에 `setSupportMultipleWindows(true)`·`onCreateWindow` 0건, `javaScriptCanOpenWindowsAutomatically = true` 0건 | [FR#31] [NFR#5] | 단위. mutation: 구현 PR 에서 L1~L9 조건과 L4 목록 항목을 하나씩 지우기, 소문자 정규화 지우기, L6 의 리다이렉트 조건 지우기, L6 의 제스처 조건 지우기, 확인 창을 건너뛰고 바로 실행하기, L5~L7 을 L8 뒤로 옮기기, N1·N2 설정을 되돌리기를 각각 해 실패하는지 확인해 PR 본문에 남긴다. L10 은 TC#47 |
 | `TC#46` | intent 구성 I1~I7 조건마다 1건 이상: `;end` 없음 → 막기. `component=`·`SEL;`·`action=`·`launchFlags=`·`S.extra=` 가 있어도 결과에 없음. `scheme=https;package=com.x` → data `https://나머지`, package `com.x`. `scheme` 없음 → data 없음. `scheme=` 값이 L4 목록 9개 각각과 대소문자 변형(`scheme=FILE`) → 막기. `package=` 이 앱 id → 막기. 대체 주소 `https%3A%2F%2Fa` → `https://a`, `javascript%3Ax` → 대체 없음, 잘못된 퍼센트 인코딩 → 그 키 없음 | [FR#32] [NFR#5] | 단위. mutation: TC#45 와 같다 |
-| `TC#47` | 로컬 픽스처 페이지(개발 PC 의 정적 서버를 `adb reverse` 로 연결)에서 링크마다 탭: `mailto:` → 메일 앱/선택 창, `tel:` → 다이얼러, 설치된 앱의 `intent:`(e.g. 설정 앱이 받는 browsable 주소) → 그 앱, 미설치 package + https 대체 → 열람 WebView 에 대체 주소, 대체 없음 → 안내, `file:` → 반응 없음, 자동 `location = 'intent:…'` 스크립트 → 반응 없음, iframe 안 링크 탭 → 반응 없음. https 링크 탭 → 302 로 `intent:`·`market:` 에 리다이렉트 → "외부 앱으로 열까요?" 확인, 취소 → 아무것도 안 열림·페이지 그대로, 열기 → 그 앱(미설치면 L10 대로). 클릭 처리기 안에서 `location = 'intent:…'` 로 바꾸는 버튼 → 결과를 기록(D#12 잔여 위험). 새 창: `target="_blank"` https 링크 탭 → 같은 열람 WebView 에서 열림, `target="_blank"` `mailto:` 링크 탭 → 메일 앱, 클릭 안 `window.open('https://…')` → 같은 WebView, 클릭 안 `window.open('content://x')`·`window.open('file:///a')` → 아무것도 열리지 않음, `setTimeout` 뒤 `window.open('https://…')`(사용자 조작 없음) → 열리지 않음, iframe 안 `window.open('intent:…')`: 사용자 조작 없음(`setTimeout`) → 열리지 않음(N2, L6). iframe 안을 사용자가 탭한 처리기에서 → 새 창이 주 프레임 이동이 되므로 제스처 있음·리다이렉트 아님으로 L8 대로 외부 앱(확인 없음, D#12 잔여 위험과 같은 경우). 실제로 주 프레임 이동으로 오는지 기록. 새 창 요청이 `shouldOverrideUrlLoading` 을 거치는지(분류 적용 여부)를 PR 에 기록 | [FR#31] [FR#32] | 수동, 에뮬레이터. 픽스처는 저장소에 두지 않고 PR 본문에 내용을 남긴다 |
+| `TC#47` | 로컬 픽스처 페이지(개발 PC 의 정적 서버를 `adb reverse` 로 연결)에서 링크마다 탭: 외부 앱으로 가는 링크는 모두 "외부 앱으로 열까요?" 확인 → 취소 시 아무것도 안 열림, 열기 시 `mailto:` → 메일 앱/선택 창, `tel:` → 다이얼러, 설치된 앱의 `intent:`(e.g. 설정 앱이 받는 browsable 주소) → 그 앱, 미설치 package + https 대체 → 열람 WebView 에 대체 주소, 대체 없음 → 안내, `file:` → 반응 없음, 자동 `location = 'intent:…'` 스크립트 → 반응 없음, iframe 안 링크 탭 → 반응 없음. https 링크 탭 → 302 로 `intent:`·`market:` 에 리다이렉트 → "외부 앱으로 열까요?" 확인, 취소 → 아무것도 안 열림·페이지 그대로, 열기 → 그 앱(미설치면 L10 대로). 클릭 처리기 안에서 `location = 'intent:…'` 로 바꾸는 버튼 → 확인 창(D#12). 새 창: `target="_blank"` https 링크 탭 → 같은 열람 WebView 에서 열림, `target="_blank"` `mailto:` 링크 탭 → 메일 앱, 클릭 안 `window.open('https://…')` → 같은 WebView, 클릭 안 `window.open('content://x')`·`window.open('file:///a')` → 아무것도 열리지 않음, `setTimeout` 뒤 `window.open('https://…')`(사용자 조작 없음) → 열리지 않음, iframe 안 `window.open('intent:…')`: 사용자 조작 없음(`setTimeout`) → 열리지 않음(N2, L6). iframe 안을 사용자가 탭한 처리기에서 → 새 창이 주 프레임 이동이 되므로 제스처 있음·리다이렉트 아님으로 확인 창. 실제로 주 프레임 이동으로 오는지 기록. 새 창 요청이 `shouldOverrideUrlLoading` 을 거치는지(분류 적용 여부)를 PR 에 기록 | [FR#31] [FR#32] | 수동, 에뮬레이터. 픽스처는 저장소에 두지 않고 PR 본문에 내용을 남긴다 |
 | `TC#48` | 다운로드 분류 W1~W2: `https://a/f.zip`·`HTTP://a/f` → 열기 스낵바, `blob:https://a/1`·`data:application/zip;base64,x`·`file:///sdcard/a.apk`·`content://x`·`ftp://a/f`·`FILE:///a`·빈 문자열 → 안내 | [FR#33] [NFR#5] | 단위. mutation: 구현 PR 에서 W1 의 scheme 비교를 "http 로 시작" 으로 넓히기, 소문자 정규화 지우기를 각각 해 실패하는지 확인 |
 | `TC#53` | 픽스처의 첨부 링크 탭 → 스낵바, "브라우저에서 열기" → 브라우저가 그 주소로 열리고 열람 화면은 그대로, 스낵바를 누르지 않고 사라짐 → 아무것도 열리지 않음. iframe 이 자동으로 첨부 응답을 만듦 → 브라우저가 열리지 않음. 브라우저를 모두 비활성화 후 열기 → 안내. `blob:` 다운로드 → 지원 안 함 안내 | [FR#33] | 수동, 에뮬레이터 (TC#47 픽스처) |
 | `TC#54` | 주소 입력 분류 U1~U5: U1 빈 값·공백만 → 오류. U2 `https://a`·`http://a`·`HTTPS://a`·`Http://a` → 허용, scheme 소문자. U3 L4 목록 9개(`javascript:x` `data:x` `file:///a` `content://x` `blob:https://a/1` `filesystem:https://a/t` `about:blank` `chrome://x` `view-source:https://a`)와 `FILE:///a`·`JavaScript:x`·`mailto:a@b`·`intent://x#Intent;end`·`ftp://a` → 오류. U4 `example.com` → `https://example.com`, `localhost:8080/x` → `https://localhost:8080/x`, `example.com:443` → `https://example.com:443`. U5 `https://`·`https:///a` → 오류. 허용 결과를 다시 넣으면 같은 값 | [FR#2] [FR#35] [NFR#5] | 단위. mutation: 구현 PR 에서 U2~U5 를 하나씩 지우기, 소문자 비교 지우기, 포트 예외 지우기를 각각 해 실패하는지 확인 |
 | `TC#55` | debug 빌드에서 DB 의 웹페이지 주소를 `content://x` 와 `javascript:alert(1)` 로 바꿔 열람 → 로드 없이 열 수 없는 주소 화면(다시 시도 없음), 행은 목록에 남고 편집 다이얼로그에 그 값이 보임, `https://` 로 고쳐 저장 후 열람 → 열림 | [FR#35] | 수동, 에뮬레이터 (`adb shell run-as` 로 DB 수정, 확인 후 원복) |
 | `TC#56` | U6 소스 검사: `app/src/main/java` 에서 `.loadUrl(` 이 래퍼 함수 본문 한 곳에만 있고, 그 본문이 `loadUrl` 전에 주소 입력 분류 함수를 부른다 | [FR#35] [NFR#5] | 단위 (소스 읽기, TC#43 과 같은 방식). mutation: 구현 PR 에서 Activity 하나에 `webView.loadUrl(x)` 직접 호출 추가, 래퍼의 분류 호출 제거를 각각 해 실패하는지 확인 |
+| `TC#57` | 이전/다음 버튼 스크립트(HtmlUnit 픽스처): `target="_blank"`·이름 붙은 `target` 링크와 그 자식 요소 → 클릭하지 않고 절대 주소 반환, `<base target="_blank">` 아래 대상 없는 링크 → 주소 반환, 클릭 처리기의 `window.open('/x')` → 처리기는 실행되고 절대 주소 반환·`window.open` 원래 함수로 복원, `target="_self"` 링크·일반 버튼 → 그대로 클릭·반환 없음, 가로채지 않는 호출(두 번 탭) → 새 창 링크도 그대로 클릭 | [FR#9] | 단위 (`spec_tune_edit.md` §6.8 엔진) |
+| `TC#58` | 이전/다음 연결이 `target="_blank"` http 링크 → 같은 열람 WebView 에서 열림, `window.open('http…')` 버튼 → 같은 WebView, `target="_blank"` `mailto:` 링크 → 확인 창, `target="_blank"` `file:` 링크 → 아무것도 안 열림 | [FR#9] [FR#31] | 수동, 에뮬레이터 (TC#47 픽스처) |
 | `TC#49` | 앱 매니페스트에 `uses-permission` 이 `INTERNET` 하나이고 `<queries>` 가 없다 | [NFR#6] | 단위 (`StoreListingTest` TC#13 에 단언 추가) |
 | `TC#50` | `docs/privacy.md` 한국어·영어 "공유" 절에 다른 앱으로 링크 주소를 넘기는 서술이 있다 | [FR#31] | 단위 (`StoreListingTest`) |
 | `TC#51` | v1.1.1 태그 빌드에 웹페이지 2개 → 새 빌드(태그 v1.2.0, 목록에 10200 과 문구)로 덮어 설치 → 시작 안내 없이 새 소식 다이얼로그, 확인 → 재실행 시 없음. 같은 새 빌드 새 설치 → 시작 안내만, 닫은 뒤 새 소식 없음. 새 소식 표시 중 프로세스 종료 → 재실행 시 다시 보임. 영어·한국어 | [FR#34] | 수동, 에뮬레이터. 태그는 로컬 빌드용 `VERSION_TAG` 로만 준다 |
@@ -788,3 +800,4 @@ intent 구성 (`intent://나머지#Intent;키=값;…;end`)
 - GH-25: 색상 TC 에 CSS 계약 반영
 - GH-42: 색상 대체 블록 조건과 83 미만 WebView 확인 (TC#22, TC#28)
 - GH-51: 목록 카드·삭제 되돌리기·시작 안내(GH-53), 이전/다음 버튼·로드 오류·외부 링크(GH-55) 요구사항 추가
+- GH-55: 외부 앱 항상 확인(D#12·L6·L7 재정의), 이전/다음 버튼의 새 창 대상 처리(FR#9, TC#57·TC#58)

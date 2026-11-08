@@ -32,6 +32,16 @@ class SourceRulesTest {
     }
 
     @Test
+    fun `TC#45 L7 외부 앱 실행은 확인 창의 열기 버튼 한 곳에서만 부른다`() {
+        val calls = occurrences("openExternal(")
+        assertEquals("정의 1 + 호출 1", listOf("SafeWebView.kt", "SafeWebView.kt"), calls)
+        val src = code(sources.single { it.name == "SafeWebView.kt" })
+        val confirm = Regex("""fun confirmExternal\((.*?)\n    }""", RegexOption.DOT_MATCHES_ALL).find(src)!!.groupValues[1]
+        assertTrue("확인 창 밖에서 외부 앱 실행", "setPositiveButton" in confirm && "openExternal(" in confirm)
+        assertEquals("startActivity 는 외부 실행·브라우저 열기 두 곳", 2, Regex(Regex.escape("startActivity(")).findAll(src).count())
+    }
+
+    @Test
     fun `TC#56 loadUrl 은 래퍼 한 곳에서 주소 입력 분류 뒤에만 부른다`() {
         assertEquals(listOf("SafeWebView.kt"), occurrences(".loadUrl("))
         val src = code(sources.single { it.name == "SafeWebView.kt" })

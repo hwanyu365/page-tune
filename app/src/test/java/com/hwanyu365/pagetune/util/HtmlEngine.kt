@@ -17,6 +17,7 @@ class HtmlEngine(html: String) : AutoCloseable {
         val url = URL("http://fixture.test/")
         client.webConnection = MockWebConnection().apply {
             setResponse(url, html, 200, "OK", "text/html", StandardCharsets.UTF_8, emptyList())
+            setDefaultResponse("<html></html>")
         }
         page = client.getPage(url)
         eval(

@@ -35,6 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import org.json.JSONTokener
 
 class WebBrowserActivity : AppCompatActivity() {
 
@@ -181,11 +182,11 @@ class WebBrowserActivity : AppCompatActivity() {
 
     private fun setupListeners() {
         binding.btnGnbPrev.setOnClickListener {
-            triggerClickAction(gnbPrevAction)
+            pressNavButton(gnbPrevAction)
         }
 
         binding.btnGnbNext.setOnClickListener {
-            triggerClickAction(gnbNextAction)
+            pressNavButton(gnbNextAction)
         }
 
         binding.btnLoadErrorRetry.setOnClickListener {
@@ -446,6 +447,15 @@ class WebBrowserActivity : AppCompatActivity() {
         if (action == null) return
         val script = JsScripts.getClickEventScript(action.targetSelector)
         binding.wvBrowser.evaluateJavascript(script, null)
+    }
+
+    private fun pressNavButton(action: PluginAction?) {
+        if (action == null) return
+        val script = JsScripts.getClickEventScript(action.targetSelector, captureNewWindow = true)
+        binding.wvBrowser.evaluateJavascript(script) { result ->
+            val url = runCatching { JSONTokener(result).nextValue() as? String }.getOrNull() ?: return@evaluateJavascript
+            webClient.openUserLink(binding.wvBrowser, url)
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")

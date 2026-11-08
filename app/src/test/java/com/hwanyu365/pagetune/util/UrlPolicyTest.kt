@@ -20,7 +20,7 @@ class UrlPolicyTest {
     private fun link(url: String, mainFrame: Boolean = true, gesture: Boolean = true, redirect: Boolean = false) =
         UrlPolicy.classifyLink(url, mainFrame, gesture, redirect, appId)
 
-    private fun view(url: String, confirm: Boolean = false) = External(ExternalTarget.View(url), confirm)
+    private fun view(url: String) = External(ExternalTarget.View(url))
 
     @Test
     fun `TC#45 L1 scheme 을 구할 수 없으면 막는다`() {
@@ -47,37 +47,39 @@ class UrlPolicyTest {
         for (url in listOf("mailto:a@b", "intent://x#Intent;scheme=https;end")) {
             assertEquals(url, Block, link(url, mainFrame = false))
             assertEquals(url, Block, link(url, mainFrame = false, redirect = true))
+            assertEquals(url, Block, link(url, mainFrame = false, gesture = false, redirect = true))
         }
     }
 
     @Test
-    fun `TC#45 L6 제스처 없는 외부 scheme 은 리다이렉트 여부와 무관하게 막는다`() {
-        for (url in listOf("mailto:a@b", "intent://x#Intent;scheme=https;end")) {
-            assertEquals(url, Block, link(url, gesture = false))
-            assertEquals(url, Block, link(url, gesture = false, redirect = true))
+    fun `TC#45 L6 사용자 조작도 리다이렉트도 없는 외부 scheme 은 막는다`() {
+        for (url in listOf("mailto:a@b", "market://details?id=x", "intent://x#Intent;scheme=https;end")) {
+            assertEquals(url, Block, link(url, gesture = false, redirect = false))
         }
     }
 
     @Test
-    fun `TC#45 L7 제스처 있는 리다이렉트 도달 주소는 같은 대상을 확인 후 연다`() {
-        for (url in listOf("mailto:a@b", "market://details?id=x")) assertEquals(url, view(url, confirm = true), link(url, redirect = true))
-        assertEquals(
-            External(ExternalTarget.IntentTarget("https://x", null, null), confirm = true),
-            link("intent://x#Intent;scheme=https;end", redirect = true),
-        )
-        assertEquals(Block, link("intent://x#Intent;scheme=file;end", redirect = true))
+    fun `TC#45 L7 사용자 조작이나 리다이렉트로 온 외부 scheme 은 같은 대상을 확인 후 연다`() {
+        for (url in listOf("mailto:a@b", "market://details?id=x")) {
+            assertEquals(url, view(url), link(url, gesture = true, redirect = false))
+            assertEquals(url, view(url), link(url, gesture = false, redirect = true))
+            assertEquals(url, view(url), link(url, gesture = true, redirect = true))
+        }
+        val intent = External(ExternalTarget.IntentTarget("https://x", null, null))
+        assertEquals(intent, link("intent://x#Intent;scheme=https;end", gesture = false, redirect = true))
+        assertEquals(Block, link("intent://x#Intent;scheme=file;end", gesture = false, redirect = true))
     }
 
     @Test
     fun `TC#45 L8 intent 주소는 intent 구성 결과를 쓴다`() {
-        assertEquals(External(ExternalTarget.IntentTarget("https://x", "com.x", null), false), link("intent://x#Intent;scheme=https;package=com.x;end"))
-        assertEquals(External(ExternalTarget.IntentTarget("https://x", null, null), false), link("intent:x#Intent;scheme=https;end"))
-        assertEquals(External(ExternalTarget.IntentTarget("https://x", null, null), false), link("INTENT://x#Intent;scheme=https;end"))
+        assertEquals(External(ExternalTarget.IntentTarget("https://x", "com.x", null)), link("intent://x#Intent;scheme=https;package=com.x;end"))
+        assertEquals(External(ExternalTarget.IntentTarget("https://x", null, null)), link("intent:x#Intent;scheme=https;end"))
+        assertEquals(External(ExternalTarget.IntentTarget("https://x", null, null)), link("INTENT://x#Intent;scheme=https;end"))
         assertEquals(Block, link("intent://x#Intent;scheme=https"))
     }
 
     @Test
-    fun `TC#45 L9 그 밖 scheme 은 확인 없이 외부 앱 보기로 넘긴다`() {
+    fun `TC#45 L9 그 밖 scheme 은 외부 앱 보기로 넘긴다`() {
         for (url in listOf("mailto:a@b", "tel:1", "market://details?id=x", "myapp://x")) assertEquals(url, view(url), link(url))
     }
 

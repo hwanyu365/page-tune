@@ -173,7 +173,7 @@ object JsScripts {
     """.trimIndent()
 
     /** 요소 정보로 찾은 첫 요소를 클릭한다. 단계마다 찾지 못하면 다음 단계로 넘어간다. */
-    fun getClickEventScript(detailsJson: String): String {
+    fun getClickEventScript(detailsJson: String, captureNewWindow: Boolean = false): String {
         return """
             (function() {
                 $ELEMENT_MATCH_JS
@@ -213,15 +213,30 @@ object JsScripts {
                 try {
                     var info = JSON.parse(${jsString(detailsJson)});
                     var target = findElement(info);
-                    if (target) {
-                        target.click();
-                        console.log("WebPlugin: Click event triggered on " + (info.id || info.textContent || info.selector));
-                    } else {
+                    if (!target) {
                         console.error("WebPlugin: Target element not found for click.");
+                        return null;
                     }
+                    if ($captureNewWindow) {
+                        var link = target.closest ? target.closest('a[href]') : null;
+                        var base = document.querySelector('base[target]');
+                        var frame = link ? (link.getAttribute('target') || (base ? base.getAttribute('target') : '')) : '';
+                        if (link && frame && ['_self', '_top', '_parent'].indexOf(frame.toLowerCase()) === -1) return link.href;
+                        var opened = null;
+                        var open = window.open;
+                        window.open = function(url) { opened = url == null ? '' : String(url); return null; };
+                        try { target.click(); } finally { window.open = open; }
+                        if (opened === null) return null;
+                        var resolver = document.createElement('a');
+                        resolver.href = opened;
+                        return resolver.href;
+                    }
+                    target.click();
+                    console.log("WebPlugin: Click event triggered on " + (info.id || info.textContent || info.selector));
                 } catch (e) {
                     console.error("WebPlugin: click rule failed", e);
                 }
+                return null;
             })();
         """.trimIndent()
     }

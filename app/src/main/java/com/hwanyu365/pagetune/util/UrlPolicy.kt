@@ -13,7 +13,7 @@ sealed interface ExternalTarget {
 sealed interface LinkDecision {
     data object InWebView : LinkDecision
     data object Block : LinkDecision
-    data class External(val target: ExternalTarget, val confirm: Boolean) : LinkDecision
+    data class External(val target: ExternalTarget) : LinkDecision
 }
 
 object UrlPolicy {
@@ -32,9 +32,9 @@ object UrlPolicy {
         val lower = url.trim().lowercase()
         if (lower == "about:blank" || lower == "about:srcdoc") return LinkDecision.InWebView
         if (scheme in BLOCKED) return LinkDecision.Block
-        if (!isMainFrame || !hasGesture) return LinkDecision.Block
+        if (!isMainFrame || (!hasGesture && !isRedirect)) return LinkDecision.Block
         val target = if (scheme == "intent") parseIntent(url, appId) ?: return LinkDecision.Block else ExternalTarget.View(url)
-        return LinkDecision.External(target, confirm = isRedirect)
+        return LinkDecision.External(target)
     }
 
     fun parseIntent(url: String, appId: String): ExternalTarget.IntentTarget? {

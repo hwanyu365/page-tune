@@ -481,19 +481,6 @@ object JsScripts {
      * 로드 직후엔 본문이 아직 짧아 scrollTo 가 문서 끝에서 잘린다. 목표에 닿을 때까지 짧게 재시도한다.
      * 사용자가 화면을 만지면 멈춘다. 재시도가 사용자의 스크롤을 계속 되돌리면 페이지를 쓸 수 없다.
      */
-    /** 페이지 끝에 빈 공간을 둬 맨 아래의 폭 전체 버튼이 마지막 내용을 가리지 않게 한다. 넓은 뷰포트 페이지는 CSS px 가 dp 와 달라 화면 폭 비율로 바꾼다. */
-    fun getBottomSpaceScript(heightDp: Int, viewWidthDp: Float): String = """
-        (function() {
-            var s = document.getElementById('pagetune-bottom-space');
-            if (!s) {
-                s = document.createElement('style');
-                s.id = 'pagetune-bottom-space';
-                (document.head || document.documentElement).appendChild(s);
-            }
-            s.textContent = 'html::after{content:"";display:block;height:' + ($heightDp * window.innerWidth / $viewWidthDp) + 'px}';
-        })();
-    """.trimIndent()
-
     fun getScrollScript(y: Int): String {
         return """
             (function() {

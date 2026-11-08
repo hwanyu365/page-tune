@@ -73,7 +73,7 @@ class NavButtonsAutoHideTest {
     @Test
     fun `TC#62 2단 버튼 영역 높이는 버튼 수로 정해진다`() {
         assertEquals(0, NavButtonsAutoHide.stackHeightDp(0))
-        assertEquals(72, NavButtonsAutoHide.stackHeightDp(1))
-        assertEquals(136, NavButtonsAutoHide.stackHeightDp(2))
+        assertEquals(56, NavButtonsAutoHide.stackHeightDp(1))
+        assertEquals(112, NavButtonsAutoHide.stackHeightDp(2))
     }
 }

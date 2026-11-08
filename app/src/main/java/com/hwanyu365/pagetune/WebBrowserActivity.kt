@@ -136,7 +136,6 @@ class WebBrowserActivity : AppCompatActivity() {
                     applyColorActions()
                     applyHiddenActions()
                     applyScrollAction()
-                    applyBottomSpace()
                 }
             }
 
@@ -168,12 +167,10 @@ class WebBrowserActivity : AppCompatActivity() {
         }
         binding.wvBrowser.webViewClient = webClient
         binding.wvBrowser.installSafeDownloads(this, binding.root)
-        binding.wvBrowser.setOnScrollChangeListener { v, _, scrollY, _, oldScrollY ->
-            val density = resources.displayMetrics.density
-            @Suppress("DEPRECATION")
-            val remainingPx = binding.wvBrowser.contentHeight * binding.wvBrowser.scale - (scrollY + v.height)
-            navState = NavButtonsAutoHide.onScroll(navState, (scrollY - oldScrollY) / density, remainingPx / density)
-            refreshNavButtons()
+        binding.wvBrowser.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY -> onBrowserScroll(scrollY - oldScrollY) }
+        // 회전해도 화면을 다시 만들지 않고(configChanges) 스크롤 이벤트도 오지 않는다 → 크기가 바뀌면 맨 아래 여부를 다시 판정한다.
+        binding.wvBrowser.addOnLayoutChangeListener { v, l, t, r, b, ol, ot, or, ob ->
+            if (r - l != or - ol || b - t != ob - ot) v.post { onBrowserScroll(0) }
         }
 
         binding.wvBrowser.webChromeClient = object : WebChromeClient() {
@@ -268,18 +265,22 @@ class WebBrowserActivity : AppCompatActivity() {
         refreshTuneUi()
     }
 
+    private fun onBrowserScroll(dyPx: Int) {
+        val wv = binding.wvBrowser
+        val density = resources.displayMetrics.density
+        @Suppress("DEPRECATION")
+        val remainingPx = wv.contentHeight * wv.scale - (wv.scrollY + wv.height)
+        navState = NavButtonsAutoHide.onScroll(navState, dyPx / density, remainingPx / density)
+        refreshNavButtons()
+    }
+
     private fun navButtonCount() = listOfNotNull(gnbPrevAction, gnbNextAction).size
 
     private fun refreshNavButtons() {
         val active = tuneEnabled && loadError == null
         val stacked = active && navState.atEnd && navButtonCount() > 0
-        fun visibility(action: PluginAction?) = when {
-            action == null || !active || stacked -> View.GONE
-            navState.visible -> View.VISIBLE
-            else -> View.INVISIBLE
-        }
-        binding.btnGnbPrev.visibility = visibility(gnbPrevAction)
-        binding.btnGnbNext.visibility = visibility(gnbNextAction)
+        binding.btnGnbPrev.visibility = View.GONE
+        binding.btnGnbNext.visibility = View.GONE
         binding.layoutGnbStack.visibility = if (stacked) View.VISIBLE else View.GONE
         binding.btnStackPrev.visibility = if (gnbPrevAction != null) View.VISIBLE else View.GONE
         binding.btnStackNext.visibility = if (gnbNextAction != null) View.VISIBLE else View.GONE
@@ -287,12 +288,6 @@ class WebBrowserActivity : AppCompatActivity() {
             if (stacked) -NavButtonsAutoHide.stackHeightDp(navButtonCount()) * resources.displayMetrics.density else 0f
     }
 
-    private fun applyBottomSpace() {
-        val count = navButtonCount()
-        val widthDp = binding.wvBrowser.width / resources.displayMetrics.density
-        if (count == 0 || widthDp <= 0f) return
-        binding.wvBrowser.evaluateJavascript(JsScripts.getBottomSpaceScript(NavButtonsAutoHide.stackHeightDp(count), widthDp), null)
-    }
 
     private fun refreshTuneUi() {
         refreshNavButtons()

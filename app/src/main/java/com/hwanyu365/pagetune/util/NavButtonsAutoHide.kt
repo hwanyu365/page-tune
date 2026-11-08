@@ -24,6 +24,6 @@ object NavButtonsAutoHide {
         }
     }
 
-    /** 맨 아래의 폭 전체 버튼 영역: 아래 여백 16 + 버튼 56 씩 + 버튼 사이 8. 레이아웃 값과 같아야 페이지 끝 여백이 버튼에 맞는다. */
-    fun stackHeightDp(buttons: Int): Int = if (buttons == 0) 0 else 16 + buttons * 56 + (buttons - 1) * 8
+    /** 맨 아래의 폭 전체 버튼 영역 높이. 레이아웃의 버튼 높이와 같아야 아래 당기기 안내가 버튼 위에 놓인다. */
+    fun stackHeightDp(buttons: Int): Int = buttons * 56
 }

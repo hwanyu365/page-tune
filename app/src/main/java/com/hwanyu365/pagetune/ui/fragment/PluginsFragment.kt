@@ -1,12 +1,12 @@
 package com.hwanyu365.pagetune.ui.fragment
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hwanyu365.pagetune.PluginEditActivity
 import com.hwanyu365.pagetune.R
 import com.hwanyu365.pagetune.db.AppDatabase
@@ -18,7 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class PluginsFragment : Fragment() {
+class PluginsFragment : Fragment(), TabPage {
 
     private lateinit var binding: FragmentPluginsBinding
     private lateinit var db: AppDatabase
@@ -76,7 +76,7 @@ class PluginsFragment : Fragment() {
                 Toast.makeText(requireContext(), R.string.list_none_selected, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            AlertDialog.Builder(requireContext())
+            MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.tune_delete_title)
                 .setMessage(resources.getQuantityString(R.plurals.tune_delete_message, selectedIds.size, selectedIds.size))
                 .setPositiveButton(R.string.delete) { _, _ ->
@@ -142,6 +142,10 @@ class PluginsFragment : Fragment() {
             return true
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onTabLeft() {
+        if (this::adapter.isInitialized && adapter.isDeleteMode) exitDeleteMode()
     }
 
     private fun enterDeleteMode() {

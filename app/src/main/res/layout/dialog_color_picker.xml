@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -16,8 +15,7 @@
         <View
             android:id="@+id/v_color_preview"
             android:layout_width="56dp"
-            android:layout_height="40dp"
-            android:background="@color/colorPrimary" />
+            android:layout_height="40dp" />
 
         <TextView
             android:id="@+id/tv_color_hex"
@@ -25,10 +23,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="12dp"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/colorTextPrimary"
-            tools:text="#000000" />
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="@color/onSurface" />
 
     </LinearLayout>
 
@@ -36,8 +32,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/color_channel_r"
-        android:textSize="12sp"
-        android:textColor="@color/colorTextSecondary" />
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="@color/onSurfaceVariant" />
 
     <SeekBar
         android:id="@+id/sb_red"
@@ -49,8 +45,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/color_channel_g"
-        android:textSize="12sp"
-        android:textColor="@color/colorTextSecondary" />
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="@color/onSurfaceVariant" />
 
     <SeekBar
         android:id="@+id/sb_green"
@@ -62,8 +58,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/color_channel_b"
-        android:textSize="12sp"
-        android:textColor="@color/colorTextSecondary" />
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="@color/onSurfaceVariant" />
 
     <SeekBar
         android:id="@+id/sb_blue"

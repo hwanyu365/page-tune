@@ -31,7 +31,7 @@ class ResourceRulesTest {
     fun `TC#22 브랜드 색 위 글자색은 171717 이다`() {
         val colors = File(res, "values/colors.xml").readText()
 
-        assertTrue(Regex("""name="colorOnAccent">#171717<""").containsMatchIn(colors))
-        assertTrue(Regex("""name="colorAccentLight">#ff7347<""").containsMatchIn(colors))
+        assertTrue(Regex("""name="onPrimary">#171717<""").containsMatchIn(colors))
+        assertTrue(Regex("""name="brandOnSurface">#ff7347<""").containsMatchIn(colors))
     }
 }

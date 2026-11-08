@@ -2,7 +2,6 @@ package com.hwanyu365.pagetune
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
@@ -15,12 +14,12 @@ import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hwanyu365.pagetune.db.AppDatabase
 import com.hwanyu365.pagetune.db.Plugin
 import com.hwanyu365.pagetune.db.PluginAction
@@ -135,8 +134,9 @@ class PluginEditActivity : AppCompatActivity() {
             }
         }
 
-        binding.btnToggleInspect.setOnCheckedChangeListener { _, isChecked ->
+        binding.btnToggleInspect.addOnCheckedChangeListener { button, isChecked ->
             isInspectMode = isChecked
+            button.setText(if (isChecked) R.string.edit_pick_on else R.string.edit_pick_off)
             if (isChecked) {
                 binding.tvInspectorStatus.visibility = View.VISIBLE
                 binding.wvInspector.evaluateJavascript("if (typeof window.webPluginInspectEnabled !== 'undefined') { window.webPluginInspectEnabled = true; 'enabled'; } else { 'inject'; }") { result ->
@@ -213,7 +213,7 @@ class PluginEditActivity : AppCompatActivity() {
             finish()
             return
         }
-        AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this)
             .setTitle(R.string.edit_leave_title)
             .setMessage(R.string.edit_leave_message)
             .setPositiveButton(R.string.edit_leave_discard) { _, _ -> finish() }
@@ -465,8 +465,8 @@ class PluginEditActivity : AppCompatActivity() {
         if (tempActions.isEmpty()) {
             val emptyTv = TextView(this).apply {
                 setText(R.string.edit_rules_empty)
-                textSize = 12f
-                setTextColor(androidx.core.content.ContextCompat.getColor(this@PluginEditActivity, R.color.colorTextSecondary))
+                setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
+                setTextColor(androidx.core.content.ContextCompat.getColor(this@PluginEditActivity, R.color.onSurfaceVariant))
             }
             binding.layoutActionsList.addView(emptyTv)
             return
@@ -476,9 +476,11 @@ class PluginEditActivity : AppCompatActivity() {
             val view = layoutInflater.inflate(android.R.layout.simple_list_item_2, null)
             val text1 = view.findViewById<TextView>(android.R.id.text1)
             val text2 = view.findViewById<TextView>(android.R.id.text2)
+            text1.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
+            text2.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
 
-            val textColorPrimary = androidx.core.content.ContextCompat.getColor(this, R.color.colorTextPrimary)
-            val textColorSecondary = androidx.core.content.ContextCompat.getColor(this, R.color.colorTextSecondary)
+            val textColorPrimary = androidx.core.content.ContextCompat.getColor(this, R.color.onSurface)
+            val textColorSecondary = androidx.core.content.ContextCompat.getColor(this, R.color.onSurfaceVariant)
 
             try {
                 val json = JSONObject(action.targetSelector)
@@ -497,7 +499,6 @@ class PluginEditActivity : AppCompatActivity() {
                     else -> selector
                 }
                 text2.setTextColor(textColorSecondary)
-                text2.textSize = 11f
             } catch (e: Exception) {
                 text1.text = getString(R.string.edit_rule_title, index + 1, action.actionType)
                 text1.setTextColor(textColorPrimary)

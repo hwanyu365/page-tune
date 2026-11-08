@@ -14,6 +14,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -30,6 +31,9 @@ import com.hwanyu365.pagetune.util.SafeWebViewClient
 import com.hwanyu365.pagetune.util.installSafeDownloads
 import com.hwanyu365.pagetune.util.TuneRuleCounts
 import com.hwanyu365.pagetune.util.padForInsets
+import com.hwanyu365.pagetune.util.PullNavigation
+import com.hwanyu365.pagetune.util.PullSide
+import com.hwanyu365.pagetune.util.PullState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -50,6 +54,8 @@ class WebBrowserActivity : AppCompatActivity() {
     private var loadError: LoadErrorKind? = null
     private var failedUrl: String? = null
     private var navState = NavButtonsState()
+    private var pullState = PullState()
+    private var pullNavigation = false
     private val mHitRect = Rect()
     private var originalUrlHost: String? = null
 
@@ -251,6 +257,7 @@ class WebBrowserActivity : AppCompatActivity() {
         }
         pluginId = pluginWithActions?.plugin?.id
         hasTune = pluginWithActions != null
+        pullNavigation = pluginWithActions?.plugin?.pullNavigation == true
         classifyActions(pluginWithActions?.actions.orEmpty())
         ruleCounts = TuneRuleCounts.of(pluginWithActions?.actions.orEmpty())
         setupGestureControls()
@@ -443,6 +450,46 @@ class WebBrowserActivity : AppCompatActivity() {
         binding.wvBrowser.evaluateJavascript(script, null)
     }
 
+    private fun onPullTouch(e: MotionEvent) {
+        val density = resources.displayMetrics.density
+        val x = e.x / density
+        val y = e.y / density
+        when (e.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                val active = pullNavigation && tuneEnabled && loadError == null
+                pullState = PullNavigation.onDown(
+                    x, y,
+                    atTop = !binding.wvBrowser.canScrollVertically(-1),
+                    atBottom = !binding.wvBrowser.canScrollVertically(1),
+                    prevEnabled = active && gnbPrevAction != null,
+                    nextEnabled = active && gnbNextAction != null,
+                )
+            }
+            MotionEvent.ACTION_POINTER_DOWN -> pullState = PullNavigation.onSecondPointer(pullState)
+            MotionEvent.ACTION_MOVE -> pullState = PullNavigation.onMove(pullState, x, y)
+            MotionEvent.ACTION_UP -> {
+                when (PullNavigation.onUp(pullState)) {
+                    PullSide.PREV -> triggerClickAction(gnbPrevAction)
+                    PullSide.NEXT -> triggerClickAction(gnbNextAction)
+                    null -> Unit
+                }
+                pullState = PullNavigation.onCancel()
+            }
+            MotionEvent.ACTION_CANCEL -> pullState = PullNavigation.onCancel()
+        }
+        refreshPullIndicator()
+    }
+
+    private fun refreshPullIndicator() {
+        fun show(view: TextView, side: PullSide, pull: Int, release: Int) {
+            val visible = pullState.showing && pullState.side == side
+            view.visibility = if (visible) View.VISIBLE else View.GONE
+            if (visible) view.setText(if (pullState.ready) release else pull)
+        }
+        show(binding.tvPullPrev, PullSide.PREV, R.string.browser_pull_prev, R.string.browser_release_prev)
+        show(binding.tvPullNext, PullSide.NEXT, R.string.browser_pull_next, R.string.browser_release_next)
+    }
+
     private fun triggerClickAction(action: PluginAction?) {
         if (action == null) return
         val script = JsScripts.getClickEventScript(action.targetSelector)
@@ -457,6 +504,7 @@ class WebBrowserActivity : AppCompatActivity() {
         val hasGesture = (gestureTopAction != null || gestureBottomAction != null)
         binding.wvBrowser.setOnTouchListener { _, motionEvent ->
             if (motionEvent.actionMasked == MotionEvent.ACTION_DOWN) navState = NavButtonsAutoHide.onTouch(navState)
+            onPullTouch(motionEvent)
             mGestureDetector?.onTouchEvent(motionEvent) ?: false
         }
         if (!hasGesture) {

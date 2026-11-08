@@ -1,6 +1,7 @@
 package com.hwanyu365.pagetune.db
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -9,8 +10,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [Plugin::class, PluginAction::class, WebPage::class],
-    version = 3,
-    exportSchema = true
+    version = 4,
+    exportSchema = true,
+    autoMigrations = [AutoMigration(from = 3, to = 4)],
 )
 abstract class AppDatabase : RoomDatabase() {
 

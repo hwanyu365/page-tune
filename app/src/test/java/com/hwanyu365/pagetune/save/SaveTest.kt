@@ -26,8 +26,9 @@ private class FakeStore(private val failOn: String? = null) : TuneStore {
                 if (op.substringBefore(":") == failOn) throw IllegalStateException(op)
                 pending += op
             }
-            override suspend fun insertTune(name: String, testUrl: String): Long { write("insert:$name,$testUrl"); return 7 }
-            override suspend fun updateTune(id: Long, name: String, testUrl: String) = write("update:$id,$name,$testUrl")
+            override suspend fun insertTune(name: String, testUrl: String, pullNavigation: Boolean): Long { write("insert:$name,$testUrl" + pull(pullNavigation)); return 7 }
+            override suspend fun updateTune(id: Long, name: String, testUrl: String, pullNavigation: Boolean) = write("update:$id,$name,$testUrl" + pull(pullNavigation))
+            private fun pull(on: Boolean) = if (on) ",pull" else ""
             override suspend fun replaceRules(pluginId: Long, rules: List<PluginAction>) = write("rules:$pluginId,${rules.map { it.targetSelector }}")
             override suspend fun linkWebPage(webPageId: Long, pluginId: Long) = write("link:$webPageId,$pluginId")
             fun close() { open = false }
@@ -123,5 +124,15 @@ class SaveTest {
         } catch (e: IllegalStateException) {
         }
         assertEquals(emptyList<String>(), store.committed)
+    }
+
+    @Test
+    fun `TC#60 끝에서 당겨 이동 값은 새 Tune 과 기존 Tune 저장에 그대로 전달된다`() = runBlocking {
+        val store = FakeStore()
+
+        executeSave(planSave("n", "u", rules, null, null, pullNavigation = true)!!, store)
+        executeSave(planSave("n", "u", rules, 5, null, pullNavigation = true)!!, store)
+
+        assertEquals(listOf("insert:n,u,pull", "rules:7,[#b, #a]", "update:5,n,u,pull", "rules:5,[#b, #a]"), store.committed)
     }
 }

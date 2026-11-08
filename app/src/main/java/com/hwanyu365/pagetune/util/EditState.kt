@@ -5,13 +5,14 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /** 화면이 다시 만들어져도 저장하지 않은 편집과 변경 판정 기준을 잃지 않도록 인스턴스 상태에 넣는 값. */
-data class EditState(val name: String, val testUrl: String, val rules: List<PluginAction>, val initial: EditSnapshot, val pageUrl: String?) {
+data class EditState(val name: String, val testUrl: String, val rules: List<PluginAction>, val initial: EditSnapshot, val pageUrl: String?, val pullNavigation: Boolean = false) {
 
     fun encode(): String = JSONObject()
         .put("name", name)
         .put("testUrl", testUrl)
         .put("rules", rules.toJson())
-        .put("initial", JSONObject().put("name", initial.name).put("testUrl", initial.testUrl).put("rules", initial.rules.toJson()))
+        .put("pullNavigation", pullNavigation)
+        .put("initial", JSONObject().put("name", initial.name).put("testUrl", initial.testUrl).put("rules", initial.rules.toJson()).put("pullNavigation", initial.pullNavigation))
         .apply { pageUrl?.let { put("pageUrl", it) } }
         .toString()
 
@@ -32,8 +33,9 @@ data class EditState(val name: String, val testUrl: String, val rules: List<Plug
                 name = o.getString("name"),
                 testUrl = o.getString("testUrl"),
                 rules = o.getJSONArray("rules").toRules(),
-                initial = EditSnapshot(i.getString("name"), i.getString("testUrl"), i.getJSONArray("rules").toRules()),
+                initial = EditSnapshot(i.getString("name"), i.getString("testUrl"), i.getJSONArray("rules").toRules(), i.optBoolean("pullNavigation")),
                 pageUrl = o.optStringOrNull("pageUrl"),
+                pullNavigation = o.optBoolean("pullNavigation"),
             )
         }.getOrNull()
 

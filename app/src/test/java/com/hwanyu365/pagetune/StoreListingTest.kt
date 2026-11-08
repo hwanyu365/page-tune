@@ -44,6 +44,15 @@ class StoreListingTest {
         assertFalse(Regex("""[\w.+-]+@[\w-]+\.[\w.]+""").containsMatchIn(text))
     }
 
+    private fun section(text: String, heading: String) = text.substringAfter("## $heading\n").substringBefore("\n## ")
+
+    @Test
+    fun `TC#38 개인정보 처리방침의 기기 저장 절에 마지막으로 본 버전 설정값이 있다`() {
+        val text = File("../docs/privacy.md").readText()
+        assertTrue("마지막으로 본 앱 버전" in section(text, "기기에 저장하는 정보"))
+        assertTrue("last app version you saw" in section(text, "Information stored on your device"))
+    }
+
     @Test
     fun `TC#13 매니페스트의 권한·백업 설정이 방침 서술과 맞는다`() {
         val manifest = File("src/main/AndroidManifest.xml").readText()

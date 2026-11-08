@@ -2,8 +2,11 @@ package com.hwanyu365.pagetune.ui.fragment
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.*
+import android.widget.PopupMenu
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -12,7 +15,15 @@ import com.hwanyu365.pagetune.R
 import com.hwanyu365.pagetune.db.AppDatabase
 import com.hwanyu365.pagetune.databinding.FragmentPluginsBinding
 import com.hwanyu365.pagetune.db.Plugin
+import com.hwanyu365.pagetune.save.RestoreConflictException
+import com.hwanyu365.pagetune.save.RoomListStore
+import com.hwanyu365.pagetune.save.deleteTunesWithSnapshot
+import com.hwanyu365.pagetune.save.planTuneRestore
+import com.hwanyu365.pagetune.save.restoreTunes
+import com.hwanyu365.pagetune.ui.SelectionMode
+import com.hwanyu365.pagetune.ui.UndoSnackbar
 import com.hwanyu365.pagetune.ui.adapter.PluginAdapter
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,6 +35,8 @@ class PluginsFragment : Fragment(), TabPage {
     private lateinit var db: AppDatabase
     private lateinit var adapter: PluginAdapter
     private val mainScope = CoroutineScope(Dispatchers.Main)
+    private lateinit var selectionMode: SelectionMode
+    private val undo = UndoSnackbar()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,16 +55,20 @@ class PluginsFragment : Fragment(), TabPage {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = PluginAdapter(
-            onEditClick = { plugin ->
-                val intent = Intent(requireContext(), PluginEditActivity::class.java).apply {
-                    putExtra("plugin_id", plugin.id)
-                }
-                startActivity(intent)
-            },
-            onCopyClick = { plugin ->
-                duplicatePlugin(plugin)
+        selectionMode = SelectionMode(requireActivity() as AppCompatActivity, object : SelectionMode.Listener {
+            override fun onSelectAll() = adapter.selectAll(true)
+            override fun onDeleteSelected() = confirmDelete(adapter.getSelectedIds())
+            override fun onSelectionModeEnded() {
+                adapter.setDeleteMode(false)
+                binding.fabAddPlugin.visibility = View.VISIBLE
             }
+        })
+
+        adapter = PluginAdapter(
+            onEditClick = { plugin -> openEditor(plugin) },
+            onMoreClick = { anchor, plugin -> showItemMenu(anchor, plugin) },
+            onLongPress = { plugin -> enterDeleteMode(plugin.id) },
+            onSelectionChanged = { selectionMode.update(it) }
         )
 
         binding.rvPlugins.layoutManager = LinearLayoutManager(requireContext())
@@ -66,42 +83,21 @@ class PluginsFragment : Fragment(), TabPage {
             startActivity(Intent(requireContext(), PluginEditActivity::class.java))
         }
 
-        binding.btnCancelDelete.setOnClickListener {
-            exitDeleteMode()
-        }
-
-        binding.btnConfirmDelete.setOnClickListener {
-            val selectedIds = adapter.getSelectedIds()
-            if (selectedIds.isEmpty()) {
-                Toast.makeText(requireContext(), R.string.list_none_selected, Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.tune_delete_title)
-                .setMessage(resources.getQuantityString(R.plurals.tune_delete_message, selectedIds.size, selectedIds.size))
-                .setPositiveButton(R.string.delete) { _, _ ->
-                    mainScope.launch {
-                        withContext(Dispatchers.IO) {
-                            db.pluginDao().deletePluginsByIds(selectedIds)
-                        }
-                        exitDeleteMode()
-                        loadPlugins()
-                    }
-                }
-                .setNegativeButton(R.string.cancel, null)
-                .show()
-        }
-
-        binding.chkSelectAll.setOnCheckedChangeListener { _, isChecked ->
-            adapter.selectAll(isChecked)
-        }
-
         loadPlugins()
     }
 
     override fun onResume() {
         super.onResume()
         loadPlugins()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        undo.close()
+    }
+
+    private fun openEditor(plugin: Plugin) {
+        startActivity(Intent(requireContext(), PluginEditActivity::class.java).putExtra("plugin_id", plugin.id))
     }
 
     /** Tune 을 액션까지 통째로 복제한다. 비슷한 사이트용 Tune 을 처음부터 다시 만들지 않기 위한 기능이다. */
@@ -138,28 +134,85 @@ class PluginsFragment : Fragment(), TabPage {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.action_delete_mode) {
-            enterDeleteMode()
+            enterDeleteMode(null)
             return true
         }
         return super.onOptionsItemSelected(item)
     }
 
     override fun onTabLeft() {
-        if (this::adapter.isInitialized && adapter.isDeleteMode) exitDeleteMode()
+        if (!this::adapter.isInitialized) return
+        selectionMode.finish()
+        undo.close()
     }
 
-    private fun enterDeleteMode() {
-        adapter.setDeleteMode(true)
-        binding.layoutHeader.visibility = View.VISIBLE
-        binding.layoutDeleteActions.visibility = View.VISIBLE
+    private fun showItemMenu(anchor: View, plugin: Plugin) {
+        PopupMenu(requireContext(), anchor).apply {
+            inflate(R.menu.menu_tune_item)
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.action_edit -> openEditor(plugin)
+                    R.id.action_duplicate -> duplicatePlugin(plugin)
+                    R.id.action_delete -> confirmDelete(listOf(plugin.id))
+                }
+                true
+            }
+        }.show()
+    }
+
+    private fun enterDeleteMode(selectedId: Long?) {
+        adapter.setDeleteMode(true, selectedId)
         binding.fabAddPlugin.visibility = View.GONE
-        binding.chkSelectAll.isChecked = false
+        selectionMode.start(adapter.getSelectedIds().size)
     }
 
-    private fun exitDeleteMode() {
-        adapter.setDeleteMode(false)
-        binding.layoutHeader.visibility = View.GONE
-        binding.layoutDeleteActions.visibility = View.GONE
-        binding.fabAddPlugin.visibility = View.VISIBLE
+    private fun confirmDelete(ids: List<Long>) {
+        if (ids.isEmpty()) {
+            Toast.makeText(requireContext(), R.string.list_none_selected, Toast.LENGTH_SHORT).show()
+            return
+        }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.tune_delete_title)
+            .setMessage(resources.getQuantityString(R.plurals.tune_delete_message, ids.size, ids.size))
+            .setPositiveButton(R.string.delete) { _, _ -> delete(ids) }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun delete(ids: List<Long>) {
+        val store = RoomListStore(db)
+        mainScope.launch {
+            val snapshot = try {
+                withContext(Dispatchers.IO) { deleteTunesWithSnapshot(ids, store) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "delete failed", e)
+                Toast.makeText(requireContext(), R.string.list_delete_failed, Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            selectionMode.finish()
+            loadPlugins()
+            val plan = planTuneRestore(snapshot) ?: return@launch
+            undo.show(binding.root, binding.fabAddPlugin, resources.getQuantityString(R.plurals.tune_deleted, plan.tunes.size, plan.tunes.size)) {
+                mainScope.launch {
+                    try {
+                        withContext(Dispatchers.IO) { restoreTunes(plan, store) }
+                    } catch (e: RestoreConflictException) {
+                        Toast.makeText(requireContext(), R.string.list_restore_failed, Toast.LENGTH_SHORT).show()
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.e(TAG, "restore failed", e)
+                        Toast.makeText(requireContext(), R.string.list_restore_failed, Toast.LENGTH_SHORT).show()
+                    }
+                    loadPlugins()
+                }
+            }
+        }
+    }
+
+    private companion object {
+        const val TAG = "PluginsFragment"
     }
 }

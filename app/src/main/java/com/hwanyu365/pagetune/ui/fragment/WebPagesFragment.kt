@@ -2,9 +2,12 @@ package com.hwanyu365.pagetune.ui.fragment
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.ArrayAdapter
+import android.widget.PopupMenu
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -16,7 +19,15 @@ import com.hwanyu365.pagetune.db.AppDatabase
 import com.hwanyu365.pagetune.db.Plugin
 import com.hwanyu365.pagetune.db.WebPage
 import com.hwanyu365.pagetune.db.WebPageWithPlugin
+import com.hwanyu365.pagetune.save.RestoreConflictException
+import com.hwanyu365.pagetune.save.RoomListStore
+import com.hwanyu365.pagetune.save.deleteWebPagesWithSnapshot
+import com.hwanyu365.pagetune.save.planWebPageRestore
+import com.hwanyu365.pagetune.save.restoreWebPages
+import com.hwanyu365.pagetune.ui.SelectionMode
+import com.hwanyu365.pagetune.ui.UndoSnackbar
 import com.hwanyu365.pagetune.ui.adapter.WebPageAdapter
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,6 +39,8 @@ class WebPagesFragment : Fragment(), TabPage {
     private lateinit var db: AppDatabase
     private lateinit var adapter: WebPageAdapter
     private val mainScope = CoroutineScope(Dispatchers.Main)
+    private lateinit var selectionMode: SelectionMode
+    private val undo = UndoSnackbar()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,17 +59,25 @@ class WebPagesFragment : Fragment(), TabPage {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        selectionMode = SelectionMode(requireActivity() as AppCompatActivity, object : SelectionMode.Listener {
+            override fun onSelectAll() = adapter.selectAll(true)
+            override fun onDeleteSelected() = confirmDelete(adapter.getSelectedIds())
+            override fun onSelectionModeEnded() {
+                adapter.setDeleteMode(false)
+                binding.fabAddWebpage.visibility = View.VISIBLE
+            }
+        })
+
         adapter = WebPageAdapter(
             onItemClick = { webpageWithPlugin ->
-                // Open WebBrowserActivity
                 val intent = Intent(requireContext(), WebBrowserActivity::class.java).apply {
                     putExtra("webpage_id", webpageWithPlugin.webPage.id)
                 }
                 startActivity(intent)
             },
-            onEditClick = { webpageWithPlugin ->
-                showWebPageEditDialog(webpageWithPlugin.webPage)
-            }
+            onMoreClick = { anchor, item -> showItemMenu(anchor, item.webPage) },
+            onLongPress = { item -> enterDeleteMode(item.webPage.id) },
+            onSelectionChanged = { selectionMode.update(it) }
         )
 
         binding.rvWebpages.layoutManager = LinearLayoutManager(requireContext())
@@ -70,42 +91,17 @@ class WebPagesFragment : Fragment(), TabPage {
             showWebPageEditDialog(null)
         }
 
-        binding.btnCancelDelete.setOnClickListener {
-            exitDeleteMode()
-        }
-
-        binding.btnConfirmDelete.setOnClickListener {
-            val selectedIds = adapter.getSelectedIds()
-            if (selectedIds.isEmpty()) {
-                Toast.makeText(requireContext(), R.string.list_none_selected, Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.webpage_delete_title)
-                .setMessage(resources.getQuantityString(R.plurals.webpage_delete_message, selectedIds.size, selectedIds.size))
-                .setPositiveButton(R.string.delete) { _, _ ->
-                    mainScope.launch {
-                        withContext(Dispatchers.IO) {
-                            db.webPageDao().deleteWebPagesByIds(selectedIds)
-                        }
-                        exitDeleteMode()
-                        loadWebPages()
-                    }
-                }
-                .setNegativeButton(R.string.cancel, null)
-                .show()
-        }
-
-        binding.chkSelectAll.setOnCheckedChangeListener { _, isChecked ->
-            adapter.selectAll(isChecked)
-        }
-
         loadWebPages()
     }
 
     override fun onResume() {
         super.onResume()
         loadWebPages()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        undo.close()
     }
 
     private fun loadWebPages() {
@@ -126,29 +122,81 @@ class WebPagesFragment : Fragment(), TabPage {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.action_delete_mode) {
-            enterDeleteMode()
+            enterDeleteMode(null)
             return true
         }
         return super.onOptionsItemSelected(item)
     }
 
     override fun onTabLeft() {
-        if (this::adapter.isInitialized && adapter.isDeleteMode) exitDeleteMode()
+        if (!this::adapter.isInitialized) return
+        selectionMode.finish()
+        undo.close()
     }
 
-    private fun enterDeleteMode() {
-        adapter.setDeleteMode(true)
-        binding.layoutHeader.visibility = View.VISIBLE
-        binding.layoutDeleteActions.visibility = View.VISIBLE
+    private fun showItemMenu(anchor: View, webPage: WebPage) {
+        PopupMenu(requireContext(), anchor).apply {
+            inflate(R.menu.menu_webpage_item)
+            setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.action_edit -> showWebPageEditDialog(webPage)
+                    R.id.action_delete -> confirmDelete(listOf(webPage.id))
+                }
+                true
+            }
+        }.show()
+    }
+
+    private fun enterDeleteMode(selectedId: Long?) {
+        adapter.setDeleteMode(true, selectedId)
         binding.fabAddWebpage.visibility = View.GONE
-        binding.chkSelectAll.isChecked = false
+        selectionMode.start(adapter.getSelectedIds().size)
     }
 
-    private fun exitDeleteMode() {
-        adapter.setDeleteMode(false)
-        binding.layoutHeader.visibility = View.GONE
-        binding.layoutDeleteActions.visibility = View.GONE
-        binding.fabAddWebpage.visibility = View.VISIBLE
+    private fun confirmDelete(ids: List<Long>) {
+        if (ids.isEmpty()) {
+            Toast.makeText(requireContext(), R.string.list_none_selected, Toast.LENGTH_SHORT).show()
+            return
+        }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.webpage_delete_title)
+            .setMessage(resources.getQuantityString(R.plurals.webpage_delete_message, ids.size, ids.size))
+            .setPositiveButton(R.string.delete) { _, _ -> delete(ids) }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun delete(ids: List<Long>) {
+        val store = RoomListStore(db)
+        mainScope.launch {
+            val snapshot = try {
+                withContext(Dispatchers.IO) { deleteWebPagesWithSnapshot(ids, store) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "delete failed", e)
+                Toast.makeText(requireContext(), R.string.list_delete_failed, Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+            selectionMode.finish()
+            loadWebPages()
+            val plan = planWebPageRestore(snapshot) ?: return@launch
+            undo.show(binding.root, binding.fabAddWebpage, resources.getQuantityString(R.plurals.webpage_deleted, plan.size, plan.size)) {
+                mainScope.launch {
+                    try {
+                        withContext(Dispatchers.IO) { restoreWebPages(plan, store) }
+                    } catch (e: RestoreConflictException) {
+                        Toast.makeText(requireContext(), R.string.list_restore_failed, Toast.LENGTH_SHORT).show()
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.e(TAG, "restore failed", e)
+                        Toast.makeText(requireContext(), R.string.list_restore_failed, Toast.LENGTH_SHORT).show()
+                    }
+                    loadWebPages()
+                }
+            }
+        }
     }
 
     private fun showWebPageEditDialog(webPage: WebPage?) {
@@ -222,5 +270,9 @@ class WebPagesFragment : Fragment(), TabPage {
 
             dialog.show()
         }
+    }
+
+    private companion object {
+        const val TAG = "WebPagesFragment"
     }
 }

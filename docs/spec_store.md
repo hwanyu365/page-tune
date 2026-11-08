@@ -87,7 +87,7 @@
 | 항목 | 값 | 근거 |
 | --- | --- | --- |
 | 권한 | `INTERNET` 하나 | 매니페스트 |
-| 저장 | Room DB `web_plugin_database` — 웹페이지(제목·주소·연결된 Tune), Tune(이름·테스트 주소), 규칙 | `db/` |
+| 저장 | Room DB `web_plugin_database` — 웹페이지(제목·주소·연결된 Tune), Tune(이름·테스트 주소), 규칙. SharedPreferences — 마지막으로 본 versionCode 정수 하나 (`spec_page_view.md` FR#27, FR#34) | `db/`, 시작 안내·새 소식 판정 |
 | 웹 데이터 | WebView 의 쿠키·캐시·DOM 저장소는 Android WebView 가 기기에 보관한다 | `util/WebViewConfig.kt` |
 | 외부 전송 | 사용자가 연 페이지의 요청 외 없음. 분석·광고·크래시 SDK 가 의존성에 없다 | `app/build.gradle` dependencies |
 | 공유 | 빠른 메뉴의 주소 공유는 시스템 공유 시트로 사용자가 고른 앱에만 주소를 넘긴다 | `WebBrowserActivity` |

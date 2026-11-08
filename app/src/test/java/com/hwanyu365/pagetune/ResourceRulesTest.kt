@@ -34,4 +34,18 @@ class ResourceRulesTest {
         assertTrue(Regex("""name="onPrimary">#171717<""").containsMatchIn(colors))
         assertTrue(Regex("""name="brandOnSurface">#ff7347<""").containsMatchIn(colors))
     }
+
+    @Test
+    fun `TC#52 새 소식 목록은 오름차순·중복 없음이고 항목마다 두 언어 문구가 있다`() {
+        val codes = com.hwanyu365.pagetune.ui.WHATS_NEW_NOTES.map { it.first }
+        assertEquals(codes.sorted().distinct(), codes)
+
+        val names = R.string::class.java.fields.associate { it.getInt(null) to it.name }
+        for ((code, id) in com.hwanyu365.pagetune.ui.WHATS_NEW_NOTES) {
+            assertEquals("whats_new_$code", names[id])
+            for (dir in listOf("values", "values-ko")) {
+                assertTrue("$dir 에 whats_new_$code 없음", Regex("""<string name="whats_new_$code">""").containsMatchIn(File(res, "$dir/strings.xml").readText()))
+            }
+        }
+    }
 }

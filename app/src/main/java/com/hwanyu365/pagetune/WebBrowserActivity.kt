@@ -53,6 +53,7 @@ class WebBrowserActivity : AppCompatActivity() {
     private var loadError: LoadErrorKind? = null
     private var failedUrl: String? = null
     private var atPageEnd = false
+    private var endChecksLeft = 0
     private var pullState = PullState()
     private val mHitRect = Rect()
     private var originalUrlHost: String? = null
@@ -123,6 +124,12 @@ class WebBrowserActivity : AppCompatActivity() {
         }
 
         webClient = object : SafeWebViewClient(this, { kind, url -> showLoadError(kind, url) }) {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                atPageEnd = false
+                refreshNavButtons()
+            }
+
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 // Cloudflare 통과 쿠키(cf_clearance)는 앱이 죽으면 날아간다. 페이지마다 디스크로 내려 재방문 시 챌린지를 건너뛴다.
@@ -131,7 +138,8 @@ class WebBrowserActivity : AppCompatActivity() {
                 if (loadError == null) binding.layoutLoadError.visibility = View.GONE
                 atPageEnd = false
                 refreshNavButtons()
-                // 스크롤할 수 없는 페이지는 스크롤 이벤트가 오지 않는다 → 로드 직후 한 번 판정해야 맨 아래 버튼이 나온다.
+                // 스크롤할 수 없는 페이지는 스크롤 이벤트가 오지 않는다 → 로드 직후 판정해야 맨 아래 버튼이 나온다.
+                endChecksLeft = END_CHECK_RETRIES
                 view?.post { onBrowserScroll() }
                 if (tuneEnabled) {
                     applyColorActions()
@@ -260,6 +268,8 @@ class WebBrowserActivity : AppCompatActivity() {
 
     private fun onBrowserScroll() {
         val wv = binding.wvBrowser
+        // 문서 높이가 0 인 동안은 판정할 수 없고, 높이가 생겨도 알려 주는 이벤트가 없다 → 로드 직후에 한해 잠시 뒤 다시 본다.
+        if (wv.contentHeight == 0 && endChecksLeft-- > 0) wv.postDelayed({ onBrowserScroll() }, END_CHECK_DELAY_MS)
         @Suppress("DEPRECATION")
         val remainingPx = wv.contentHeight * wv.scale - (wv.scrollY + wv.height)
         atPageEnd = PageEnd.reached(wv.contentHeight, remainingPx / resources.displayMetrics.density)
@@ -409,6 +419,8 @@ class WebBrowserActivity : AppCompatActivity() {
     private companion object {
         const val TOOLBAR_MILLIS = 4000
         const val STATUS_MILLIS = 3000L
+        const val END_CHECK_RETRIES = 10
+        const val END_CHECK_DELAY_MS = 200L
     }
 
     private fun classifyActions(actions: List<PluginAction>) {

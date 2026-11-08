@@ -485,7 +485,7 @@ CSS 계약 [GH-25]
 | `TC#19` | 규칙 판정: `id` 필드가 불안정 → 재선택 필요. `id` 필드가 안정이거나 비어 있음 → 아님 (셀렉터가 이스케이프된 `#안정id > …` 인 경우 포함) | [FR#19] | 단위 |
 | `TC#20` | `app/build.gradle` lint 설정에 두 검사가 error 로 지정돼 있고 `lintDebug` 가 통과. 레이아웃에 하드코딩 문자열 1개, `values` 에만 있는 문자열 1개를 각각 넣으면 `lintDebug` 가 해당 검사 이름으로 실패 | [NFR#2] | 자동 (검증 명령) + 수동 mutation 1회, 결과는 PR 본문 |
 | `TC#21` | 기기 언어 영어·한국어 각각 → Tunes 탭·편집 화면·다이얼로그·안내 문구가 해당 언어, 용어표와 일치 | [NFR#2] | 수동 |
-| `TC#22` | TalkBack → 아이콘 버튼마다 라벨 읽힘, Layout Inspector → 터치 타깃 48dp 이상, 글꼴 200% 잘림 없음, 편집 시트 핸들 라벨이 "Expand or collapse panel"/"패널 펼치기/접기", 삭제 선택 모드 항목 체크박스 bounds 높이·너비 48dp 이상, 주황 버튼 글자색 `#171717`·카드 강조 글자색 `#ff7347` | [NFR#3] [NFR#4] | 수동 |
+| `TC#22` | 아이콘 버튼마다 접근성 라벨(uiautomator content-desc) 있음, Layout Inspector → 터치 타깃 48dp 이상, 글꼴 200% 잘림 없음, 편집 시트 핸들 라벨이 "Expand or collapse panel"/"패널 펼치기/접기", 삭제 선택 모드 항목 체크박스 bounds 높이·너비 48dp 이상, 주황 버튼 글자색 `#171717`·카드 강조 글자색 `#ff7347` | [NFR#3] [NFR#4] | 수동 |
 | `TC#23` | v3 DB 에 Tune·규칙을 둔 빌드에서 새 빌드로 덮어 설치 → 데이터 유지, 스키마 스냅샷 `3.json` 외 추가 없음 | [NFR#1] | 수동 + `app/schemas/` 확인 |
 | `TC#24` | `app/build.gradle` dependencies 변경이 HtmlUnit·`org.json:json` 의 `testImplementation` 추가뿐이고, release APK 에 두 라이브러리 클래스가 없음 | [NFR#6] | PR diff 확인 + APK 내용 확인 |
 | `TC#25` | 메인 화면 오버플로 → 오픈소스 라이선스 → Material Symbols 저작권 표시와 Apache 2.0 원문이 보임, `@android:drawable/` 참조가 레이아웃·메뉴에 0건 | [NFR#4] | 수동 + `grep` |

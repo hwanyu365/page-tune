@@ -136,6 +136,7 @@ class WebBrowserActivity : AppCompatActivity() {
                     applyColorActions()
                     applyHiddenActions()
                     applyScrollAction()
+                    applyBottomSpace()
                 }
             }
 
@@ -195,6 +196,9 @@ class WebBrowserActivity : AppCompatActivity() {
         binding.btnGnbNext.setOnClickListener {
             triggerClickAction(gnbNextAction)
         }
+
+        binding.btnStackPrev.setOnClickListener { triggerClickAction(gnbPrevAction) }
+        binding.btnStackNext.setOnClickListener { triggerClickAction(gnbNextAction) }
 
         binding.btnLoadErrorRetry.setOnClickListener {
             clearLoadError()
@@ -264,14 +268,30 @@ class WebBrowserActivity : AppCompatActivity() {
         refreshTuneUi()
     }
 
+    private fun navButtonCount() = listOfNotNull(gnbPrevAction, gnbNextAction).size
+
     private fun refreshNavButtons() {
+        val active = tuneEnabled && loadError == null
+        val stacked = active && navState.atEnd && navButtonCount() > 0
         fun visibility(action: PluginAction?) = when {
-            action == null || !tuneEnabled || loadError != null -> View.GONE
+            action == null || !active || stacked -> View.GONE
             navState.visible -> View.VISIBLE
             else -> View.INVISIBLE
         }
         binding.btnGnbPrev.visibility = visibility(gnbPrevAction)
         binding.btnGnbNext.visibility = visibility(gnbNextAction)
+        binding.layoutGnbStack.visibility = if (stacked) View.VISIBLE else View.GONE
+        binding.btnStackPrev.visibility = if (gnbPrevAction != null) View.VISIBLE else View.GONE
+        binding.btnStackNext.visibility = if (gnbNextAction != null) View.VISIBLE else View.GONE
+        binding.tvPullBottom.translationY =
+            if (stacked) -NavButtonsAutoHide.stackHeightDp(navButtonCount()) * resources.displayMetrics.density else 0f
+    }
+
+    private fun applyBottomSpace() {
+        val count = navButtonCount()
+        val widthDp = binding.wvBrowser.width / resources.displayMetrics.density
+        if (count == 0 || widthDp <= 0f) return
+        binding.wvBrowser.evaluateJavascript(JsScripts.getBottomSpaceScript(NavButtonsAutoHide.stackHeightDp(count), widthDp), null)
     }
 
     private fun refreshTuneUi() {

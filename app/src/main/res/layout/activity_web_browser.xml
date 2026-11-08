@@ -45,6 +45,41 @@
         android:visibility="gone"
         app:tint="@color/onSurface" />
 
+    <LinearLayout
+        android:id="@+id/layout_gnb_stack"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_stack_prev"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="@string/browser_prev"
+            android:textColor="@color/onSurface"
+            app:backgroundTint="@color/scrim"
+            app:icon="@drawable/ic_chevron_left"
+            app:iconGravity="textStart"
+            app:iconTint="@color/onSurface" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_stack_next"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/browser_next"
+            android:textColor="@color/onSurface"
+            app:backgroundTint="@color/scrim"
+            app:icon="@drawable/ic_chevron_right"
+            app:iconGravity="textEnd"
+            app:iconTint="@color/onSurface" />
+
+    </LinearLayout>
+
     <TextView
         android:id="@+id/tv_pull_top"
         android:layout_width="wrap_content"

@@ -15,10 +15,15 @@ data class EditState(val name: String, val testUrl: String, val rules: List<Plug
         .apply { pageUrl?.let { put("pageUrl", it) } }
         .toString()
 
+    /** 인스턴스 상태가 Binder 거래 한도를 넘으면 앱이 죽는다 → 상한을 넘으면 넘기지 않고 DB·인자로 다시 채우게 둔다. Parcel 은 문자열을 UTF-16 으로 쓴다. */
+    fun encodeForInstanceState(limitBytes: Int = MAX_STATE_BYTES): String? = encode().takeIf { it.length * 2 <= limitBytes }
+
     companion object {
-        /** 첫 커밋 전에는 WebView 주소가 비어 있다 → 마지막으로 연 주소로 다시 연다. */
-        fun pageToRestore(loadFailed: Boolean, failedUrl: String?, webViewUrl: String?, lastLoadedUrl: String?): String? =
-            (if (loadFailed) failedUrl else webViewUrl) ?: lastLoadedUrl
+        const val MAX_STATE_BYTES = 200_000
+
+        /** 로드 중이면 WebView 주소는 이전 문서이거나 비어 있다 → 진행 중인 주소가 가장 앞선다. */
+        fun pageToRestore(loadingUrl: String?, loadFailed: Boolean, failedUrl: String?, webViewUrl: String?, lastLoadedUrl: String?): String? =
+            loadingUrl ?: (if (loadFailed) failedUrl else webViewUrl) ?: lastLoadedUrl
 
         fun decode(text: String): EditState? = runCatching {
             val o = JSONObject(text)

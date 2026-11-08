@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -127,11 +128,14 @@ class PluginEditActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         if (!editLoaded) return
-        val pageUrl = EditState.pageToRestore(loadError != null, failedUrl, binding.wvInspector.url, webClient.lastLoadedUrl)
-        outState.putString(
-            STATE_EDIT,
-            EditState(binding.etInpPname.text.toString(), binding.etInpTaddr.text.toString(), tempActions.toList(), initialSnapshot, pageUrl).encode()
-        )
+        val pageUrl = EditState.pageToRestore(webClient.loadingUrl, loadError != null, failedUrl, binding.wvInspector.url, webClient.lastLoadedUrl)
+        val state = EditState(binding.etInpPname.text.toString(), binding.etInpTaddr.text.toString(), tempActions.toList(), initialSnapshot, pageUrl)
+        val encoded = state.encodeForInstanceState()
+        if (encoded == null) {
+            Log.w(TAG, "edit state exceeds instance state limit; it will be reloaded instead")
+            return
+        }
+        outState.putString(STATE_EDIT, encoded)
     }
 
     private fun restoreEdit(state: EditState) {
@@ -724,6 +728,7 @@ class PluginEditActivity : AppCompatActivity() {
         const val EXTRA_SAVED_PLUGIN_ID = "saved_plugin_id"
         private const val HIGHLIGHT_MS = 3000L
         private const val STATE_EDIT = "edit_state"
+        private const val TAG = "PluginEditActivity"
     }
 
     // Inner class bridge for element selection callback

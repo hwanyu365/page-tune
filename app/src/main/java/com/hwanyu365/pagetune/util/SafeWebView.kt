@@ -32,6 +32,10 @@ open class SafeWebViewClient(
     var lastLoadedUrl: String? = null
         private set
 
+    /** 주 문서 로드를 시작해 끝나기 전까지의 주소. WebView.url 은 새 문서가 그려지기 전까지 이전 주소를 돌려준다. */
+    var loadingUrl: String? = null
+        private set
+
     fun loadChecked(view: WebView, input: String?, onRejected: () -> Unit): String? {
         val url = input?.let { UrlPolicy.normalizeInput(it) }
         if (url == null) {
@@ -40,6 +44,7 @@ open class SafeWebViewClient(
         }
         tracker.start(url)
         lastLoadedUrl = url
+        loadingUrl = url
         view.loadUrl(url)
         return url
     }
@@ -74,6 +79,12 @@ open class SafeWebViewClient(
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
         url?.let { tracker.add(it) }
+        loadingUrl = url
+    }
+
+    override fun onPageFinished(view: WebView?, url: String?) {
+        super.onPageFinished(view, url)
+        loadingUrl = null
     }
 
     override fun onPageCommitVisible(view: WebView?, url: String?) {

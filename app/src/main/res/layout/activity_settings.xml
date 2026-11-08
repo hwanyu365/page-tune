@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize" />
+
+    <LinearLayout
+        android:id="@+id/item_app_info"
+        style="@style/SettingsItem">
+
+        <TextView
+            style="@style/SettingsItemTitle"
+            android:text="@string/settings_app_info" />
+
+        <TextView
+            android:id="@+id/tv_app_version"
+            style="@style/SettingsItemSummary" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/item_licenses"
+        style="@style/SettingsItem"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            style="@style/SettingsItemTitle"
+            android:text="@string/menu_licenses" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/item_privacy"
+        style="@style/SettingsItem"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            style="@style/SettingsItemTitle"
+            android:text="@string/settings_privacy" />
+
+        <TextView
+            style="@style/SettingsItemSummary"
+            android:text="@string/settings_privacy_summary" />
+    </LinearLayout>
+
+</LinearLayout>

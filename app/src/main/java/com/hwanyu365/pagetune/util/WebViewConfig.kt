@@ -15,7 +15,7 @@ object WebViewConfig {
             domStorageEnabled = true
             databaseEnabled = true
             cacheMode = WebSettings.LOAD_DEFAULT
-            javaScriptCanOpenWindowsAutomatically = true
+            javaScriptCanOpenWindowsAutomatically = false
             mediaPlaybackRequiresUserGesture = false
             builtInZoomControls = false
             // UA 는 건드리지 않는다. WebView 는 Sec-CH-UA 클라이언트 힌트에 "Android WebView" 브랜드를 항상 실어 보내므로,

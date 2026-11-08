@@ -124,10 +124,44 @@
     <string name="color_channel_g" translatable="false">G</string>
     <string name="color_channel_b" translatable="false">B</string>
 
-    <string name="browser_prev">◁ Prev</string>
-    <string name="browser_next">Next ▷</string>
+    <string name="browser_prev">Previous</string>
+    <string name="browser_next">Next</string>
     <string name="browser_error_invalid_id">Couldn’t open this page</string>
     <string name="browser_error_not_found">This page was removed</string>
+
+    <string name="load_error_retry">Try again</string>
+    <string name="load_error_cannot_connect_title">Can’t connect</string>
+    <string name="load_error_cannot_connect_message">Check your internet connection and the address.</string>
+    <string name="load_error_no_response_title">The site isn’t responding</string>
+    <string name="load_error_no_response_message">Try again in a moment.</string>
+    <string name="load_error_secure_title">Secure connection failed</string>
+    <string name="load_error_secure_message">This site’s certificate has a problem, so the page can’t be opened safely.</string>
+    <string name="load_error_bad_address_title">Can’t open this address</string>
+    <string name="load_error_bad_address_message">Check the address. Only http and https addresses can be opened.</string>
+    <string name="load_error_other_title">Couldn’t open the page</string>
+    <string name="load_error_other_message">Try again.</string>
+    <string name="url_input_error">Only http and https addresses can be used</string>
+    <string name="external_confirm_title">Open in another app?</string>
+    <string name="external_confirm_open">Open</string>
+    <string name="external_no_app">No app can open this link</string>
+    <string name="external_target_app">App: %1$s</string>
+    <string name="external_target_email">Email to: %1$s</string>
+    <string name="external_target_phone">Phone number: %1$s</string>
+    <string name="external_target_address">Address: %1$s</string>
+    <string name="external_target_unknown">Unknown app</string>
+    <string name="external_fallback">If the app isn’t installed, opens: %1$s</string>
+    <string name="external_no_fallback">If the app isn’t installed, nothing opens</string>
+    <string name="download_prompt">Downloads open in your browser</string>
+    <string name="download_open_in_browser">Open in browser</string>
+    <string name="download_unsupported">This download isn’t supported</string>
+
+    <string name="settings">Settings</string>
+    <string name="settings_app_info">App info</string>
+    <string name="settings_app_version" translatable="false">%1$s %2$s</string>
+    <string name="settings_privacy">Privacy policy</string>
+    <string name="settings_privacy_summary">Open in browser</string>
+    <string name="settings_no_browser">No app can open the privacy policy. Address: %s</string>
+    <string name="privacy_policy_url" translatable="false">https://hwanyu365.github.io/page-tune/privacy</string>
 
     <string name="empty_tunes_message">No Tunes yet. A Tune hides parts of a page and sets its colors.</string>
     <string name="empty_tunes_action">Create Tune</string>

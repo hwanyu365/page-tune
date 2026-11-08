@@ -31,6 +31,7 @@ PageTune(이하 "앱")은 웹페이지의 보이는 모습과 시작 위치를 �
 ## 공유
 
 - 빠른 메뉴의 주소 공유는 Android 공유 시트를 열어요. 사용자가 고른 앱에만 주소가 전달돼요.
+- 사용자가 누른 메일·전화·앱 링크와, 사용자가 브라우저에서 열기를 고른 다운로드 주소는 그 주소를 처리하는 다른 앱(메일 앱, 브라우저 등)에 넘겨요. 설정 화면의 개인정보 처리방침도 브라우저 앱에 주소를 넘겨 열어요.
 
 ## 백업
 
@@ -86,6 +87,7 @@ PageTune ("the app") saves per-site settings for how web pages look and where th
 ## Sharing
 
 - Share address in the quick menu opens the Android share sheet. The address is passed only to the app you choose.
+- Email, phone, and app links you tap, and download addresses you choose to open in a browser, are passed to the other app that handles them (such as an email app or browser). Privacy policy in Settings also opens by passing its address to a browser app.
 
 ## Backup
 

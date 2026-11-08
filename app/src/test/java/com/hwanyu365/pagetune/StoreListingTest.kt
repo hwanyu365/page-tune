@@ -69,6 +69,31 @@ class StoreListingTest {
     }
 
     @Test
+    fun `TC#49 매니페스트는 다른 앱을 미리 조회하는 선언이 없다`() {
+        val manifest = File("src/main/AndroidManifest.xml").readText()
+        assertFalse("<queries" in manifest)
+        assertFalse("QUERY_ALL_PACKAGES" in manifest)
+    }
+
+    @Test
+    fun `TC#50 처리방침 공유 절은 링크·다운로드 주소를 다른 앱에 넘기는 것을 밝힌다`() {
+        val policy = File("../docs/privacy.md").readText().replace("\r\n", "\n")
+        fun section(title: String) = policy.substringAfter("## $title\n").substringBefore("\n## ")
+        val ko = section("공유")
+        assertTrue(ko, "다른 앱" in ko && "다운로드" in ko && "메일" in ko)
+        val en = section("Sharing")
+        assertTrue(en, "other app" in en && "download" in en && "email" in en)
+    }
+
+    @Test
+    fun `TC#7 설정 화면은 다른 앱이 열 수 없다`() {
+        val manifest = File("src/main/AndroidManifest.xml").readText()
+        val activity = Regex("""<activity\b[^>]*android:name="\.SettingsActivity"[^>]*>""").find(manifest)
+        assertTrue("SettingsActivity 선언 없음", activity != null)
+        assertTrue(activity!!.value, "android:exported=\"false\"" in activity.value)
+    }
+
+    @Test
     fun `TC#14 listing 은 백업 예외를 밝힌다`() {
         for ((locale, phrase) in listOf("ko-KR" to "Google 계정", "en-US" to "Google account")) {
             val text = File(listings, "$locale/full-description.txt").readText()

@@ -36,6 +36,16 @@ class ResourceRulesTest {
     }
 
     @Test
+    fun `TC#4 처리방침 주소는 번역하지 않는 문자열 하나다`() {
+        val strings = File(res, "values/strings.xml").readText()
+        val entry = Regex("""<string name="privacy_policy_url"([^>]*)>([^<]*)</string>""").find(strings)
+        assertTrue("privacy_policy_url 없음", entry != null)
+        assertEquals("https://hwanyu365.github.io/page-tune/privacy", entry!!.groupValues[2])
+        assertTrue("""translatable="false"""" in entry.groupValues[1])
+        assertTrue("privacy_policy_url" !in File(res, "values-ko/strings.xml").readText())
+    }
+
+    @Test
     fun `TC#52 새 소식 목록은 오름차순·중복 없음이고 항목마다 두 언어 문구가 있다`() {
         val codes = com.hwanyu365.pagetune.ui.WHATS_NEW_NOTES.map { it.first }
         assertEquals(codes.sorted().distinct(), codes)

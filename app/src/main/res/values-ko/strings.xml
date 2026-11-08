@@ -89,10 +89,35 @@
     <string name="edit_name_required">Tune 이름을 입력해 주세요</string>
     <string name="edit_saved">Tune을 저장했어요</string>
 
-    <string name="browser_prev">◁ 이전</string>
-    <string name="browser_next">다음 ▷</string>
+    <string name="browser_prev">이전</string>
+    <string name="browser_next">다음</string>
     <string name="browser_error_invalid_id">페이지를 열 수 없어요</string>
     <string name="browser_error_not_found">삭제된 페이지예요</string>
+
+    <string name="load_error_retry">다시 시도</string>
+    <string name="load_error_cannot_connect_title">연결할 수 없어요</string>
+    <string name="load_error_cannot_connect_message">인터넷 연결과 주소를 확인해 주세요.</string>
+    <string name="load_error_no_response_title">사이트가 응답하지 않아요</string>
+    <string name="load_error_no_response_message">잠시 뒤 다시 시도해 주세요.</string>
+    <string name="load_error_secure_title">보안 연결에 실패했어요</string>
+    <string name="load_error_secure_message">사이트 인증서에 문제가 있어 페이지를 안전하게 열 수 없어요.</string>
+    <string name="load_error_bad_address_title">열 수 없는 주소예요</string>
+    <string name="load_error_bad_address_message">주소를 확인해 주세요. http·https 주소만 열 수 있어요.</string>
+    <string name="load_error_other_title">페이지를 열 수 없어요</string>
+    <string name="load_error_other_message">다시 시도해 주세요.</string>
+    <string name="url_input_error">http·https 주소만 쓸 수 있어요</string>
+    <string name="external_confirm_title">외부 앱으로 열까요?</string>
+    <string name="external_confirm_open">열기</string>
+    <string name="external_no_app">열 수 있는 앱이 없어요</string>
+    <string name="download_prompt">다운로드는 브라우저에서 받을 수 있어요</string>
+    <string name="download_open_in_browser">브라우저에서 열기</string>
+    <string name="download_unsupported">지원하지 않는 다운로드예요</string>
+
+    <string name="settings">설정</string>
+    <string name="settings_app_info">앱 정보</string>
+    <string name="settings_privacy">개인정보 처리방침</string>
+    <string name="settings_privacy_summary">브라우저에서 열기</string>
+    <string name="settings_no_browser">처리방침을 열 수 있는 앱이 없어요. 주소: %s</string>
 
     <string name="empty_tunes_message">아직 Tune 이 없어요. Tune 은 페이지의 일부를 숨기고 색상을 바꿔요.</string>
     <string name="empty_tunes_action">Tune 만들기</string>

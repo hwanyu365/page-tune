@@ -17,6 +17,7 @@ import com.hwanyu365.pagetune.db.Plugin
 import com.hwanyu365.pagetune.db.WebPage
 import com.hwanyu365.pagetune.db.WebPageWithPlugin
 import com.hwanyu365.pagetune.ui.adapter.WebPageAdapter
+import com.hwanyu365.pagetune.util.UrlPolicy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -192,17 +193,16 @@ class WebPagesFragment : Fragment(), TabPage {
 
             dialogBinding.btnDialogSave.setOnClickListener {
                 val title = dialogBinding.etTitle.text.toString().trim()
-                var url = dialogBinding.etUrl.text.toString().trim()
-                
-                if (title.isEmpty() || url.isEmpty()) {
+                val input = dialogBinding.etUrl.text.toString().trim()
+
+                if (title.isEmpty() || input.isEmpty()) {
                     Toast.makeText(requireContext(), R.string.webpage_error_fill_all, Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
 
-                // Add protocol if missing
-                if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                    url = "https://$url"
-                }
+                val url = UrlPolicy.normalizeInput(input)
+                dialogBinding.tilUrl.error = if (url == null) getString(R.string.url_input_error) else null
+                if (url == null) return@setOnClickListener
 
                 val selectedPosition = dialogBinding.spPlugins.selectedItemPosition
                 val selectedPluginId = if (selectedPosition > 0) plugins[selectedPosition - 1].id else null

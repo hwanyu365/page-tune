@@ -34,4 +34,14 @@ class ResourceRulesTest {
         assertTrue(Regex("""name="onPrimary">#171717<""").containsMatchIn(colors))
         assertTrue(Regex("""name="brandOnSurface">#ff7347<""").containsMatchIn(colors))
     }
+
+    @Test
+    fun `TC#4 처리방침 주소는 번역하지 않는 문자열 하나다`() {
+        val strings = File(res, "values/strings.xml").readText()
+        val entry = Regex("""<string name="privacy_policy_url"([^>]*)>([^<]*)</string>""").find(strings)
+        assertTrue("privacy_policy_url 없음", entry != null)
+        assertEquals("https://hwanyu365.github.io/page-tune/privacy", entry!!.groupValues[2])
+        assertTrue("""translatable="false"""" in entry.groupValues[1])
+        assertTrue("privacy_policy_url" !in File(res, "values-ko/strings.xml").readText())
+    }
 }

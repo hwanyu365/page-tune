@@ -1,12 +1,12 @@
 package com.hwanyu365.pagetune
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
 import com.hwanyu365.pagetune.databinding.ActivityMainBinding
 import com.hwanyu365.pagetune.ui.fragment.PluginsFragment
@@ -44,13 +44,8 @@ class MainActivity : AppCompatActivity() {
         if (position == 0) WebPagesFragment::class.java else PluginsFragment::class.java
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId != R.id.action_licenses) return super.onOptionsItemSelected(item)
-        val text = resources.openRawResource(R.raw.open_source_licenses).bufferedReader().use { it.readText() }
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.menu_licenses)
-            .setMessage(text)
-            .setPositiveButton(R.string.ok, null)
-            .show()
+        if (item.itemId != R.id.action_settings) return super.onOptionsItemSelected(item)
+        startActivity(Intent(this, SettingsActivity::class.java))
         return true
     }
 

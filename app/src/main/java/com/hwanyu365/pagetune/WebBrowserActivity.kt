@@ -13,7 +13,6 @@ import android.view.View
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.view.accessibility.AccessibilityManager
-import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +23,11 @@ import com.hwanyu365.pagetune.db.AppDatabase
 import com.hwanyu365.pagetune.db.PluginAction
 import com.hwanyu365.pagetune.databinding.ActivityWebBrowserBinding
 import com.hwanyu365.pagetune.util.JsScripts
+import com.hwanyu365.pagetune.util.LoadErrorKind
+import com.hwanyu365.pagetune.util.NavButtonsAutoHide
+import com.hwanyu365.pagetune.util.NavButtonsState
+import com.hwanyu365.pagetune.util.SafeWebViewClient
+import com.hwanyu365.pagetune.util.installSafeDownloads
 import com.hwanyu365.pagetune.util.TuneRuleCounts
 import com.hwanyu365.pagetune.util.padForInsets
 import kotlinx.coroutines.CoroutineScope
@@ -41,6 +45,10 @@ class WebBrowserActivity : AppCompatActivity() {
     private var webPageId: Long = -1
 
     private var mGestureDetector: GestureDetector? = null
+    private lateinit var webClient: SafeWebViewClient
+    private var loadError: LoadErrorKind? = null
+    private var failedUrl: String? = null
+    private var navState = NavButtonsState()
     private val mHitRect = Rect()
     private var originalUrlHost: String? = null
 
@@ -107,12 +115,15 @@ class WebBrowserActivity : AppCompatActivity() {
             loadWithOverviewMode = true
         }
 
-        binding.wvBrowser.webViewClient = object : WebViewClient() {
+        webClient = object : SafeWebViewClient(this, { kind, url -> showLoadError(kind, url) }) {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 // Cloudflare 통과 쿠키(cf_clearance)는 앱이 죽으면 날아간다. 페이지마다 디스크로 내려 재방문 시 챌린지를 건너뛴다.
                 android.webkit.CookieManager.getInstance().flush()
                 binding.pbBrowserLoading.visibility = View.GONE
+                if (loadError == null) binding.layoutLoadError.visibility = View.GONE
+                navState = NavButtonsAutoHide.onPageLoaded()
+                refreshNavButtons()
                 if (tuneEnabled) {
                     applyColorActions()
                     applyHiddenActions()
@@ -146,6 +157,15 @@ class WebBrowserActivity : AppCompatActivity() {
                 }
             }
         }
+        binding.wvBrowser.webViewClient = webClient
+        binding.wvBrowser.installSafeDownloads(this, binding.root)
+        binding.wvBrowser.setOnScrollChangeListener { v, _, scrollY, _, oldScrollY ->
+            val density = resources.displayMetrics.density
+            @Suppress("DEPRECATION")
+            val remainingPx = binding.wvBrowser.contentHeight * binding.wvBrowser.scale - (scrollY + v.height)
+            navState = NavButtonsAutoHide.onScroll(navState, (scrollY - oldScrollY) / density, remainingPx / density)
+            refreshNavButtons()
+        }
 
         binding.wvBrowser.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView?, newProgress: Int) {
@@ -168,7 +188,37 @@ class WebBrowserActivity : AppCompatActivity() {
             triggerClickAction(gnbNextAction)
         }
 
+        binding.btnLoadErrorRetry.setOnClickListener {
+            clearLoadError()
+            webClient.loadChecked(binding.wvBrowser, failedUrl) { showLoadError(LoadErrorKind.BAD_ADDRESS, null) }
+        }
+
         setupQuickMenu()
+    }
+
+    private fun showLoadError(kind: LoadErrorKind, url: String?) {
+        loadError = kind
+        failedUrl = url
+        val (icon, title, message) = when (kind) {
+            LoadErrorKind.CANNOT_CONNECT -> Triple(R.drawable.ic_error, R.string.load_error_cannot_connect_title, R.string.load_error_cannot_connect_message)
+            LoadErrorKind.NO_RESPONSE -> Triple(R.drawable.ic_error, R.string.load_error_no_response_title, R.string.load_error_no_response_message)
+            LoadErrorKind.SECURE_CONNECTION -> Triple(R.drawable.ic_lock, R.string.load_error_secure_title, R.string.load_error_secure_message)
+            LoadErrorKind.BAD_ADDRESS -> Triple(R.drawable.ic_error, R.string.load_error_bad_address_title, R.string.load_error_bad_address_message)
+            LoadErrorKind.OTHER -> Triple(R.drawable.ic_error, R.string.load_error_other_title, R.string.load_error_other_message)
+        }
+        binding.ivLoadError.setImageResource(icon)
+        binding.tvLoadErrorTitle.setText(title)
+        binding.tvLoadErrorMessage.setText(message)
+        binding.btnLoadErrorRetry.visibility = if (url == null) View.GONE else View.VISIBLE
+        binding.layoutLoadError.visibility = View.VISIBLE
+        binding.pbBrowserLoading.visibility = View.GONE
+        refreshNavButtons()
+    }
+
+    private fun clearLoadError() {
+        loadError = null
+        binding.layoutLoadError.visibility = View.GONE
+        refreshNavButtons()
     }
 
     private fun loadWebPageData() {
@@ -188,7 +238,7 @@ class WebBrowserActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 originalUrlHost = null
             }
-            binding.wvBrowser.loadUrl(data.url)
+            webClient.loadChecked(binding.wvBrowser, data.url) { showLoadError(LoadErrorKind.BAD_ADDRESS, null) }
             showTuneStatus()
         }
     }
@@ -206,11 +256,18 @@ class WebBrowserActivity : AppCompatActivity() {
         refreshTuneUi()
     }
 
+    private fun refreshNavButtons() {
+        fun visibility(action: PluginAction?) = when {
+            action == null || !tuneEnabled || loadError != null -> View.GONE
+            navState.visible -> View.VISIBLE
+            else -> View.INVISIBLE
+        }
+        binding.btnGnbPrev.visibility = visibility(gnbPrevAction)
+        binding.btnGnbNext.visibility = visibility(gnbNextAction)
+    }
+
     private fun refreshTuneUi() {
-        val hasGnb = tuneEnabled && (gnbPrevAction != null || gnbNextAction != null)
-        binding.layoutFloatingGnb.visibility = if (hasGnb) View.VISIBLE else View.GONE
-        binding.btnGnbPrev.visibility = if (gnbPrevAction != null) View.VISIBLE else View.GONE
-        binding.btnGnbNext.visibility = if (gnbNextAction != null) View.VISIBLE else View.GONE
+        refreshNavButtons()
 
         binding.btnQuickToggle.isEnabled = hasTune
         binding.btnQuickToggle.alpha = if (hasTune) 1f else 0.4f
@@ -267,11 +324,19 @@ class WebBrowserActivity : AppCompatActivity() {
         }
         binding.btnQuickBack.setOnClickListener {
             scheduleToolbarHide()
-            if (binding.wvBrowser.canGoBack()) binding.wvBrowser.goBack() else finish()
+            if (binding.wvBrowser.canGoBack()) {
+                clearLoadError()
+                binding.wvBrowser.goBack()
+            } else {
+                finish()
+            }
         }
         binding.btnQuickRefresh.setOnClickListener {
             scheduleToolbarHide()
-            binding.wvBrowser.reload()
+            when {
+                loadError == null -> binding.wvBrowser.reload()
+                failedUrl != null -> binding.btnLoadErrorRetry.performClick()
+            }
         }
         binding.btnQuickShare.setOnClickListener {
             scheduleToolbarHide()
@@ -386,8 +451,12 @@ class WebBrowserActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     private fun setupGestureControls() {
         val hasGesture = (gestureTopAction != null || gestureBottomAction != null)
+        binding.wvBrowser.setOnTouchListener { _, motionEvent ->
+            if (motionEvent.actionMasked == MotionEvent.ACTION_DOWN) navState = NavButtonsAutoHide.onTouch(navState)
+            mGestureDetector?.onTouchEvent(motionEvent) ?: false
+        }
         if (!hasGesture) {
-            binding.wvBrowser.setOnTouchListener(null)
+            mGestureDetector = null
             return
         }
 
@@ -398,7 +467,7 @@ class WebBrowserActivity : AppCompatActivity() {
 
         mGestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent): Boolean {
-                if (!tuneEnabled) return false
+                if (!tuneEnabled || loadError != null) return false
                 binding.wvBrowser.getHitRect(mHitRect)
                 val areaPercent = areaPercentVal / 100f
                 val prevHitY = mHitRect.bottom * areaPercent
@@ -415,10 +484,6 @@ class WebBrowserActivity : AppCompatActivity() {
                 return super.onDoubleTap(e)
             }
         })
-
-        binding.wvBrowser.setOnTouchListener { _, motionEvent ->
-            mGestureDetector?.onTouchEvent(motionEvent) ?: false
-        }
     }
 
 }

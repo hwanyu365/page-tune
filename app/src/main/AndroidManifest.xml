@@ -29,6 +29,10 @@
         <activity
             android:name=".PluginEditActivity"
             android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false" />
             
     </application>
 

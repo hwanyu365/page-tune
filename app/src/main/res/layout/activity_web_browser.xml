@@ -19,31 +19,76 @@
         android:layout_alignParentTop="true"
         android:visibility="gone" />
 
-    <!-- Floating GNB (Semitemporary Overlay at bottom) -->
-    <LinearLayout
-        android:id="@+id/layout_floating_gnb"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
+    <ImageButton
+        android:id="@+id/btn_gnb_prev"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/scrim"
-        android:orientation="horizontal"
+        android:layout_alignParentStart="true"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_quick_handle"
+        android:contentDescription="@string/browser_prev"
+        android:src="@drawable/ic_chevron_left"
+        android:visibility="gone"
+        app:tint="@color/onSurface" />
+
+    <ImageButton
+        android:id="@+id/btn_gnb_next"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_quick_handle"
+        android:contentDescription="@string/browser_next"
+        android:src="@drawable/ic_chevron_right"
+        android:visibility="gone"
+        app:tint="@color/onSurface" />
+
+    <LinearLayout
+        android:id="@+id/layout_load_error"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/surface"
+        android:clickable="true"
+        android:focusable="true"
         android:gravity="center"
-        android:padding="8dp"
+        android:orientation="vertical"
+        android:padding="24dp"
         android:visibility="gone">
 
-        <Button
-            android:id="@+id/btn_gnb_prev"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="@string/browser_prev"
-            android:layout_marginEnd="16dp" />
+        <ImageView
+            android:id="@+id/iv_load_error"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_error"
+            app:tint="@color/error" />
 
-        <Button
-            android:id="@+id/btn_gnb_next"
+        <TextView
+            android:id="@+id/tv_load_error_title"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="@string/browser_next"
-            android:layout_marginStart="16dp" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="@color/onSurface" />
+
+        <TextView
+            android:id="@+id/tv_load_error_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="@color/onSurfaceVariant" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_load_error_retry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/load_error_retry" />
 
     </LinearLayout>
 

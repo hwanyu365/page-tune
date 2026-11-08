@@ -106,7 +106,7 @@
 | `outline` | `#8a8a8a` | 입력칸 테두리, 외곽선 버튼 |
 | `outlineVariant` | `#2a2a2a` | 구분선 (장식) |
 | `error` / `onError` | `#ffb4ab` / `#690005` | 입력 오류, 오류 화면 아이콘 |
-| `scrim` | `#171717`, 불투명도 85% | 열람 화면 오버레이 배경 (FR#6) |
+| `scrim` | `#D9171717` (ARGB, 알파 `0xD9` = 217/255 ≈ 85%) | 열람 화면 오버레이 배경 (FR#6) |
 | `avatar1`~`avatar8` | `#ff7347` `#7cb7ff` `#6fd3a8` `#f5c451` `#c79bff` `#ff8fb1` `#5fd0e0` `#b5d96b` | 도메인 아바타 배경 (`spec_page_view.md` §6.7). 글자는 `onPrimary` |
 
 대비 (계산값, 소수 둘째 자리)
@@ -121,8 +121,9 @@
 | `brandOnSurface` | 같은 순서 | 6.65 / 6.19 / 5.76 / 5.33 | 4.5 |
 | `outline` | 같은 순서 | 5.19 / 4.83 / 4.50 / 4.16 | 3 (비텍스트) |
 | `error` | 같은 순서 | 10.56 / 9.82 / 9.14 / 8.45 | 4.5 |
+| `onError` | `error` | 7.72 | 4.5 |
 | `primary` (아이콘·막대) | `surface` / `surfaceContainerHigh` | 5.13 / 4.11 | 3 (비텍스트) |
-| `onSurface` | `scrim` 을 흰 배경에 합성한 `#3a3a3a` | 8.62 | 4.5 |
+| `onSurface` | `scrim`(`#D9171717`)을 흰 배경에 합성한 `#3a3a3a` | 8.62 | 4.5 |
 | `onPrimary` | `avatar1`~`avatar8` | 최소 6.65 (`avatar1`) | 4.5 |
 
 - `primary` 를 표면 위 글자색으로 쓰지 않는다 → `primary` / `surfaceContainer` = 4.44:1 로 4.5:1 미달 (D#1).
@@ -188,8 +189,8 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 | TC | 시나리오 | 대상 | 비고 |
 | --- | --- | --- | --- |
 | `TC#1` | 매니페스트의 모든 activity 테마와 application 테마가 앱 테마 계열이고, 앱 테마의 최상위 부모가 `Theme.Material3.Dark` 로 시작한다. `Theme.AppCompat` 부모가 0건 | [FR#1] | 단위 (리소스 XML 파싱) |
-| `TC#2` | `values/colors.xml` 에 §4.1 토큰이 모두 같은 값으로 있고, 그 밖의 색 리소스는 `ic_launcher_background` 뿐이다. `layout`·`menu`·`drawable`(launcher·벡터 아이콘 제외) 에 `#` 색 리터럴 0건 | [FR#2] | 단위 |
-| `TC#3` | `colors.xml` 값으로 §4.1 대비 표의 모든 조합을 WCAG 상대 휘도 식으로 계산 → 각 기준 이상. `scrim` 은 흰색 위 합성 후 계산 | [NFR#1] [FR#6] | 단위. mutation: 구현 PR 에서 `onSurfaceVariant` 를 `#5c5c5c` 로 바꿔 실패하는지 확인 |
+| `TC#2` | `values/colors.xml` 에 §4.1 토큰이 모두 같은 값으로 있고, 그 밖의 색 리소스는 `ic_launcher_background` 뿐이다. `scrim` 은 `#D9171717` 이다. `layout`·`menu`·`drawable`(launcher·벡터 아이콘 제외) 에 `#` 색 리터럴 0건. `app/src/main/java` Kotlin 에 색 직접 지정 0건: `Color.parseColor("#`, `Color.rgb(`, `Color.argb(`, `0xFF`·`0x` 로 시작하는 8자리 색 정수 리터럴, `Color.BLACK`·`Color.WHITE` 등 `Color.` 상수 (FR#2 예외인 주입 스크립트 문자열과 색 선택 다이얼로그의 사용자 색 계산은 허용 목록으로 둔다) | [FR#2] | 단위 (리소스 XML 파싱 + 소스 읽기). mutation: 구현 PR 에서 Kotlin 파일 하나에 `Color.parseColor("#ffffff")` 를 넣어 실패하는지 확인 |
+| `TC#3` | `colors.xml` 값으로 §4.1 대비 표의 모든 조합을 WCAG 상대 휘도 식으로 계산 → 각 기준 이상. `scrim` 은 `colors.xml` 의 ARGB 값(`#D9171717`)에서 알파를 읽어 흰색 위에 합성한 뒤 계산 | [NFR#1] [FR#6] | 단위. mutation: 구현 PR 에서 `onSurfaceVariant` 를 `#5c5c5c` 로 바꿔 실패하는지 확인 |
 | `TC#4` | `layout` 에 `android:textSize` 0건, Kotlin 에 `textSize =` 0건 | [FR#3] | 단위 (레이아웃) + `grep` (Kotlin) |
 | `TC#5` | `layout` 의 `layout_margin*`·`padding*` 값이 0dp 또는 §4.3 값 | [FR#4] | 단위 |
 | `TC#6` | `layout` 에 `androidx.appcompat.widget.Toolbar`·`androidx.cardview.widget.CardView`·단독 편집칸(부모가 `TextInputLayout` 이 아닌 `EditText`/`NoAutofillEditText`) 0건. Kotlin 에 `android.app.AlertDialog`·`androidx.appcompat.app.AlertDialog` import 0건 | [FR#5] | 단위 (레이아웃) + `grep` (Kotlin) |

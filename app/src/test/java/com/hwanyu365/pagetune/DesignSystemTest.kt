@@ -126,10 +126,11 @@ class DesignSystemTest {
         "hexString" to Regex("""#[0-9A-Fa-f]{6}\b"""),
     )
 
-    // 주입 스크립트는 페이지 안의 색이고, 색 선택 다이얼로그는 사용자가 고른 색을 계산한다 → 앱 화면 색이 아니다.
+    // 주입 스크립트는 페이지 안의 색이고, 색 선택 다이얼로그는 사용자가 고른 색을 계산하고, 프리셋은 페이지에 칠할 색이다 → 앱 화면 색이 아니다.
     private val colorAllowlist = mapOf(
         "JsScripts.kt" to colorRules.keys,
         "ColorPickerDialog.kt" to setOf("rgb", "constant"),
+        "ColorPresets.kt" to setOf("hexString"),
     )
 
     @Test

@@ -2,7 +2,10 @@ package com.hwanyu365.pagetune
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -23,12 +26,17 @@ import com.hwanyu365.pagetune.db.AppDatabase
 import com.hwanyu365.pagetune.db.Plugin
 import com.hwanyu365.pagetune.db.PluginAction
 import com.hwanyu365.pagetune.databinding.ActivityPluginEditBinding
+import com.hwanyu365.pagetune.databinding.ItemRuleBinding
 import com.hwanyu365.pagetune.save.RoomTuneStore
 import com.hwanyu365.pagetune.save.executeSave
 import com.hwanyu365.pagetune.save.planSave
 import com.hwanyu365.pagetune.ui.view.ColorPickerDialog
 import com.hwanyu365.pagetune.util.EditSnapshot
+import com.hwanyu365.pagetune.util.EditStep
+import com.hwanyu365.pagetune.util.ElementLabel
 import com.hwanyu365.pagetune.util.JsScripts
+import com.hwanyu365.pagetune.util.RequestGeneration
+import com.hwanyu365.pagetune.util.LoadErrorKind
 import com.hwanyu365.pagetune.util.SafeWebViewClient
 import com.hwanyu365.pagetune.util.UrlPolicy
 import com.hwanyu365.pagetune.util.installSafeDownloads
@@ -61,6 +69,16 @@ class PluginEditActivity : AppCompatActivity() {
     private var imeExtra = 0
     private var initialSnapshot = EditSnapshot.of("", "", emptyList())
 
+    private var pageLoaded = false
+    private var loadError: LoadErrorKind? = null
+    private var errorThisLoad = false
+    private var failedUrl: String? = null
+    private var detailsOpen = false
+    private var highlightedIndex: Int? = null
+    private val highlightRequests = RequestGeneration()
+    private val handler = Handler(Looper.getMainLooper())
+    private val clearHighlightLater = Runnable { clearRuleHighlight() }
+
     // "color" 액션의 입력값. picker 만 이 값을 만들므로 항상 "#RRGGBB" 이거나 null 이다.
     private var colorBg: String? = null
     private var colorText: String? = null
@@ -91,19 +109,33 @@ class PluginEditActivity : AppCompatActivity() {
         if (pluginId != -1L) {
             loadPluginData()
         } else {
-            loadUrl?.let {
-                binding.etInpTaddr.setText(it)
-                webClient.loadChecked(binding.wvInspector, it, ::showAddressError)
-            }
+            loadUrl?.let { binding.etInpTaddr.setText(it) }
             initialSnapshot = currentSnapshot()
+            loadUrl?.let { webClient.loadChecked(binding.wvInspector, it, ::showUnopenableAddress) }
         }
+        updateStep()
+    }
+
+    override fun onDestroy() {
+        handler.removeCallbacks(clearHighlightLater)
+        super.onDestroy()
     }
 
     @SuppressLint("SetJavaScriptEnabled", "AddJavascriptInterface")
     private fun setupWebView() {
         com.hwanyu365.pagetune.util.WebViewConfig.applyCommon(binding.wvInspector)
 
-        webClient = object : SafeWebViewClient(this, { _, _ -> }) {
+        webClient = object : SafeWebViewClient(this, ::showLoadError) {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                pageLoaded = false
+                errorThisLoad = false
+                highlightedIndex = null
+                highlightRequests.invalidate()
+                handler.removeCallbacks(clearHighlightLater)
+                updateStep()
+            }
+
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 // Cloudflare 통과 쿠키(cf_clearance)는 앱이 죽으면 날아간다. 페이지마다 디스크로 내려 재방문 시 챌린지를 건너뛴다.
@@ -114,6 +146,12 @@ class PluginEditActivity : AppCompatActivity() {
                 }
                 // Automatically re-apply all current hidden actions
                 applyCurrentActions()
+                if (!errorThisLoad) {
+                    loadError = null
+                    binding.layoutLoadError.visibility = View.GONE
+                    pageLoaded = true
+                }
+                updateStep()
             }
         }
         binding.wvInspector.webViewClient = webClient
@@ -152,6 +190,15 @@ class PluginEditActivity : AppCompatActivity() {
                 binding.wvInspector.evaluateJavascript("window.webPluginInspectEnabled = false; window.webPluginClearHighlight();", null)
                 hideActionConfigPanel()
             }
+        }
+
+        binding.btnLoadRetry.setOnClickListener {
+            failedUrl?.let { webClient.loadChecked(binding.wvInspector, it, ::showUnopenableAddress) }
+        }
+
+        binding.btnSelectorDetails.setOnClickListener {
+            detailsOpen = !detailsOpen
+            applyDetailsState()
         }
 
         binding.btnSelectParent.setOnClickListener {
@@ -209,6 +256,45 @@ class PluginEditActivity : AppCompatActivity() {
     private fun currentSnapshot() = EditSnapshot.of(
         binding.etInpPname.text.toString(), binding.etInpTaddr.text.toString(), tempActions
     )
+
+    private fun updateStep() {
+        val step = EditStep.of(
+            loadFailed = loadError != null,
+            hasSelection = selectedElementJson != null,
+            pageLoaded = pageLoaded,
+            rulesChanged = currentSnapshot().rulesDifferFrom(initialSnapshot),
+        )
+        val (name, hint) = when (step) {
+            EditStep.ADDRESS -> R.string.edit_step_address to R.string.edit_step_address_hint
+            EditStep.PICK -> R.string.edit_step_pick to R.string.edit_step_pick_hint
+            EditStep.RULE -> R.string.edit_step_rule to R.string.edit_step_rule_hint
+            EditStep.SAVE -> R.string.edit_step_save to R.string.edit_step_save_hint
+        }
+        binding.tvEditStep.text = getString(R.string.edit_step, step.number, getString(name))
+        binding.tvEditStepHint.setText(hint)
+    }
+
+    // 실패한 페이지에서 이전 선택은 가리킬 요소가 없다 → 선택을 풀어 단계가 주소로 돌아간다.
+    private fun showLoadError(kind: LoadErrorKind, url: String?) {
+        errorThisLoad = true
+        loadError = kind
+        failedUrl = url
+        val (title, message) = loadErrorText(kind)
+        binding.tvLoadErrorTitle.setText(title)
+        binding.tvLoadErrorMessage.setText(message)
+        binding.btnLoadRetry.visibility = if (url != null) View.VISIBLE else View.GONE
+        binding.layoutLoadError.visibility = View.VISIBLE
+        if (selectedElementJson != null) hideActionConfigPanel()
+        updateStep()
+    }
+
+    private fun loadErrorText(kind: LoadErrorKind): Pair<Int, Int> = when (kind) {
+        LoadErrorKind.CANNOT_CONNECT -> R.string.load_error_cannot_connect_title to R.string.load_error_cannot_connect_message
+        LoadErrorKind.NO_RESPONSE -> R.string.load_error_no_response_title to R.string.load_error_no_response_message
+        LoadErrorKind.SECURE_CONNECTION -> R.string.load_error_secure_title to R.string.load_error_secure_message
+        LoadErrorKind.BAD_ADDRESS -> R.string.load_error_bad_address_title to R.string.load_error_bad_address_message
+        LoadErrorKind.OTHER -> R.string.load_error_other_title to R.string.load_error_other_message
+    }
 
     private fun requestExit() {
         if (!currentSnapshot().differsFrom(initialSnapshot)) {
@@ -294,10 +380,10 @@ class PluginEditActivity : AppCompatActivity() {
             if (pluginWithActions != null) {
                 binding.etInpPname.setText(pluginWithActions.plugin.name)
                 pluginWithActions.plugin.testUrl?.let { binding.etInpTaddr.setText(it) }
-                (loadUrl ?: pluginWithActions.plugin.testUrl)?.let { webClient.loadChecked(binding.wvInspector, it, ::showAddressError) }
                 tempActions.addAll(pluginWithActions.actions)
-                refreshActionsListUI()
                 initialSnapshot = currentSnapshot()
+                refreshActionsListUI()
+                (loadUrl ?: pluginWithActions.plugin.testUrl)?.let { webClient.loadChecked(binding.wvInspector, it, ::showUnopenableAddress) }
             }
         }
     }
@@ -307,30 +393,77 @@ class PluginEditActivity : AppCompatActivity() {
     }
 
     private fun onElementSelectedFromJs(detailsJson: String, matchCount: Int) {
+        clearRuleHighlight()
         selectedElementJson = detailsJson
-        try {
-            val json = JSONObject(detailsJson)
-            val selector = json.optString("selector")
-            val textContent = json.optString("textContent")
-            val displayText = if (textContent.isNotEmpty()) {
-                getString(R.string.edit_selected_with_text, textContent, selector)
-            } else {
-                getString(R.string.edit_selected, selector)
-            }
-            val matchText = getString(
-                when (matchCount) {
-                    1 -> R.string.edit_match_count
-                    0 -> R.string.edit_match_none
-                    else -> R.string.edit_match_many
-                },
-                matchCount
-            )
-            binding.tvSelectedSelector.text = listOf(matchText, displayText).joinToString("\n")
-            binding.layoutTraversalActions.visibility = View.VISIBLE
-            binding.layoutActionConfig.visibility = View.VISIBLE
-            sheet.state = BottomSheetBehavior.STATE_EXPANDED
-        } catch (e: Exception) {
+        val label = ElementLabel.of(detailsJson)
+        if (label == null) {
             binding.tvSelectedSelector.setText(R.string.edit_selected_error)
+            updateStep()
+            return
+        }
+        val matchText = getString(
+            when (matchCount) {
+                1 -> R.string.edit_match_count
+                0 -> R.string.edit_match_none
+                else -> R.string.edit_match_many
+            },
+            matchCount
+        )
+        binding.tvSelectedSelector.text = listOf(matchText, labelText(label)).joinToString("\n")
+        binding.tvSelectorDetail.text = JSONObject(detailsJson).optString("selector")
+        applyDetailsState()
+        binding.layoutTraversalActions.visibility = View.VISIBLE
+        binding.layoutActionConfig.visibility = View.VISIBLE
+        sheet.state = BottomSheetBehavior.STATE_EXPANDED
+        updateStep()
+    }
+
+    private fun applyDetailsState() {
+        binding.tvSelectorDetail.visibility = if (detailsOpen) View.VISIBLE else View.GONE
+        binding.btnSelectorDetails.setText(if (detailsOpen) R.string.edit_details_hide else R.string.edit_details_show)
+    }
+
+    private fun labelText(label: ElementLabel): String {
+        val kind = getString(
+            when (label.kind) {
+                ElementLabel.Kind.LINK -> R.string.element_kind_link
+                ElementLabel.Kind.IMAGE -> R.string.element_kind_image
+                ElementLabel.Kind.BUTTON -> R.string.element_kind_button
+                ElementLabel.Kind.INPUT -> R.string.element_kind_input
+                ElementLabel.Kind.FRAME -> R.string.element_kind_frame
+                ElementLabel.Kind.MEDIA -> R.string.element_kind_media
+                ElementLabel.Kind.AREA -> R.string.element_kind_area
+            }
+        )
+        return label.text?.let { getString(R.string.edit_label_with_text, kind, it) } ?: kind
+    }
+
+    private fun clearRuleHighlight() {
+        handler.removeCallbacks(clearHighlightLater)
+        highlightedIndex = null
+        highlightRequests.invalidate()
+        binding.wvInspector.evaluateJavascript(JsScripts.CLEAR_HIGHLIGHT_SCRIPT, null)
+    }
+
+    private fun onRuleTapped(index: Int) {
+        val action = tempActions[index]
+        val toggleOff = action.actionType == "hidden" && highlightedIndex == index
+        clearRuleHighlight()
+        if (toggleOff) return
+        if (action.actionType == "scroll") {
+            runCatching { JSONObject(action.targetSelector).getInt("y") }.getOrNull()
+                ?.let { binding.wvInspector.evaluateJavascript(JsScripts.getScrollScript(it), null) }
+            return
+        }
+        val token = highlightRequests.next()
+        binding.wvInspector.evaluateJavascript(JsScripts.getHighlightScript(action.actionType, action.targetSelector)) { result ->
+            if (!highlightRequests.isCurrent(token)) return@evaluateJavascript
+            if ((result?.toDoubleOrNull() ?: 0.0) < 1) {
+                Toast.makeText(this, R.string.edit_rule_not_found, Toast.LENGTH_SHORT).show()
+                return@evaluateJavascript
+            }
+            highlightedIndex = index
+            if (action.actionType != "hidden") handler.postDelayed(clearHighlightLater, HIGHLIGHT_MS)
         }
     }
 
@@ -342,6 +475,7 @@ class PluginEditActivity : AppCompatActivity() {
         colorBg = null
         colorText = null
         refreshColorButtons()
+        updateStep()
     }
 
     private fun refreshColorButtons() {
@@ -358,7 +492,7 @@ class PluginEditActivity : AppCompatActivity() {
         val hiddenActions = tempActions.filter { it.actionType == "hidden" }
         if (hiddenActions.isEmpty()) {
             // Disconnect old MutationObserver if no hidden actions
-            binding.wvInspector.evaluateJavascript("(function() { if (window.webPluginObserver) { window.webPluginObserver.disconnect(); } })();", null)
+            binding.wvInspector.evaluateJavascript("(function() { if (window.webPluginObserver) { window.webPluginObserver.disconnect(); } window.webPluginApplyHide = null; })();", null)
             return
         }
         val script = JsScripts.getMutationObserverHideScript(hiddenActions.map { it.targetSelector })
@@ -464,6 +598,7 @@ class PluginEditActivity : AppCompatActivity() {
 
     private fun refreshActionsListUI() {
         binding.layoutActionsList.removeAllViews()
+        updateStep()
         if (tempActions.isEmpty()) {
             val emptyTv = TextView(this).apply {
                 setText(R.string.edit_rules_empty)
@@ -475,50 +610,38 @@ class PluginEditActivity : AppCompatActivity() {
         }
 
         tempActions.forEachIndexed { index, action ->
-            val view = layoutInflater.inflate(android.R.layout.simple_list_item_2, null)
-            val text1 = view.findViewById<TextView>(android.R.id.text1)
-            val text2 = view.findViewById<TextView>(android.R.id.text2)
-            text1.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
-            text2.setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodySmall)
-
-            val textColorPrimary = androidx.core.content.ContextCompat.getColor(this, R.color.onSurface)
-            val textColorSecondary = androidx.core.content.ContextCompat.getColor(this, R.color.onSurfaceVariant)
-
-            try {
-                val json = JSONObject(action.targetSelector)
-                val selector = json.optString("selector")
-                val typeDesc = when (action.actionType) {
-                    "hidden" -> getString(R.string.edit_rule_type_hide)
-                    "color" -> getString(R.string.edit_rule_type_color, action.styleCss)
-                    "scroll" -> getString(R.string.edit_rule_type_start, json.optInt("y"))
-                    else -> getString(R.string.edit_rule_type_click, triggerLabel(action.triggerType))
-                }
-                text1.text = getString(R.string.edit_rule_title, index + 1, typeDesc)
-                text1.setTextColor(textColorPrimary)
-                text2.text = when {
-                    action.actionType == "scroll" -> getString(R.string.edit_rule_start_note)
-                    UnstableId.needsReselect(action.targetSelector) -> getString(R.string.edit_rule_select_again, selector)
-                    else -> selector
-                }
-                text2.setTextColor(textColorSecondary)
-            } catch (e: Exception) {
-                text1.text = getString(R.string.edit_rule_title, index + 1, action.actionType)
-                text1.setTextColor(textColorPrimary)
-                text2.setText(R.string.edit_rule_broken)
-                text2.setTextColor(textColorSecondary)
+            val item = ItemRuleBinding.inflate(layoutInflater, binding.layoutActionsList, false)
+            val typeDesc = when (action.actionType) {
+                "hidden" -> getString(R.string.edit_rule_type_hide)
+                "color" -> getString(R.string.edit_rule_type_color, action.styleCss)
+                "scroll" -> getString(R.string.edit_rule_type_start, runCatching { JSONObject(action.targetSelector).optInt("y") }.getOrDefault(0))
+                "click" -> getString(R.string.edit_rule_type_click, triggerLabel(action.triggerType))
+                else -> action.actionType
+            }
+            item.tvRuleType.text = getString(R.string.edit_rule_title, index + 1, typeDesc)
+            val label = ElementLabel.of(action.targetSelector)
+            item.tvRuleLabel.text = when {
+                action.actionType == "scroll" -> getString(R.string.edit_rule_start_note)
+                label == null -> getString(R.string.edit_rule_broken)
+                UnstableId.needsReselect(action.targetSelector) -> getString(R.string.edit_rule_select_again, labelText(label))
+                else -> labelText(label)
             }
 
-            // Click to remove action
-            view.setOnClickListener {
+            item.layoutRuleBody.setOnClickListener { onRuleTapped(index) }
+            item.btnRuleDelete.setOnClickListener {
+                clearRuleHighlight()
                 tempActions.removeAt(index)
                 refreshActionsListUI()
                 binding.wvInspector.reload() // Reload page to restore deleted hidden item
                 Toast.makeText(this, R.string.edit_rule_removed, Toast.LENGTH_SHORT).show()
             }
 
-            binding.layoutActionsList.addView(view)
+            binding.layoutActionsList.addView(item.root)
         }
     }
+
+    // 앱이 고른 주소(저장 주소·로드 주소·실패한 주소)의 거부는 다시 시도해도 같은 결과라 다시 시도 없이 보인다.
+    private fun showUnopenableAddress() = showLoadError(LoadErrorKind.BAD_ADDRESS, null)
 
     private fun showAddressError() {
         binding.tilInpTaddr.error = getString(R.string.url_input_error)
@@ -548,6 +671,7 @@ class PluginEditActivity : AppCompatActivity() {
         const val EXTRA_LOAD_URL = "load_url"
         const val EXTRA_LINK_WEBPAGE_ID = "link_webpage_id"
         const val EXTRA_SAVED_PLUGIN_ID = "saved_plugin_id"
+        private const val HIGHLIGHT_MS = 3000L
     }
 
     // Inner class bridge for element selection callback

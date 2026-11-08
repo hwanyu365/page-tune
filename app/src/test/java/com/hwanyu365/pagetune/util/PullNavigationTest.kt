@@ -8,20 +8,20 @@ import org.junit.Test
 
 class PullNavigationTest {
 
-    private fun down(atTop: Boolean = false, atBottom: Boolean = false, prev: Boolean = true, next: Boolean = true) =
-        PullNavigation.onDown(100f, 500f, atTop, atBottom, prev, next)
+    private fun down(atTop: Boolean = false, atBottom: Boolean = false, top: Boolean = true, bottom: Boolean = true) =
+        PullNavigation.onDown(100f, 500f, atTop, atBottom, top, bottom)
 
     private fun PullState.move(dy: Float, dx: Float = 0f) = PullNavigation.onMove(this, 100f + dx, 500f + dy)
     private fun PullState.up() = PullNavigation.onUp(this)
 
     @Test
-    fun `TC#60 맨 위에서 아래로 72dp 당겨 떼면 이전`() {
-        assertEquals(PullSide.PREV, down(atTop = true).move(72f).up())
+    fun `TC#60 맨 위에서 아래로 72dp 당겨 떼면 위 당기기`() {
+        assertEquals(PullSide.TOP, down(atTop = true).move(72f).up())
     }
 
     @Test
-    fun `TC#60 맨 아래에서 위로 72dp 당겨 떼면 다음`() {
-        assertEquals(PullSide.NEXT, down(atBottom = true).move(-72f).up())
+    fun `TC#60 맨 아래에서 위로 72dp 당겨 떼면 아래 당기기`() {
+        assertEquals(PullSide.BOTTOM, down(atBottom = true).move(-72f).up())
     }
 
     @Test
@@ -39,9 +39,9 @@ class PullNavigationTest {
     }
 
     @Test
-    fun `TC#60 그 쪽이 불가하면 누르지 않는다`() {
-        assertNull(down(atTop = true, prev = false).move(200f).up())
-        assertNull(down(atBottom = true, next = false).move(-200f).up())
+    fun `TC#60 그 쪽 연결이 없으면 누르지 않는다`() {
+        assertNull(down(atTop = true, top = false).move(200f).up())
+        assertNull(down(atBottom = true, bottom = false).move(-200f).up())
     }
 
     @Test
@@ -51,7 +51,7 @@ class PullNavigationTest {
         assertTrue(s.move(8f).showing)
         assertFalse(s.move(71f).ready)
         assertTrue(s.move(72f).ready)
-        assertEquals(PullSide.PREV, s.move(8f).side)
+        assertEquals(PullSide.TOP, s.move(8f).side)
     }
 
     @Test
@@ -77,13 +77,31 @@ class PullNavigationTest {
 
     @Test
     fun `TC#60 짧은 페이지는 당긴 방향대로다`() {
-        assertEquals(PullSide.PREV, down(atTop = true, atBottom = true).move(80f).up())
-        assertEquals(PullSide.NEXT, down(atTop = true, atBottom = true).move(-80f).up())
+        assertEquals(PullSide.TOP, down(atTop = true, atBottom = true).move(80f).up())
+        assertEquals(PullSide.BOTTOM, down(atTop = true, atBottom = true).move(-80f).up())
     }
 
     @Test
     fun `TC#60 반대로 8dp 넘게 움직였다 되돌아오면 그 터치에서는 누르지 않는다`() {
         assertNull(down(atTop = true).move(-9f).move(100f).up())
         assertNull(down(atBottom = true).move(9f).move(-100f).up())
+    }
+
+    @Test
+    fun `TC#60 가장 많이 당긴 지점에서 16dp 되돌리면 취소되고 안내가 사라진다`() {
+        val s = down(atTop = true).move(200f).move(184f)
+        assertFalse(s.showing)
+        assertNull(s.up())
+        assertNull(down(atBottom = true).move(-200f).move(-184f).up())
+    }
+
+    @Test
+    fun `TC#60 16dp 미만 되돌림은 유지된다`() {
+        assertEquals(PullSide.TOP, down(atTop = true).move(200f).move(185f).up())
+    }
+
+    @Test
+    fun `TC#60 취소된 터치는 다시 당겨도 누르지 않는다`() {
+        assertNull(down(atTop = true).move(200f).move(180f).move(300f).up())
     }
 }

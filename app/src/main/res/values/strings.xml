@@ -93,6 +93,8 @@
     <string name="edit_trigger_double_bottom">Double tap bottom area</string>
     <string name="edit_trigger_button_prev">Prev button (◁)</string>
     <string name="edit_trigger_button_next">Next button (▷)</string>
+    <string name="edit_trigger_pull_top">Pull down at page top</string>
+    <string name="edit_trigger_pull_bottom">Pull up at page bottom</string>
     <string name="edit_area_label">Tap area height (1–50%)</string>
     <string name="edit_area_hint">Default: 40%</string>
     <string name="edit_area_error">Enter a value from 1 to 50</string>
@@ -207,11 +209,7 @@
     <string name="tune_kind_color">Color %d</string>
     <string name="tune_kind_click">Prev/Next navigation %d</string>
     <string name="tune_kind_start">Start position %d</string>
-    <string name="edit_pull_nav">Pull at page edge to go Prev/Next</string>
-    <string name="edit_pull_nav_note">Pull down at the top for Prev, pull up at the bottom for Next. Needs a Prev/Next button rule.</string>
-    <string name="browser_pull_prev">Pull for previous page</string>
-    <string name="browser_release_prev">Release for previous page</string>
-    <string name="browser_pull_next">Pull for next page</string>
-    <string name="browser_release_next">Release for next page</string>
-    <string name="whats_new_10300">• Pull at the top or bottom of a page to go to the previous or next page. Turn it on for each Tune.</string>
+    <string name="whats_new_10300">• Pull down at the top or up at the bottom of a page to tap a linked element, like the next post. Link it as a Prev/Next navigation rule.</string>
+    <string name="browser_pull">Pull to go</string>
+    <string name="browser_pull_release">Release to go</string>
 </resources>

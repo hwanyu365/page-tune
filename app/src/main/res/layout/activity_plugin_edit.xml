@@ -448,21 +448,6 @@
                     android:layout_marginTop="8dp"
                     android:text="@string/edit_start_position_set" />
 
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/sw_pull_nav"
-                    android:enabled="false"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/edit_pull_nav" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/edit_pull_nav_note"
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:textColor="@color/onSurfaceVariant" />
-
             </LinearLayout>
 
         </ScrollView>

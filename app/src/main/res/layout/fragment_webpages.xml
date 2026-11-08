@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground">
+    android:background="@color/background">
 
     <!-- Table Header for multi-delete mode -->
     <LinearLayout
@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="8dp"
-        android:background="@color/colorGrayLight"
+        android:background="@color/surfaceContainerHigh"
         android:gravity="center_vertical"
         android:visibility="gone">
 
@@ -41,17 +41,16 @@
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
         android:padding="8dp"
-        android:background="@color/colorGrayLight"
+        android:background="@color/surfaceContainerHigh"
         android:visibility="gone">
 
         <Button
             android:id="@+id/btn_cancel_delete"
+            style="?attr/borderlessButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/cancel"
-            android:backgroundTint="@color/colorPrimary"
-            android:textColor="@color/colorWhite"
             android:layout_marginEnd="8dp" />
 
         <Button
@@ -59,9 +58,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/delete"
-            android:backgroundTint="@color/colorAccent"
-            android:textColor="@color/colorOnAccent" />
+            android:text="@string/delete" />
     </LinearLayout>
 
     <LinearLayout
@@ -71,7 +68,7 @@
         android:layout_centerInParent="true"
         android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:padding="32dp"
+        android:padding="24dp"
         android:visibility="gone">
 
         <TextView
@@ -79,8 +76,8 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/empty_webpages_message"
-            android:textSize="16sp"
-            android:textColor="@color/colorTextPrimary" />
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="@color/onSurface" />
 
         <Button
             android:id="@+id/btn_empty_action"
@@ -88,9 +85,7 @@
             android:layout_height="wrap_content"
             android:minHeight="48dp"
             android:layout_marginTop="16dp"
-            android:text="@string/empty_webpages_action"
-            android:backgroundTint="@color/colorAccent"
-            android:textColor="@color/colorOnAccent" />
+            android:text="@string/empty_webpages_action" />
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -102,7 +97,7 @@
         android:layout_margin="16dp"
         android:src="@drawable/ic_add"
         android:contentDescription="@string/empty_webpages_action"
-        app:tint="@color/colorWhite"
-        app:backgroundTint="@color/colorAccent" />
+        app:tint="@color/onPrimary"
+        app:backgroundTint="@color/primary" />
 
 </RelativeLayout>

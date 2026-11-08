@@ -1,12 +1,12 @@
 package com.hwanyu365.pagetune
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.tabs.TabLayoutMediator
 import com.hwanyu365.pagetune.databinding.ActivityMainBinding
 import com.hwanyu365.pagetune.ui.fragment.PluginsFragment
 import com.hwanyu365.pagetune.ui.fragment.WebPagesFragment
@@ -25,14 +25,16 @@ class MainActivity : AppCompatActivity() {
         binding.root.padForInsets()
         setSupportActionBar(binding.toolbar)
 
-        binding.viewPager.adapter = MainPagerAdapter(supportFragmentManager)
-        binding.tabLayout.setupWithViewPager(binding.viewPager)
+        binding.viewPager.adapter = MainPagerAdapter()
+        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+            tab.setText(if (position == 0) R.string.tab_webpages else R.string.tab_tunes)
+        }.attach()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId != R.id.action_licenses) return super.onOptionsItemSelected(item)
         val text = resources.openRawResource(R.raw.open_source_licenses).bufferedReader().use { it.readText() }
-        AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this)
             .setTitle(R.string.menu_licenses)
             .setMessage(text)
             .setPositiveButton(R.string.ok, null)
@@ -40,13 +42,10 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    private inner class MainPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
-        override fun getCount(): Int = 2
+    private inner class MainPagerAdapter : FragmentStateAdapter(this) {
+        override fun getItemCount(): Int = 2
 
-        override fun getItem(position: Int): Fragment =
+        override fun createFragment(position: Int): Fragment =
             if (position == 0) WebPagesFragment() else PluginsFragment()
-
-        override fun getPageTitle(position: Int): CharSequence =
-            getString(if (position == 0) R.string.tab_webpages else R.string.tab_tunes)
     }
 }

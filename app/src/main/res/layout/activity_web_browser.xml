@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/colorOverlay"
+        android:background="@color/scrim"
         android:orientation="horizontal"
         android:gravity="center"
         android:padding="8dp"
@@ -36,8 +36,6 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="@string/browser_prev"
-            android:backgroundTint="@color/colorAccent"
-            android:textColor="@color/colorOnAccent"
             android:layout_marginEnd="16dp" />
 
         <Button
@@ -45,8 +43,6 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="@string/browser_next"
-            android:backgroundTint="@color/colorAccent"
-            android:textColor="@color/colorOnAccent"
             android:layout_marginStart="16dp" />
 
     </LinearLayout>
@@ -68,7 +64,7 @@
             android:background="@drawable/bg_quick_handle"
             android:contentDescription="@string/quick_menu"
             android:src="@drawable/ic_more_vert"
-            app:tint="@color/colorWhite" />
+            app:tint="@color/onSurface" />
 
         <LinearLayout
             android:id="@+id/layout_quick_toolbar"
@@ -77,7 +73,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
             android:layout_toStartOf="@id/btn_quick_handle"
-            android:background="@color/colorOverlay"
+            android:background="@color/scrim"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:visibility="gone">
@@ -90,7 +86,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/quick_back"
             android:src="@drawable/ic_arrow_back"
-            app:tint="@color/colorTextPrimary" />
+            app:tint="@color/onSurface" />
 
         <ImageButton
             android:id="@+id/btn_quick_refresh"
@@ -100,7 +96,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/quick_refresh"
             android:src="@drawable/ic_refresh"
-            app:tint="@color/colorTextPrimary" />
+            app:tint="@color/onSurface" />
 
         <ImageButton
             android:id="@+id/btn_quick_share"
@@ -110,7 +106,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/quick_share"
             android:src="@drawable/ic_share"
-            app:tint="@color/colorTextPrimary" />
+            app:tint="@color/onSurface" />
 
         <ImageButton
             android:id="@+id/btn_quick_toggle"
@@ -120,7 +116,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/quick_tune_off"
             android:src="@drawable/ic_toggle_on"
-            app:tint="@color/colorTextPrimary" />
+            app:tint="@color/onSurface" />
 
         <ImageButton
             android:id="@+id/btn_quick_edit"
@@ -130,7 +126,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/quick_edit_tune"
             android:src="@drawable/ic_edit"
-            app:tint="@color/colorTextPrimary" />
+            app:tint="@color/onSurface" />
 
         </LinearLayout>
 
@@ -142,10 +138,10 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="4dp"
             android:paddingHorizontal="12dp"
-            android:paddingVertical="6dp"
-            android:background="@color/colorOverlay"
-            android:textColor="@color/colorWhite"
-            android:textSize="12sp"
+            android:paddingVertical="4dp"
+            android:background="@color/scrim"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="@color/onSurface"
             android:visibility="gone" />
 
     </RelativeLayout>

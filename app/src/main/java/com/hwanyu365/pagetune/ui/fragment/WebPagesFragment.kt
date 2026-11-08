@@ -1,6 +1,5 @@
 package com.hwanyu365.pagetune.ui.fragment
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
@@ -8,6 +7,7 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hwanyu365.pagetune.R
 import com.hwanyu365.pagetune.WebBrowserActivity
 import com.hwanyu365.pagetune.databinding.DialogWebpageEditBinding
@@ -80,7 +80,7 @@ class WebPagesFragment : Fragment() {
                 Toast.makeText(requireContext(), R.string.list_none_selected, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            AlertDialog.Builder(requireContext())
+            MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.webpage_delete_title)
                 .setMessage(resources.getQuantityString(R.plurals.webpage_delete_message, selectedIds.size, selectedIds.size))
                 .setPositiveButton(R.string.delete) { _, _ ->
@@ -132,6 +132,12 @@ class WebPagesFragment : Fragment() {
         return super.onOptionsItemSelected(item)
     }
 
+    // ViewPager2 는 보이지 않게 된 탭의 메뉴를 끈다. 그 시점이 탭을 떠난 때다.
+    override fun setMenuVisibility(menuVisible: Boolean) {
+        super.setMenuVisibility(menuVisible)
+        if (!menuVisible && this::adapter.isInitialized && adapter.isDeleteMode) exitDeleteMode()
+    }
+
     private fun enterDeleteMode() {
         adapter.setDeleteMode(true)
         binding.layoutHeader.visibility = View.VISIBLE
@@ -149,7 +155,7 @@ class WebPagesFragment : Fragment() {
 
     private fun showWebPageEditDialog(webPage: WebPage?) {
         val dialogBinding = DialogWebpageEditBinding.inflate(LayoutInflater.from(requireContext()))
-        val dialog = AlertDialog.Builder(requireContext())
+        val dialog = MaterialAlertDialogBuilder(requireContext())
             .setView(dialogBinding.root)
             .create()
 

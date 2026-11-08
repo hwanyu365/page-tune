@@ -1,10 +1,10 @@
 package com.hwanyu365.pagetune.ui.view
 
-import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.widget.SeekBar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hwanyu365.pagetune.R
 import com.hwanyu365.pagetune.databinding.DialogColorPickerBinding
 
@@ -38,7 +38,7 @@ object ColorPickerDialog {
         binding.sbBlue.progress = Color.blue(start)
         refreshPreview()
 
-        AlertDialog.Builder(context)
+        MaterialAlertDialogBuilder(context)
             .setTitle(title)
             .setView(binding.root)
             .setPositiveButton(R.string.ok) { _, _ -> onPick(toHex(currentColor())) }

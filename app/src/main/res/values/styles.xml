@@ -1,38 +1,112 @@
 <resources>
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowBackground">@color/colorBackground</item>
-        <item name="android:textColorPrimary">@color/colorTextPrimary</item>
-        <item name="android:textColorSecondary">@color/colorTextSecondary</item>
-        <item name="windowActionBar">true</item>
-        <item name="windowNoTitle">false</item>
-        <item name="actionBarStyle">@style/AppTheme.ActionBar</item>
+    <style name="AppTheme" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/onPrimary</item>
+        <item name="colorPrimaryContainer">@color/primary</item>
+        <item name="colorOnPrimaryContainer">@color/onPrimary</item>
+        <item name="colorPrimaryInverse">@color/primary</item>
+        <!-- M3 기본 보라 계열이 secondary·tertiary 를 읽는 위젯으로 새지 않게 토큰에 묶는다. -->
+        <item name="colorSecondary">@color/primary</item>
+        <item name="colorOnSecondary">@color/onPrimary</item>
+        <item name="colorSecondaryContainer">@color/surfaceContainerHigh</item>
+        <item name="colorOnSecondaryContainer">@color/onSurface</item>
+        <item name="colorTertiary">@color/primary</item>
+        <item name="colorOnTertiary">@color/onPrimary</item>
+        <item name="colorTertiaryContainer">@color/surfaceContainerHigh</item>
+        <item name="colorOnTertiaryContainer">@color/onSurface</item>
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorOnBackground">@color/onSurface</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/onSurface</item>
+        <item name="colorSurfaceVariant">@color/surfaceContainerHigh</item>
+        <item name="colorOnSurfaceVariant">@color/onSurfaceVariant</item>
+        <item name="colorSurfaceInverse">@color/onSurface</item>
+        <item name="colorOnSurfaceInverse">@color/surface</item>
+        <item name="colorSurfaceBright">@color/surfaceContainerHigh</item>
+        <item name="colorSurfaceDim">@color/surface</item>
+        <item name="colorSurfaceContainerLowest">@color/surface</item>
+        <item name="colorSurfaceContainerLow">@color/surfaceContainerLow</item>
+        <item name="colorSurfaceContainer">@color/surfaceContainer</item>
+        <item name="colorSurfaceContainerHigh">@color/surfaceContainerHigh</item>
+        <item name="colorSurfaceContainerHighest">@color/surfaceContainerHigh</item>
+        <item name="colorOutline">@color/outline</item>
+        <item name="colorOutlineVariant">@color/outlineVariant</item>
+        <item name="colorError">@color/error</item>
+        <item name="colorOnError">@color/onError</item>
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:textColorPrimary">@color/onSurface</item>
+        <item name="android:textColorSecondary">@color/onSurfaceVariant</item>
+
+        <item name="toolbarStyle">@style/Widget.App.Toolbar</item>
+        <item name="tabStyle">@style/Widget.App.TabLayout</item>
+        <item name="materialCardViewStyle">@style/Widget.App.CardView</item>
+        <item name="borderlessButtonStyle">@style/Widget.App.Button.TextButton</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.App.Button.OutlinedButton</item>
+        <item name="textInputStyle">@style/Widget.App.TextInputLayout</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
     </style>
 
-    <style name="AppTheme.ActionBar" parent="Widget.AppCompat.ActionBar.Solid">
-        <item name="background">@color/colorPrimary</item>
-        <item name="titleTextStyle">@style/AppTheme.ActionBar.Title</item>
-    </style>
-
-    <style name="AppTheme.ActionBar.Title" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
-        <item name="android:textColor">@color/colorTextPrimary</item>
-    </style>
-
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="AppTheme.FullScreen" parent="Theme.AppCompat.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <style name="AppTheme.FullScreen">
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowBackground">@color/colorBackground</item>
+    </style>
+
+    <!-- M3 는 표면 위 강조 글자에 colorPrimary 를 쓴다. 표면 위에서 4.5:1 을 넘는 brandOnSurface 로 바꿔 끼운다. -->
+    <style name="ThemeOverlay.App.BrandOnSurface" parent="">
+        <item name="colorPrimary">@color/brandOnSurface</item>
+    </style>
+
+    <!-- 버튼 스타일은 M3 버튼 overlay 의 컨테이너 속성을 그대로 물려받아야 배경이 풀린다. -->
+    <style name="ThemeOverlay.App.Button.BrandOnSurface" parent="ThemeOverlay.Material3.Button.TextButton">
+        <item name="colorPrimary">@color/brandOnSurface</item>
+    </style>
+
+    <style name="Widget.App.Toolbar" parent="Widget.Material3.Toolbar.Surface">
+        <item name="android:background">@color/surfaceContainerLow</item>
+        <item name="titleTextAppearance">@style/TextAppearance.Material3.TitleLarge</item>
+    </style>
+
+    <style name="Widget.App.TabLayout" parent="Widget.Material3.TabLayout">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.BrandOnSurface</item>
+        <item name="tabIndicatorColor">@color/primary</item>
+        <item name="android:background">@color/surfaceContainerLow</item>
+        <item name="tabTextAppearance">@style/TextAppearance.Material3.LabelLarge</item>
+    </style>
+
+    <style name="Widget.App.CardView" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">@color/surfaceContainer</item>
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardElevation">0dp</item>
+    </style>
+
+    <style name="Widget.App.Button.TextButton" parent="Widget.Material3.Button.TextButton">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.Button.BrandOnSurface</item>
+    </style>
+
+    <style name="Widget.App.Button.OutlinedButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.Button.BrandOnSurface</item>
+    </style>
+
+    <style name="Widget.App.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.TextInputLayout</item>
+    </style>
+
+    <style name="ThemeOverlay.App.TextInputLayout" parent="ThemeOverlay.Material3.TextInputEditText.OutlinedBox">
+        <item name="colorPrimary">@color/brandOnSurface</item>
+    </style>
+
+    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="materialAlertDialogTitleTextStyle">@style/Widget.App.MaterialAlertDialog.Title</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.App.Button.TextButton.Dialog</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.App.Button.TextButton.Dialog</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.App.Button.TextButton.Dialog</item>
+    </style>
+
+    <style name="Widget.App.MaterialAlertDialog.Title" parent="MaterialAlertDialog.Material3.Title.Text">
+        <item name="android:textAppearance">@style/TextAppearance.Material3.TitleMedium</item>
+    </style>
+
+    <style name="Widget.App.Button.TextButton.Dialog" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.Button.BrandOnSurface</item>
     </style>
 </resources>

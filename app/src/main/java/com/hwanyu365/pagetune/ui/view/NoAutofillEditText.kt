@@ -3,13 +3,13 @@ package com.hwanyu365.pagetune.ui.view
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
-import androidx.appcompat.widget.AppCompatEditText
+import com.google.android.material.textfield.TextInputEditText
 
 class NoAutofillEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
-) : AppCompatEditText(context, attrs, defStyleAttr) {
+) : TextInputEditText(context, attrs, defStyleAttr) {
 
     // Overriding this method to return AUTOFILL_TYPE_NONE completely blocks
     // the Android Autofill framework (including Samsung Pass) from recognizing this field.

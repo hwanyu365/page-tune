@@ -61,7 +61,7 @@ class ResourceRulesTest {
 
     @Test
     fun `TC#14 한국어 문구는 영문 뒤 조사를 띄우지 않는다`() {
-        val spaced = Regex("""[A-Za-z0-9] (을|를|이|가|은|는|으로|로|의|에|와|과|도)(?=[\s.,!?"<]|$)""")
+        val spaced = Regex("""[A-Za-z0-9] (을|를|이|가|은|는|으로|로|의|에서|에게|에|와|과|도|만|부터|까지|처럼|보다|이나|나|랑)(?=[\s.,!?"<]|$)""")
         val bad = File(res, "values-ko/strings.xml").readLines().filter { spaced.containsMatchIn(it) }
         assertEquals(emptyList<String>(), bad)
     }

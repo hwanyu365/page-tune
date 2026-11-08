@@ -72,4 +72,17 @@ class EditSnapshotTest {
         assertFalse(empty.differsFrom(EditSnapshot.of("", "", emptyList())))
         assertTrue(empty.differsFrom(EditSnapshot.of("x", "", emptyList())))
     }
+
+    @Test
+    fun `TC#37 단계 판정의 규칙 비교는 이름·주소만 바뀌면 false`() {
+        assertFalse(snap(name = "x", url = "https://b.com").rulesDifferFrom(snap()))
+    }
+
+    @Test
+    fun `TC#37 단계 판정의 규칙 비교는 규칙 추가·순서 변경이면 true, id 만 다르면 false`() {
+        val two = snap().rules
+        assertTrue(snap(rules = two + rule()).rulesDifferFrom(snap()))
+        assertTrue(snap(rules = two.reversed()).rulesDifferFrom(snap()))
+        assertFalse(snap(rules = two.map { it.copy(id = 99) }).rulesDifferFrom(snap()))
+    }
 }

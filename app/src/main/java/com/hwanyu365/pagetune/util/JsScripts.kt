@@ -172,47 +172,119 @@ object JsScripts {
         })();
     """.trimIndent()
 
+    private val HIDE_FIND_JS = """
+        function webPluginFindHideTargets(info) {
+            if (info.id) {
+                var el = document.getElementById(info.id);
+                if (el) return [el];
+            }
+            var els = webPluginQueryAll(info.selector);
+            if (els.length > 0) return els;
+            return webPluginAttrMatches(info, false);
+        }
+    """.trimIndent()
+
+    private val CLICK_FIND_JS = """
+        function normalizeText(text) {
+            if (!text) return "";
+            // Remove numbers, parentheses, brackets, whitespace, and special characters
+            return text.replace(/[0-9\(\)\[\]\s\-\.\,\:\;\/\\?\!\&\_\#\+\=\*\~\`\^]/g, '').trim().toLowerCase();
+        }
+
+        function webPluginFindClickTarget(info) {
+            if (info.id) {
+                var el = document.getElementById(info.id);
+                if (el) return el;
+            }
+
+            if (info.textContent) {
+                var targetNorm = normalizeText(info.textContent);
+                if (targetNorm) {
+                    var tag = info.tagName || '*';
+                    var els = document.getElementsByTagName(tag);
+                    for (var i = 0; i < els.length; i++) {
+                        var elNorm = normalizeText(els[i].textContent);
+                        if (elNorm && (elNorm.indexOf(targetNorm) !== -1 || targetNorm.indexOf(elNorm) !== -1)) {
+                            return els[i];
+                        }
+                    }
+                }
+            }
+
+            var byAttrs = webPluginAttrMatches(info, true);
+            if (byAttrs.length > 0) return byAttrs[0];
+
+            return webPluginQueryAll(info.selector)[0] || null;
+        }
+    """.trimIndent()
+
+    /**
+     * 규칙의 요소를 그 규칙이 실제로 적용되는 찾기 순서로 찾아 테두리를 그리고, 찾은 수를 돌려준다.
+     * 숨기기 규칙은 해제할 때까지 요소와 접힌 부모를 보이게 두고, 숨기기 재적용도 그 요소를 건너뛴다.
+     */
+    fun getHighlightScript(actionType: String, detailsJson: String): String {
+        val unhide = actionType == "hidden"
+        val find = if (actionType == "click") "[webPluginFindClickTarget(info)].filter(Boolean)" else "webPluginFindHideTargets(info)"
+        return """
+            (function() {
+                $ELEMENT_MATCH_JS
+                $HIDE_FIND_JS
+                $CLICK_FIND_JS
+
+                $CLEAR_HIGHLIGHT_SCRIPT
+
+                var targets = [];
+                try {
+                    var info = JSON.parse(${jsString(detailsJson)});
+                    targets = $find;
+                } catch (e) {
+                    targets = [];
+                }
+
+                var saved = targets.map(function(el) {
+                    return { el: el, value: el.style.getPropertyValue('outline'), priority: el.style.getPropertyPriority('outline') };
+                });
+                targets.forEach(function(el) {
+                    if ($unhide) {
+                        for (var n = el; n && n !== document.body && n !== document.documentElement; n = n.parentElement) {
+                            if (n.style.display === 'none') n.style.removeProperty('display');
+                        }
+                    }
+                    el.style.setProperty('outline', '3px solid #ff9800', 'important');
+                });
+                window.webPluginHighlighted = targets;
+
+                window.webPluginClearRuleHighlight = function() {
+                    saved.forEach(function(s) {
+                        if (s.el === window.currentlySelectedElement) return;
+                        if (s.value) s.el.style.setProperty('outline', s.value, s.priority);
+                        else s.el.style.removeProperty('outline');
+                    });
+                    window.webPluginHighlighted = [];
+                    window.webPluginClearRuleHighlight = null;
+                    if ($unhide && window.webPluginApplyHide) window.webPluginApplyHide();
+                };
+
+                if (targets.length > 0) {
+                    try { targets[0].scrollIntoView({ block: 'center' }); } catch (e) {}
+                }
+                return targets.length;
+            })();
+        """.trimIndent()
+    }
+
+    const val CLEAR_HIGHLIGHT_SCRIPT = "if (window.webPluginClearRuleHighlight) window.webPluginClearRuleHighlight();"
+
     /** 요소 정보로 찾은 첫 요소를 클릭한다. 단계마다 찾지 못하면 다음 단계로 넘어간다. */
     fun getClickEventScript(detailsJson: String): String {
         return """
             (function() {
                 $ELEMENT_MATCH_JS
-
-                function normalizeText(text) {
-                    if (!text) return "";
-                    // Remove numbers, parentheses, brackets, whitespace, and special characters
-                    return text.replace(/[0-9\(\)\[\]\s\-\.\,\:\;\/\\\?\!\&\_\#\+\=\*\~\`\^]/g, '').trim().toLowerCase();
-                }
-
-                function findElement(info) {
-                    if (info.id) {
-                        var el = document.getElementById(info.id);
-                        if (el) return el;
-                    }
-
-                    if (info.textContent) {
-                        var targetNorm = normalizeText(info.textContent);
-                        if (targetNorm) {
-                            var tag = info.tagName || '*';
-                            var els = document.getElementsByTagName(tag);
-                            for (var i = 0; i < els.length; i++) {
-                                var elNorm = normalizeText(els[i].textContent);
-                                if (elNorm && (elNorm.indexOf(targetNorm) !== -1 || targetNorm.indexOf(elNorm) !== -1)) {
-                                    return els[i];
-                                }
-                            }
-                        }
-                    }
-
-                    var byAttrs = webPluginAttrMatches(info, true);
-                    if (byAttrs.length > 0) return byAttrs[0];
-
-                    return webPluginQueryAll(info.selector)[0] || null;
-                }
+                $CLICK_FIND_JS
 
                 try {
                     var info = JSON.parse(${jsString(detailsJson)});
-                    var target = findElement(info);
+                    var target = webPluginFindClickTarget(info);
                     if (!target) {
                         console.error("WebPlugin: Target element not found for click.");
                         return null;
@@ -414,25 +486,17 @@ object JsScripts {
             (function() {
                 $ELEMENT_MATCH_JS
 
-                var actionDetailsList = [${details.joinToString(", ") { jsString(it) }}];
+                $HIDE_FIND_JS
 
-                function findElement(info) {
-                    if (info.id) {
-                        var el = document.getElementById(info.id);
-                        if (el) return [el];
-                    }
-                    var els = webPluginQueryAll(info.selector);
-                    if (els.length > 0) return els;
-                    return webPluginAttrMatches(info, false);
-                }
+                var actionDetailsList = [${details.joinToString(", ") { jsString(it) }}];
 
                 function applyHide() {
                     actionDetailsList.forEach(function(detailsStr) {
                         try {
                             var info = JSON.parse(detailsStr);
-                            var targets = findElement(info);
+                            var targets = webPluginFindHideTargets(info);
                             targets.forEach(function(el) {
-                                if (el && el.style.display !== 'none') {
+                                if (el && el.style.display !== 'none' && (window.webPluginHighlighted || []).indexOf(el) === -1) {
                                     console.log("WebPlugin: hiding element", el);
                                     el.style.setProperty('display', 'none', 'important');
                                     // Collapse empty parent containers
@@ -471,6 +535,7 @@ object JsScripts {
 
                 // Initial run
                 applyHide();
+                window.webPluginApplyHide = applyHide;
 
                 // Start observing DOM changes
                 if (window.webPluginObserver) {

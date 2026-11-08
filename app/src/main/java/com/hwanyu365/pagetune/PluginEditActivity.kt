@@ -463,6 +463,8 @@ class PluginEditActivity : AppCompatActivity() {
                 return@evaluateJavascript
             }
             highlightedIndex = index
+            // 펼친 시트는 WebView 하단을 덮는다 → 페이지 끝 요소는 가운데로 스크롤할 수 없어 접어야 보인다.
+            sheet.state = BottomSheetBehavior.STATE_COLLAPSED
             if (action.actionType != "hidden") handler.postDelayed(clearHighlightLater, HIGHLIGHT_MS)
         }
     }

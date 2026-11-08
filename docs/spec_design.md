@@ -48,7 +48,7 @@
 - `FR#2` 색은 §4.1 토큰으로만 참조한다 [요구사항] GH-52
   - 레이아웃·drawable·Kotlin 은 색 값을 직접 쓰지 않고 테마 속성(`?attr/colorPrimary` 등) 또는 토큰 이름의 색 리소스를 참조한다.
   - 값으로 이름 붙인 기존 색 리소스는 남기지 않는다.
-  - 예외: 앱 아이콘 전용 `ic_launcher_background` (`spec_store.md` FR#1), 벡터 아이콘 path 의 기본 채움색(틴트로 덮인다), 페이지 안에 주입하는 스크립트의 색(요소 선택 강조 테두리 등), 색상 규칙 프리셋(`spec_tune_edit.md` FR#27) → 앱 화면 색이 아니다.
+  - 예외: 앱 아이콘 전용 `ic_launcher_background` (`spec_store.md` FR#1), 벡터 아이콘 path 의 기본 채움색(틴트로 덮인다), 페이지 안에 주입하는 스크립트의 색(요소 선택 강조 테두리 등), 색상 규칙 프리셋(`spec_tune_edit.md` FR#27, §6.13 의 프리셋 상수 한 곳) → 앱 화면 색이 아니다.
 - `FR#3` 화면 글자는 §4.2 스케일의 역할 하나로 지정한다 [요구사항] GH-52
   - 레이아웃과 코드는 글자 크기를 직접 지정하지 않고 `textAppearance` 로 역할을 고른다.
   - 최소 크기는 12sp 이고, 본문·안내 문구는 14sp 이상이다.
@@ -189,7 +189,7 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 | TC | 시나리오 | 대상 | 비고 |
 | --- | --- | --- | --- |
 | `TC#1` | 매니페스트의 모든 activity 테마와 application 테마가 앱 테마 계열이고, 앱 테마의 최상위 부모가 `Theme.Material3.Dark` 로 시작한다. `Theme.AppCompat` 부모가 0건 | [FR#1] | 단위 (리소스 XML 파싱) |
-| `TC#2` | `values/colors.xml` 에 §4.1 토큰이 모두 같은 값으로 있고, 그 밖의 색 리소스는 `ic_launcher_background` 뿐이다. `scrim` 은 `#D9171717` 이다. `layout`·`menu`·`drawable`(launcher·벡터 아이콘 제외) 에 `#` 색 리터럴 0건. `app/src/main/java` Kotlin 에 색 직접 지정 0건: `Color.parseColor("#`, `Color.rgb(`, `Color.argb(`, `0xFF`·`0x` 로 시작하는 8자리 색 정수 리터럴, `Color.BLACK`·`Color.WHITE` 등 `Color.` 상수 (FR#2 예외인 주입 스크립트 문자열과 색 선택 다이얼로그의 사용자 색 계산은 허용 목록으로 둔다) | [FR#2] | 단위 (리소스 XML 파싱 + 소스 읽기). mutation: 구현 PR 에서 Kotlin 파일 하나에 `Color.parseColor("#ffffff")` 를 넣어 실패하는지 확인 |
+| `TC#2` | `values/colors.xml` 에 §4.1 토큰이 모두 같은 값으로 있고, 그 밖의 색 리소스는 `ic_launcher_background` 뿐이다. `scrim` 은 `#D9171717` 이다. `layout`·`menu`·`drawable`(launcher·벡터 아이콘 제외) 에 `#` 색 리터럴 0건. `app/src/main/java` Kotlin 에 색 직접 지정 0건: `Color.parseColor("#`, `Color.rgb(`, `Color.argb(`, `0xFF`·`0x` 로 시작하는 8자리 색 정수 리터럴, `Color.BLACK`·`Color.WHITE` 등 `Color.` 상수 (FR#2 예외인 주입 스크립트 문자열, 색상 규칙 프리셋 상수(`spec_tune_edit.md` §6.13 의 한 곳), 색 선택 다이얼로그의 사용자 색 계산은 허용 목록으로 둔다. 허용 목록은 파일·심볼 단위이고, 프리셋 상수 밖의 `#RRGGBB` 문자열은 검사에 걸린다) | [FR#2] | 단위 (리소스 XML 파싱 + 소스 읽기). mutation: 구현 PR 에서 Kotlin 파일 하나에 `Color.parseColor("#ffffff")` 를 넣어 실패하는지 확인 |
 | `TC#3` | `colors.xml` 값으로 §4.1 대비 표의 모든 조합을 WCAG 상대 휘도 식으로 계산 → 각 기준 이상. `scrim` 은 `colors.xml` 의 ARGB 값(`#D9171717`)에서 알파를 읽어 흰색 위에 합성한 뒤 계산 | [NFR#1] [FR#6] | 단위. mutation: 구현 PR 에서 `onSurfaceVariant` 를 `#5c5c5c` 로 바꿔 실패하는지 확인 |
 | `TC#4` | `layout` 에 `android:textSize` 0건, Kotlin 에 `textSize =` 0건 | [FR#3] | 단위 (레이아웃) + `grep` (Kotlin) |
 | `TC#5` | `layout` 의 `layout_margin*`·`padding*` 값이 0dp 또는 §4.3 값 | [FR#4] | 단위 |

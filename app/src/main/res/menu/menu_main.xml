@@ -7,7 +7,7 @@
         android:icon="@drawable/ic_delete"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/action_licenses"
-        android:title="@string/menu_licenses"
+        android:id="@+id/action_settings"
+        android:title="@string/settings"
         app:showAsAction="never" />
 </menu>

@@ -9,7 +9,6 @@ import android.view.ViewConfiguration
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import android.widget.Toast
@@ -30,6 +29,9 @@ import com.hwanyu365.pagetune.save.planSave
 import com.hwanyu365.pagetune.ui.view.ColorPickerDialog
 import com.hwanyu365.pagetune.util.EditSnapshot
 import com.hwanyu365.pagetune.util.JsScripts
+import com.hwanyu365.pagetune.util.SafeWebViewClient
+import com.hwanyu365.pagetune.util.UrlPolicy
+import com.hwanyu365.pagetune.util.installSafeDownloads
 import com.hwanyu365.pagetune.util.SheetHeight
 import com.hwanyu365.pagetune.util.TriggerOptions
 import com.hwanyu365.pagetune.util.UnstableId
@@ -48,6 +50,7 @@ class PluginEditActivity : AppCompatActivity() {
 
     private var pluginId: Long = -1
     private var loadUrl: String? = null
+    private lateinit var webClient: SafeWebViewClient
     private var linkWebPageId: Long? = null
     private val tempActions = mutableListOf<PluginAction>()
     private var selectedElementJson: String? = null
@@ -90,7 +93,7 @@ class PluginEditActivity : AppCompatActivity() {
         } else {
             loadUrl?.let {
                 binding.etInpTaddr.setText(it)
-                binding.wvInspector.loadUrl(it)
+                webClient.loadChecked(binding.wvInspector, it, ::showAddressError)
             }
             initialSnapshot = currentSnapshot()
         }
@@ -100,7 +103,7 @@ class PluginEditActivity : AppCompatActivity() {
     private fun setupWebView() {
         com.hwanyu365.pagetune.util.WebViewConfig.applyCommon(binding.wvInspector)
 
-        binding.wvInspector.webViewClient = object : WebViewClient() {
+        webClient = object : SafeWebViewClient(this, { _, _ -> }) {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 // Cloudflare 통과 쿠키(cf_clearance)는 앱이 죽으면 날아간다. 페이지마다 디스크로 내려 재방문 시 챌린지를 건너뛴다.
@@ -113,24 +116,23 @@ class PluginEditActivity : AppCompatActivity() {
                 applyCurrentActions()
             }
         }
+        binding.wvInspector.webViewClient = webClient
+        binding.wvInspector.installSafeDownloads(this, binding.root)
         binding.wvInspector.webChromeClient = WebChromeClient()
         binding.wvInspector.addJavascriptInterface(AndroidInspectorBridge(), "AndroidBridge")
     }
 
     private fun setupListeners() {
         binding.btnLoadUrl.setOnClickListener {
-            var url = binding.etInpTaddr.text.toString().trim()
-            if (url.isNotEmpty()) {
-                if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                    url = "https://$url"
-                    binding.etInpTaddr.setText(url)
-                }
-                // If the target URL is already the current URL, force reload
-                if (binding.wvInspector.url == url) {
-                    binding.wvInspector.reload()
-                } else {
-                    binding.wvInspector.loadUrl(url)
-                }
+            val input = binding.etInpTaddr.text.toString()
+            if (input.isBlank()) return@setOnClickListener
+            val url = UrlPolicy.normalizeInput(input) ?: return@setOnClickListener showAddressError()
+            binding.tilInpTaddr.error = null
+            binding.etInpTaddr.setText(url)
+            if (binding.wvInspector.url == url) {
+                binding.wvInspector.reload()
+            } else {
+                webClient.loadChecked(binding.wvInspector, url, ::showAddressError)
             }
         }
 
@@ -292,7 +294,7 @@ class PluginEditActivity : AppCompatActivity() {
             if (pluginWithActions != null) {
                 binding.etInpPname.setText(pluginWithActions.plugin.name)
                 pluginWithActions.plugin.testUrl?.let { binding.etInpTaddr.setText(it) }
-                (loadUrl ?: pluginWithActions.plugin.testUrl)?.let { binding.wvInspector.loadUrl(it) }
+                (loadUrl ?: pluginWithActions.plugin.testUrl)?.let { webClient.loadChecked(binding.wvInspector, it, ::showAddressError) }
                 tempActions.addAll(pluginWithActions.actions)
                 refreshActionsListUI()
                 initialSnapshot = currentSnapshot()
@@ -518,9 +520,15 @@ class PluginEditActivity : AppCompatActivity() {
         }
     }
 
+    private fun showAddressError() {
+        binding.tilInpTaddr.error = getString(R.string.url_input_error)
+    }
+
     private fun savePlugin() {
+        val testInput = binding.etInpTaddr.text.toString()
+        val testUrl = if (testInput.isBlank()) "" else UrlPolicy.normalizeInput(testInput) ?: return showAddressError()
         val plan = planSave(
-            binding.etInpPname.text.toString(), binding.etInpTaddr.text.toString(), tempActions,
+            binding.etInpPname.text.toString(), testUrl, tempActions,
             pluginId.takeIf { it != -1L }, linkWebPageId
         )
         if (plan == null) {

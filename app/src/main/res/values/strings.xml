@@ -13,9 +13,37 @@
 
     <string name="list_select_all">Select all</string>
     <string name="list_none_selected">No items selected</string>
+    <string name="list_more_options">More options</string>
+    <string name="list_edit">Edit</string>
+    <plurals name="list_selected_count">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <string name="list_undo">Undo</string>
+    <string name="list_delete_failed">Couldn\'t delete</string>
+    <string name="list_restore_failed">Couldn\'t restore</string>
+    <plurals name="webpage_deleted">
+        <item quantity="one">%d web page deleted</item>
+        <item quantity="other">%d web pages deleted</item>
+    </plurals>
+    <plurals name="tune_deleted">
+        <item quantity="one">%d Tune deleted</item>
+        <item quantity="other">%d Tunes deleted</item>
+    </plurals>
 
-    <string name="webpage_edit_cd">Edit web page</string>
-    <string name="webpage_item_tune">Tune: %s</string>
+    <string name="intro_skip">Skip</string>
+    <string name="intro_next">Next</string>
+    <string name="intro_start">Start</string>
+    <string name="intro_1_title">Make a Tune</string>
+    <string name="intro_1_body">In the Tunes tab, open a site and pick elements on the page to hide them or change their colors.</string>
+    <string name="intro_2_title">Add a web page</string>
+    <string name="intro_2_body">In the Web pages tab, add a page and connect a Tune to it.</string>
+    <string name="intro_3_title">Use the quick menu</string>
+    <string name="intro_3_body">While viewing a page, open the quick menu at the top right to turn the Tune on or off or edit it.</string>
+    <string name="whats_new_title">What\'s new</string>
+    <string name="whats_new_version">Version %s</string>
+    <string name="whats_new_10200">• New look with a dark Material design\n• Web page and Tune cards, undo after delete\n• Step-by-step Tune editing and color presets\n• Error screens, external links, and Settings while viewing</string>
+
     <string name="webpage_item_tune_none">No Tune</string>
     <string name="webpage_tune_none">None</string>
     <string name="webpage_delete_title">Delete web pages</string>
@@ -30,7 +58,6 @@
     <string name="webpage_dialog_tune_label">Tune</string>
     <string name="webpage_error_fill_all">Enter a title and address</string>
 
-    <string name="tune_edit_cd">Edit Tune</string>
     <string name="tune_duplicate">Duplicate</string>
     <string name="tune_duplicated">Tune duplicated</string>
     <string name="tune_copy_name">%s (copy)</string>

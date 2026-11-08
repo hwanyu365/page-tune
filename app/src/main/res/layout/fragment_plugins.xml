@@ -5,61 +5,12 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <!-- Table Header for multi-delete mode -->
-    <LinearLayout
-        android:id="@+id/layout_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:background="@color/surfaceContainerHigh"
-        android:gravity="center_vertical"
-        android:visibility="gone">
-
-        <CheckBox
-            android:id="@+id/chk_select_all"
-            android:minHeight="48dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/list_select_all" />
-    </LinearLayout>
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_plugins"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/layout_header"
-        android:layout_above="@id/layout_delete_actions"
         android:padding="8dp"
         android:clipToPadding="false" />
-
-    <!-- Actions for multi-delete -->
-    <LinearLayout
-        android:id="@+id/layout_delete_actions"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:background="@color/surfaceContainerHigh"
-        android:visibility="gone">
-
-        <Button
-            android:id="@+id/btn_cancel_delete"
-            style="?attr/borderlessButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/cancel"
-            android:layout_marginEnd="8dp" />
-
-        <Button
-            android:id="@+id/btn_confirm_delete"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/delete" />
-    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layout_empty"

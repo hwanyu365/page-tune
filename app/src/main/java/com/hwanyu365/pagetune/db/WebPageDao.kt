@@ -22,6 +22,18 @@ interface WebPageDao {
     @Query("DELETE FROM webpages WHERE id IN (:ids)")
     suspend fun deleteWebPagesByIds(ids: List<Long>)
 
+    @Query("SELECT * FROM webpages WHERE id IN (:ids)")
+    suspend fun getWebPagesByIds(ids: List<Long>): List<WebPage>
+
+    @Query("SELECT id FROM webpages WHERE id IN (:ids)")
+    suspend fun existingIds(ids: List<Long>): List<Long>
+
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insertNewWebPages(pages: List<WebPage>)
+
+    @Query("SELECT EXISTS(SELECT 1 FROM webpages)")
+    suspend fun hasAny(): Boolean
+
     @Transaction
     @Query("SELECT * FROM webpages ORDER BY id DESC")
     suspend fun getAllWebPagesWithPlugin(): List<WebPageWithPlugin>

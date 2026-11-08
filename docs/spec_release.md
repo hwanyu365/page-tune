@@ -55,7 +55,7 @@
 
 ### 비기능 요구사항
 
-- **NFR#1** 기존 사용자 데이터(Room DB v3)는 업그레이드 후에도 보존된다. 스키마는 변경하지 않는다. `[요구사항]`
+- **NFR#1** 기존 사용자 데이터(Room DB)는 업그레이드 후에도 보존된다. 스키마를 바꾸면 마이그레이션과 `app/schemas/` 스냅샷을 함께 둔다 (현재 v4, `spec_tune_edit.md` NFR#1). `[요구사항]`
 - **NFR#2** keystore·비밀번호·서비스 계정 키는 저장소에 커밋하지 않는다. CI 는 GitHub Secrets 에서만 읽는다. `[요구사항]`
 - **NFR#3** `usesCleartextTraffic="true"` 는 유지한다. 사용자가 임의의 http 사이트를 열 수 있어야 하기 때문이다. `[as-built]`
 - **NFR#4** 의존성은 `google()` / `mavenCentral()` 에서만 가져온다. `[요구사항]`

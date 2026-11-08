@@ -85,4 +85,11 @@ class EditSnapshotTest {
         assertTrue(snap(rules = two.reversed()).rulesDifferFrom(snap()))
         assertFalse(snap(rules = two.map { it.copy(id = 99) }).rulesDifferFrom(snap()))
     }
+
+    @Test
+    fun `TC#60 끝에서 당겨 이동 값만 달라도 변경 있음이다`() {
+        val rules = listOf(rule())
+
+        assertTrue(EditSnapshot.of("n", "u", rules, pullNavigation = true).differsFrom(EditSnapshot.of("n", "u", rules)))
+    }
 }

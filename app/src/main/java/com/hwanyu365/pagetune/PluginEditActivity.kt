@@ -129,7 +129,7 @@ class PluginEditActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
         if (!editLoaded) return
         val pageUrl = EditState.pageToRestore(webClient.loadingUrl, loadError != null, failedUrl, binding.wvInspector.url, webClient.lastLoadedUrl)
-        val state = EditState(binding.etInpPname.text.toString(), binding.etInpTaddr.text.toString(), tempActions.toList(), initialSnapshot, pageUrl)
+        val state = EditState(binding.etInpPname.text.toString(), binding.etInpTaddr.text.toString(), tempActions.toList(), initialSnapshot, pageUrl, binding.swPullNav.isChecked)
         val encoded = state.encodeForInstanceState()
         if (encoded == null) {
             Log.w(TAG, "edit state exceeds instance state limit; it will be reloaded instead")
@@ -141,6 +141,7 @@ class PluginEditActivity : AppCompatActivity() {
     private fun restoreEdit(state: EditState) {
         binding.etInpPname.setText(state.name)
         binding.etInpTaddr.setText(state.testUrl)
+        binding.swPullNav.isChecked = state.pullNavigation
         tempActions.addAll(state.rules)
         initialSnapshot = state.initial
         editLoaded = true
@@ -286,7 +287,7 @@ class PluginEditActivity : AppCompatActivity() {
     }
 
     private fun currentSnapshot() = EditSnapshot.of(
-        binding.etInpPname.text.toString(), binding.etInpTaddr.text.toString(), tempActions
+        binding.etInpPname.text.toString(), binding.etInpTaddr.text.toString(), tempActions, binding.swPullNav.isChecked
     )
 
     private fun updateStep() {
@@ -432,6 +433,7 @@ class PluginEditActivity : AppCompatActivity() {
             if (pluginWithActions != null) {
                 binding.etInpPname.setText(pluginWithActions.plugin.name)
                 pluginWithActions.plugin.testUrl?.let { binding.etInpTaddr.setText(it) }
+                binding.swPullNav.isChecked = pluginWithActions.plugin.pullNavigation
                 tempActions.addAll(pluginWithActions.actions)
                 initialSnapshot = currentSnapshot()
                 editLoaded = true
@@ -653,6 +655,7 @@ class PluginEditActivity : AppCompatActivity() {
 
     private fun refreshActionsListUI() {
         binding.layoutActionsList.removeAllViews()
+        binding.swPullNav.isEnabled = tempActions.any { it.triggerType == "gnb_prev" || it.triggerType == "gnb_next" }
         updateStep()
         if (tempActions.isEmpty()) {
             val emptyTv = TextView(this).apply {
@@ -707,7 +710,7 @@ class PluginEditActivity : AppCompatActivity() {
         val testUrl = if (testInput.isBlank()) "" else UrlPolicy.normalizeInput(testInput) ?: return showAddressError()
         val plan = planSave(
             binding.etInpPname.text.toString(), testUrl, tempActions,
-            pluginId.takeIf { it != -1L }, linkWebPageId
+            pluginId.takeIf { it != -1L }, linkWebPageId, binding.swPullNav.isChecked
         )
         if (plan == null) {
             Toast.makeText(this, R.string.edit_name_required, Toast.LENGTH_SHORT).show()

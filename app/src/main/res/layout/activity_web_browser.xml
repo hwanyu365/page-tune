@@ -45,6 +45,34 @@
         android:visibility="gone"
         app:tint="@color/onSurface" />
 
+    <TextView
+        android:id="@+id/tv_pull_prev"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:background="@color/scrim"
+        android:textAppearance="?attr/textAppearanceLabelLarge"
+        android:textColor="@color/onSurface"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tv_pull_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="24dp"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:background="@color/scrim"
+        android:textAppearance="?attr/textAppearanceLabelLarge"
+        android:textColor="@color/onSurface"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/layout_load_error"
         android:layout_width="match_parent"

@@ -46,7 +46,7 @@
         app:tint="@color/onSurface" />
 
     <TextView
-        android:id="@+id/tv_pull_prev"
+        android:id="@+id/tv_pull_top"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -60,7 +60,7 @@
         android:visibility="gone" />
 
     <TextView
-        android:id="@+id/tv_pull_next"
+        android:id="@+id/tv_pull_bottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

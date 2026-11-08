@@ -87,6 +87,8 @@
     <string name="edit_trigger_double_bottom">아래쪽 영역 두 번 탭</string>
     <string name="edit_trigger_button_prev">이전 버튼 (◁)</string>
     <string name="edit_trigger_button_next">다음 버튼 (▷)</string>
+    <string name="edit_trigger_pull_top">맨 위에서 아래로 당기기</string>
+    <string name="edit_trigger_pull_bottom">맨 아래에서 위로 당기기</string>
     <string name="edit_area_label">탭 영역 높이 (1~50%)</string>
     <string name="edit_area_hint">기본값 40%</string>
     <string name="edit_area_error">1~50 사이 값을 입력해 주세요</string>
@@ -195,11 +197,7 @@
     <string name="tune_kind_color">색상 %d</string>
     <string name="tune_kind_click">이전/다음 이동 %d</string>
     <string name="tune_kind_start">시작 위치 %d</string>
-    <string name="edit_pull_nav">페이지 끝에서 당겨 이전/다음 이동</string>
-    <string name="edit_pull_nav_note">맨 위에서 아래로 당기면 이전, 맨 아래에서 위로 당기면 다음으로 가요. 이전/다음 버튼 규칙이 있어야 해요.</string>
-    <string name="browser_pull_prev">당겨서 이전 페이지</string>
-    <string name="browser_release_prev">놓으면 이전 페이지</string>
-    <string name="browser_pull_next">당겨서 다음 페이지</string>
-    <string name="browser_release_next">놓으면 다음 페이지</string>
-    <string name="whats_new_10300">• 페이지 맨 위·맨 아래에서 당겨 이전/다음 페이지로 갈 수 있어요. Tune마다 켜요.</string>
+    <string name="whats_new_10300">• 페이지 맨 위·맨 아래에서 당겨 다음 글 같은 연결 요소를 누를 수 있어요. 이전/다음 이동 규칙으로 연결해요.</string>
+    <string name="browser_pull">당겨서 이동</string>
+    <string name="browser_pull_release">놓으면 이동</string>
 </resources>

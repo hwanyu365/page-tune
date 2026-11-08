@@ -55,7 +55,6 @@ class WebBrowserActivity : AppCompatActivity() {
     private var failedUrl: String? = null
     private var navState = NavButtonsState()
     private var pullState = PullState()
-    private var pullNavigation = false
     private val mHitRect = Rect()
     private var originalUrlHost: String? = null
 
@@ -78,6 +77,8 @@ class WebBrowserActivity : AppCompatActivity() {
     private var gestureBottomAction: PluginAction? = null
     private var gnbPrevAction: PluginAction? = null
     private var gnbNextAction: PluginAction? = null
+    private var pullTopAction: PluginAction? = null
+    private var pullBottomAction: PluginAction? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -257,7 +258,6 @@ class WebBrowserActivity : AppCompatActivity() {
         }
         pluginId = pluginWithActions?.plugin?.id
         hasTune = pluginWithActions != null
-        pullNavigation = pluginWithActions?.plugin?.pullNavigation == true
         classifyActions(pluginWithActions?.actions.orEmpty())
         ruleCounts = TuneRuleCounts.of(pluginWithActions?.actions.orEmpty())
         setupGestureControls()
@@ -414,6 +414,8 @@ class WebBrowserActivity : AppCompatActivity() {
         gestureBottomAction = null
         gnbPrevAction = null
         gnbNextAction = null
+        pullTopAction = null
+        pullBottomAction = null
 
         actions.forEach { action ->
             if (action.actionType == "hidden") {
@@ -428,6 +430,8 @@ class WebBrowserActivity : AppCompatActivity() {
                     "gesture_bottom" -> gestureBottomAction = action
                     "gnb_prev" -> gnbPrevAction = action
                     "gnb_next" -> gnbNextAction = action
+                    "pull_top" -> pullTopAction = action
+                    "pull_bottom" -> pullBottomAction = action
                 }
             }
         }
@@ -456,21 +460,21 @@ class WebBrowserActivity : AppCompatActivity() {
         val y = e.y / density
         when (e.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
-                val active = pullNavigation && tuneEnabled && loadError == null
+                val active = tuneEnabled && loadError == null
                 pullState = PullNavigation.onDown(
                     x, y,
                     atTop = !binding.wvBrowser.canScrollVertically(-1),
                     atBottom = !binding.wvBrowser.canScrollVertically(1),
-                    prevEnabled = active && gnbPrevAction != null,
-                    nextEnabled = active && gnbNextAction != null,
+                    topEnabled = active && pullTopAction != null,
+                    bottomEnabled = active && pullBottomAction != null,
                 )
             }
             MotionEvent.ACTION_POINTER_DOWN -> pullState = PullNavigation.onSecondPointer(pullState)
             MotionEvent.ACTION_MOVE -> pullState = PullNavigation.onMove(pullState, x, y)
             MotionEvent.ACTION_UP -> {
                 when (PullNavigation.onUp(pullState)) {
-                    PullSide.PREV -> triggerClickAction(gnbPrevAction)
-                    PullSide.NEXT -> triggerClickAction(gnbNextAction)
+                    PullSide.TOP -> triggerClickAction(pullTopAction)
+                    PullSide.BOTTOM -> triggerClickAction(pullBottomAction)
                     null -> Unit
                 }
                 pullState = PullNavigation.onCancel()
@@ -481,13 +485,13 @@ class WebBrowserActivity : AppCompatActivity() {
     }
 
     private fun refreshPullIndicator() {
-        fun show(view: TextView, side: PullSide, pull: Int, release: Int) {
+        fun show(view: TextView, side: PullSide) {
             val visible = pullState.showing && pullState.side == side
             view.visibility = if (visible) View.VISIBLE else View.GONE
-            if (visible) view.setText(if (pullState.ready) release else pull)
+            if (visible) view.setText(if (pullState.ready) R.string.browser_pull_release else R.string.browser_pull)
         }
-        show(binding.tvPullPrev, PullSide.PREV, R.string.browser_pull_prev, R.string.browser_release_prev)
-        show(binding.tvPullNext, PullSide.NEXT, R.string.browser_pull_next, R.string.browser_release_next)
+        show(binding.tvPullTop, PullSide.TOP)
+        show(binding.tvPullBottom, PullSide.BOTTOM)
     }
 
     private fun triggerClickAction(action: PluginAction?) {

@@ -9,11 +9,11 @@ class RoomTuneStore(private val db: AppDatabase) : TuneStore {
 
     override suspend fun <T> inTransaction(block: suspend TuneWrites.() -> T): T = db.withTransaction {
         object : TuneWrites {
-            override suspend fun insertTune(name: String, testUrl: String, pullNavigation: Boolean) =
-                db.pluginDao().insertPlugin(Plugin(name = name, testUrl = testUrl, pullNavigation = pullNavigation))
+            override suspend fun insertTune(name: String, testUrl: String) =
+                db.pluginDao().insertPlugin(Plugin(name = name, testUrl = testUrl))
 
-            override suspend fun updateTune(id: Long, name: String, testUrl: String, pullNavigation: Boolean) =
-                db.pluginDao().updatePlugin(Plugin(id = id, name = name, testUrl = testUrl, pullNavigation = pullNavigation))
+            override suspend fun updateTune(id: Long, name: String, testUrl: String) =
+                db.pluginDao().updatePlugin(Plugin(id = id, name = name, testUrl = testUrl))
 
             override suspend fun replaceRules(pluginId: Long, rules: List<PluginAction>) {
                 db.pluginDao().deleteActionsByPluginId(pluginId)

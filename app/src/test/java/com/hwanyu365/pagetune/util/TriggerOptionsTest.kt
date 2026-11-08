@@ -14,7 +14,9 @@ class TriggerOptionsTest {
                 "gesture_top" to R.string.edit_trigger_double_top,
                 "gesture_bottom" to R.string.edit_trigger_double_bottom,
                 "gnb_prev" to R.string.edit_trigger_button_prev,
-                "gnb_next" to R.string.edit_trigger_button_next
+                "gnb_next" to R.string.edit_trigger_button_next,
+                "pull_top" to R.string.edit_trigger_pull_top,
+                "pull_bottom" to R.string.edit_trigger_pull_bottom
             ),
             TriggerOptions.all.map { it.type to it.labelRes }
         )
@@ -24,7 +26,8 @@ class TriggerOptionsTest {
     fun `TC#12 선택 위치에서 트리거 값을 얻고 범위 밖이면 null 이다`() {
         assertEquals("gnb_prev", TriggerOptions.typeAt(2))
         assertNull(TriggerOptions.typeAt(-1))
-        assertNull(TriggerOptions.typeAt(4))
+        assertEquals("pull_top", TriggerOptions.typeAt(4))
+        assertNull(TriggerOptions.typeAt(6))
     }
 
     @Test

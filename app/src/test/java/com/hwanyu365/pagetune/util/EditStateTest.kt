@@ -90,20 +90,4 @@ class EditStateTest {
         assertNull(state.encodeForInstanceState(limitBytes = state.encode().length * 2 - 1))
         assertEquals(state.encode(), state.encodeForInstanceState(limitBytes = state.encode().length * 2))
     }
-
-    @Test
-    fun `TC#60 끝에서 당겨 이동 값과 처음 상태의 값이 왕복 후 유지된다`() {
-        val on = state.copy(pullNavigation = true, initial = EditSnapshot.of("원래 이름", "https://a.com", rules.take(1), pullNavigation = true))
-
-        assertEquals(on, EditState.decode(on.encode()))
-    }
-
-    @Test
-    fun `TC#60 값이 없는 직렬화는 꺼짐으로 읽는다`() {
-        val old = """{"name":"n","testUrl":"","rules":[],"initial":{"name":"n","testUrl":"","rules":[]}}"""
-        val decoded = EditState.decode(old)!!
-
-        assertFalse(decoded.pullNavigation)
-        assertFalse(decoded.initial.pullNavigation)
-    }
 }

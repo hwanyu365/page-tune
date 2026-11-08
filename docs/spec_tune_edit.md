@@ -335,15 +335,15 @@
   - 두 WebView 가 구현 하나를 공유한다 → 같은 링크가 화면마다 다르게 처리되지 않는다.
   - 요소 선택 모드에서는 링크를 눌러도 이동하지 않는다 (FR#6) → 분류는 페이지 스크립트가 시작한 이동에도 적용된다.
 
-- `FR#31` 편집 시트에 Tune 단위 "끝에서 당겨 이동" 스위치를 둔다 → 켜면 열람 화면에서 `spec_page_view.md` FR#36 이 동작한다 [요구사항] GH-76
-  - 위치는 시트 스크롤 영역 맨 아래, 시작 위치 지정 버튼 아래이고, 그 아래에 동작 설명 한 줄을 둔다.
-  - 이전 또는 다음 버튼 규칙이 하나도 없으면 스위치는 비활성이다. 저장된 값은 지우지 않는다 → 규칙을 지웠다 다시 넣어도 켠 값이 남는다.
-  - 새 Tune 의 기본값과 기존 Tune 의 마이그레이션 값은 꺼짐이다 (소유자 결정 2026-11-09).
-  - 값은 저장(FR#11)·저장하지 않은 변경 판정(§6.4)·화면 재생성 복원(TC#57)·복제(FR#3)·삭제 되돌리기(FR#30)에 이름·규칙과 같이 포함된다.
+- `FR#31` 클릭 연결의 동작 방식에 "맨 위에서 아래로 당기기"(`pull_top`)·"맨 아래에서 위로 당기기"(`pull_bottom`)를 둔다 → 열람 화면에서 `spec_page_view.md` FR#36 이 동작한다 [요구사항] GH-76, GH-79
+  - 드롭다운의 기존 4개 뒤에 이 순서로 붙인다. 영역 비율은 쓰지 않는다.
+  - 별도 켜기 스위치는 없다 → 규칙이 있으면 동작하고 지우면 멈춘다 (소유자 결정 2026-11-09).
 
 ### 3.3 비기능 요구사항
 
-- `NFR#1` Room 스키마는 v4 다. v3 → v4 는 `plugins.pullNavigation`(INTEGER NOT NULL, 기본 0) 추가 하나이고 Room 자동 마이그레이션으로 한다. 스키마를 바꿀 때는 마이그레이션과 `app/schemas/` 스냅샷을 함께 둔다 [요구사항] GH-76
+- `NFR#1` Room 스키마는 v5 다. 스키마를 바꿀 때는 마이그레이션과 `app/schemas/` 스냅샷을 함께 둔다 [요구사항] GH-76, GH-79
+  - v3 → v4: `plugins.pullNavigation`(INTEGER NOT NULL, 기본 0) 추가, Room 자동 마이그레이션.
+  - v4 → v5: `pullNavigation` = 1 인 Tune 은 그 Tune 의 `gnb_prev`·`gnb_next` 클릭 규칙을 복사해 `pull_top`·`pull_bottom` 규칙을 만들고, `plugins` 를 다시 만들어 칸을 지운다. `plugins` 의 AUTOINCREMENT 순번은 마이그레이션 전 값 이상으로 둔다 → 지운 Tune 을 가리키는 `webpages.pluginId` 가 새 Tune 에 이어지지 않는다 (`spec_page_view.md` §6.8).
 - `NFR#2` 이 UC 화면의 사용자 노출 문자열은 모두 문자열 리소스에 두고, 영어(`values`)와 한국어(`values-ko`)를 갖춘다 [요구사항] GH-18
   - 용어·문구 규칙은 `specification.md` 공통 제약 "UI 문구" 를 따른다.
   - `app/build.gradle` 의 lint 설정에서 `HardcodedText`·`MissingTranslation` 을 error 로 지정하고, error 가 있으면 `lintDebug` 가 실패하게 둔다 → 검증 명령이 하드코딩 문자열과 번역 누락을 막는다. 두 검사의 기본 심각도에 기대지 않는다.
@@ -373,7 +373,7 @@
 | --- | --- | --- |
 | `hidden` | 요소 정보 JSON (4.3) | |
 | `color` | 요소 정보 JSON | `styleCss`: `background-color:#RRGGBB` / `color:#RRGGBB` 중 1~2개를 `;` 로 연결 |
-| `click` | 요소 정보 JSON | `triggerType` ∈ `gesture_top` `gesture_bottom` `gnb_prev` `gnb_next`, `gestureAreaPercent` 1~50 (기본 40) |
+| `click` | 요소 정보 JSON | `triggerType` ∈ `gesture_top` `gesture_bottom` `gnb_prev` `gnb_next` `pull_top` `pull_bottom`, `gestureAreaPercent` 1~50 (기본 40) |
 | `scroll` | `{"y": <정수 CSS px>}` | |
 
 ### 4.3 요소 정보 JSON
@@ -726,7 +726,7 @@ CSS 계약 [GH-25]
 | `TC#20` | `app/build.gradle` lint 설정에 두 검사가 error 로 지정돼 있고 `lintDebug` 가 통과. 레이아웃에 하드코딩 문자열 1개, `values` 에만 있는 문자열 1개를 각각 넣으면 `lintDebug` 가 해당 검사 이름으로 실패 | [NFR#2] | 자동 (검증 명령) + 수동 mutation 1회, 결과는 PR 본문 |
 | `TC#21` | 기기 언어 영어·한국어 각각 → Tunes 탭·편집 화면·다이얼로그·안내 문구가 해당 언어, 용어표와 일치 | [NFR#2] | 수동 |
 | `TC#22` | 아이콘 버튼마다 접근성 라벨(uiautomator content-desc) 있음, Layout Inspector → 터치 타깃 48dp 이상, 글꼴 200% 잘림 없음, 편집 시트 핸들 라벨이 "Expand or collapse panel"/"패널 펼치기/접기", 삭제 선택 모드 항목 체크박스 bounds 높이·너비 48dp 이상, 주황 버튼 글자색 `#171717`·카드 강조 글자색 `#ff7347` | [NFR#3] [NFR#4] | 수동 |
-| `TC#23` | v3 DB 에 Tune·규칙을 둔 빌드(v1.2.1)에서 새 빌드로 덮어 설치 → Tune·규칙·웹페이지 유지, 끝에서 당겨 이동은 꺼짐. `app/schemas/` 에 `3.json`·`4.json`, `4.json` 의 `plugins.pullNavigation` 이 `INTEGER NOT NULL DEFAULT 0` | [NFR#1] | 수동, 에뮬레이터 + `app/schemas/` 확인 |
+| `TC#23` | v1.2.1(v3) 빌드에 Tune·규칙·웹페이지 → 새 빌드 덮어 설치 → 모두 유지. v1.3.0(v4) 빌드에 스위치 켠 Tune(이전/다음 버튼 규칙)·끈 Tune·지운 Tune 의 id 를 가리키는 웹페이지 → 새 빌드 덮어 설치 → 켠 Tune 에만 위/아래 당기기 규칙 2개 추가, 규칙 개수·웹페이지 유지, 새 Tune 의 id 가 지운 Tune 의 id 보다 큼. `app/schemas/` 에 `3.json`~`5.json` | [NFR#1] | 수동, 에뮬레이터 + `app/schemas/` 확인 |
 | `TC#24` | `app/build.gradle` dependencies 변경이 HtmlUnit·`org.json:json` 의 `testImplementation` 추가뿐이고, release APK 에 두 라이브러리 클래스가 없음 | [NFR#6] | PR diff 확인 + APK 내용 확인 |
 | `TC#25` | 설정 → 오픈소스 라이선스 → Material Symbols 저작권 표시와 Apache 2.0 원문이 보임, `@android:drawable/` 참조가 레이아웃·메뉴에 0건 | [NFR#4] | 수동 + 단위 (`ResourceRulesTest`) |
 | `TC#26` | 기존 Tune 을 로드 주소 인자로 열기 → 주소 칸 = 기존 `testUrl`, WebView = 로드 주소, 바로 뒤로가기 → 확인 없이 닫힘, 규칙 추가 후 저장 → `testUrl` 불변. 새 Tune 을 로드 주소 인자로 열기 → 주소 칸 = 로드 주소, 저장 → `testUrl` = 로드 주소 | [FR#11] [FR#13] [FR#20] | 수동, 에뮬레이터 |
@@ -762,8 +762,8 @@ CSS 계약 [GH-25]
 | `TC#56` | 매니페스트: 편집 화면 activity 의 `windowSoftInputMode` 에 `stateHidden` 이 있다. 에뮬레이터(소프트 키보드): 새 Tune·기존 Tune 진입 시 키보드가 뜨지 않고, 이름 칸을 누르면 키보드 위로 시트가 올라온다 | [FR#12] | 단위 (매니페스트) + 수동 |
 | `TC#57` | 편집 상태 직렬화 왕복: 이름·주소·규칙 전 필드·순서·처음 상태·보던 주소가 같음, 복원 후 변경 판정(§6.4 전체·규칙 비교)이 같음, 해석할 수 없는 값 → 복원 안 함. 다시 열 주소: 로드 중 → 진행 중인 주소(A 가 그려진 뒤 B 로드 중 → B, 실패 뒤 다시 시도 중 → 다시 시도 주소), 로드 완료 → WebView 주소, 실패 → 실패한 주소, 모두 없음 → 마지막으로 연 주소. 직렬화 크기 상한 초과 → 넘기지 않음. 에뮬레이터: 이름 입력·규칙 추가 후 `font_scale` 변경 → 값·규칙 유지, 뒤로가기 → 저장하지 않고 나가기 확인, 로드 중 `font_scale` 변경 → 페이지가 다시 열림 | [FR#13] | 단위 (`EditStateTest`) + 수동, 에뮬레이터 |
 | `TC#58` | 편집 화면 소스: 로드 오류 표시가 분기 밖에서 조건 없이 시트를 접는다. 에뮬레이터: 요소 선택으로 시트가 펼쳐진 상태에서 로드 실패 → 시트 접힘, 오류·다시 시도 보임 | [FR#28] | 단위 (소스 읽기) + 수동, 에뮬레이터 |
-| `TC#60` | 저장 계획·실행에 끝에서 당겨 이동 값이 새 Tune·기존 Tune 모두 그대로 전달된다. 편집 상태 직렬화 왕복에 값과 처음 상태의 값이 유지되고, 값이 없는 직렬화는 꺼짐으로 읽는다. 처음 상태와 값만 다르면 변경 있음 | [FR#31] | 단위 (`SaveTest`, `EditStateTest`, `EditSnapshotTest`) |
-| `TC#61` | 에뮬레이터: 이전/다음 규칙 없음 → 스위치 비활성, 규칙 추가 → 활성, 켜고 저장 → 다시 열면 켜짐, 켜고 뒤로가기 → 저장하지 않고 나가기 확인, 켠 채 `font_scale` 변경 → 켜짐 유지, Tune 복제 → 복제본도 켜짐, 삭제 후 실행취소 → 켜짐 | [FR#31] | 수동, 에뮬레이터 |
+| `TC#60` | 드롭다운 순서와 저장 값: 기존 4개 뒤 `pull_top`·`pull_bottom`, 라벨 매핑 | [FR#31] | 단위 (`TriggerOptionsTest`, TC#12 와 같은 테스트) |
+| `TC#61` | 에뮬레이터: 요소 선택 → 동작 방식에 당기기 2개가 보이고 고르면 규칙 목록에 "이전/다음 이동 (맨 아래에서 위로 당기기)" 로 추가, 저장 후 다시 열면 유지, 편집 시트에 스위치 없음 | [FR#31] | 수동, 에뮬레이터 |
 | `TC#59` | 하단 여백 계산: 시스템 바 48·제스처 64 → 64, 제스처 없음 → 48, 키보드 800 → 800·WebView 에서 빼는 값 736, 키보드가 제스처보다 낮음 → 64·0. 에뮬레이터(제스처 내비게이션): 펼친 시트 스크롤 영역 하단이 `mandatorySystemGestures` 시작보다 위, 그 사이에서 시작한 스와이프가 앱에 남음 | [FR#12] | 단위 (`SheetHeightTest`) + 수동, 에뮬레이터. `wm size`·`wm density` 를 덮어쓴 상태에서는 런처의 제스처 판정 띠가 보고된 inset 보다 넓어 공허하다 → 기본 해상도에서 본다 |
 
 ### 통합·실기기 확인
@@ -782,3 +782,4 @@ CSS 계약 [GH-25]
 - GH-53: TC#48 id 청크 조건
 - GH-68: §5.2 소형 화면·글꼴 200% 시트 한계 명시, FR#12 접힌 동안 스크롤 영역 숨김·진입 시 키보드 없음, TC#55·TC#56
 - GH-76: FR#31 끝에서 당겨 이동 스위치, NFR#1 스키마 v4, TC#23 갱신, TC#60·TC#61
+- GH-79: FR#31 스위치를 동작 방식 2개로 대체, NFR#1 스키마 v5, TC#23·TC#60·TC#61 갱신

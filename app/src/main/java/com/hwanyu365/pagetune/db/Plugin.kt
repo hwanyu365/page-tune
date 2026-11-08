@@ -1,6 +1,5 @@
 package com.hwanyu365.pagetune.db
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -8,6 +7,5 @@ import androidx.room.PrimaryKey
 data class Plugin(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
-    val testUrl: String? = null,
-    @ColumnInfo(defaultValue = "0") val pullNavigation: Boolean = false,
+    val testUrl: String? = null
 )

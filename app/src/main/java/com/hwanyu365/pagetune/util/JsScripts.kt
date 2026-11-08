@@ -226,12 +226,24 @@ object JsScripts {
      */
     fun getHighlightScript(actionType: String, detailsJson: String): String {
         val unhide = actionType == "hidden"
-        val find = if (actionType == "click") "[webPluginFindClickTarget(info)].filter(Boolean)" else "webPluginFindHideTargets(info)"
+        val find = when (actionType) {
+            "click" -> "[webPluginFindClickTarget(info)].filter(Boolean)"
+            "color" -> colorSelectors(detailsJson).let { (primary, fallback) -> "webPluginFindColorTargets(${primary?.let(::jsString)}, ${fallback?.let(::jsString)})" }
+            else -> "webPluginFindHideTargets(info)"
+        }
         return """
             (function() {
                 $ELEMENT_MATCH_JS
                 $HIDE_FIND_JS
                 $CLICK_FIND_JS
+
+                // 색상은 CSS 로 칠한다 → 브라우저가 원래 셀렉터를 해석하지 못할 때만 대체 셀렉터가 적용된다.
+                function webPluginFindColorTargets(primary, fallback) {
+                    if (primary) {
+                        try { return Array.from(document.querySelectorAll(primary)); } catch (e) {}
+                    }
+                    return fallback ? Array.from(document.querySelectorAll(fallback)) : [];
+                }
 
                 $CLEAR_HIGHLIGHT_SCRIPT
 
@@ -322,8 +334,8 @@ object JsScripts {
     fun getColorScriptFor(actions: List<PluginAction>): String {
         val rules = actions.mapNotNull { action ->
             runCatching { JSONObject(action.targetSelector) }.getOrNull()?.let { info ->
-                val selector = info.optString("selector")
-                Triple(selector.takeIf(::isCssSafeSelector), colorFallbackSelector(info), action.styleCss ?: "")
+                val (selector, fallback) = colorSelectors(info)
+                Triple(selector, fallback, action.styleCss ?: "")
             }
         }
         val primary = buildColorCss(rules.mapNotNull { (selector, _, decls) -> selector?.let { it to decls } })
@@ -357,6 +369,13 @@ object JsScripts {
         if (rule.isEmpty()) return ""
         return if (selector == null) rule else "@supports selector(*) and (not selector($selector)) { $rule }"
     }
+
+    /** 색상 규칙의 (CSS 계약을 통과한 원래 셀렉터, 대체 셀렉터). 색상 적용과 강조가 같은 대상을 고르도록 둘 다 이 결과만 쓴다. */
+    fun colorSelectors(info: JSONObject): Pair<String?, String?> =
+        info.optString("selector").takeIf(::isCssSafeSelector) to colorFallbackSelector(info)
+
+    private fun colorSelectors(detailsJson: String): Pair<String?, String?> =
+        runCatching { JSONObject(detailsJson) }.getOrNull()?.let(::colorSelectors) ?: (null to null)
 
     /** 태그명 + 저장 속성 전부 일치를 속성 셀렉터로 표현한다. 저장 속성이 없으면 태그만으로 찾지 않으므로 null. */
     fun colorFallbackSelector(info: JSONObject): String? {

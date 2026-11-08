@@ -40,6 +40,52 @@ class RuleHighlightDomTest {
         }
     }
 
+    private val colorPage = """
+        <html><head></head><body>
+          <div id="a" role="banner">A</div>
+          <div id="b" class="b" data-x="1">B</div>
+        </body></html>
+    """
+
+    private fun outlined(engine: HtmlEngine) = listOf("a", "b").filter { outline(engine, "#$it").isNotEmpty() }
+
+    private fun colored(engine: HtmlEngine, details: String): List<String> {
+        engine.eval(JsScripts.getColorScriptFor(listOf(com.hwanyu365.pagetune.db.PluginAction(pluginId = 1, actionType = "color", targetSelector = details, styleCss = "color:#ffffff"))))
+        return listOf("a", "b").filter { engine.string("getComputedStyle(document.getElementById('$it')).color") == "rgb(255, 255, 255)" }
+    }
+
+    private fun coloredCount(engine: HtmlEngine, details: String): Int {
+        engine.eval(JsScripts.getColorScriptFor(listOf(com.hwanyu365.pagetune.db.PluginAction(pluginId = 1, actionType = "color", targetSelector = details, styleCss = "color:#ffffff"))))
+        return engine.int("Array.from(document.body.getElementsByTagName('*')).filter(function(e) { return getComputedStyle(e).color === 'rgb(255, 255, 255)'; }).length")
+    }
+
+    @Test
+    fun `TC#41 색상 규칙은 CSS 계약을 통과하지 못한 셀렉터 대신 대체 셀렉터 대상만 강조한다`() {
+        val details = rule("div.b[data-x]", mapOf("role" to "banner"))
+        HtmlEngine(colorPage).use { engine ->
+            assertEquals(1, highlight(engine, "color", details))
+            assertEquals(listOf("a"), outlined(engine))
+            engine.eval(JsScripts.CLEAR_HIGHLIGHT_SCRIPT)
+            assertEquals(listOf("a"), colored(engine, details))
+        }
+    }
+
+    @Test
+    fun `TC#41 색상 규칙의 셀렉터가 무효면 저장 id 가 아니라 대체 셀렉터 대상을 강조한다`() {
+        HtmlEngine(colorPage).use { engine ->
+            assertEquals(1, highlight(engine, "color", rule("div[[", mapOf("role" to "banner"), id = "b")))
+            assertEquals(listOf("a"), outlined(engine))
+        }
+    }
+
+    @Test
+    fun `TC#41 색상 규칙의 셀렉터가 유효하지만 0개면 대체 없이 찾지 못함이다`() {
+        HtmlEngine(colorPage).use { engine ->
+            assertEquals(0, highlight(engine, "color", rule("div.none", mapOf("role" to "banner"))))
+            assertEquals(emptyList<String>(), outlined(engine))
+        }
+    }
+
     @Test
     fun `TC#41 클릭 규칙은 첫 요소 하나에만 테두리를 그린다`() {
         HtmlEngine(page).use { engine ->
@@ -161,18 +207,24 @@ class RuleHighlightDomTest {
     @Test
     fun `TC#41 적대적 문자열·경계 문자 셀렉터로 만든 강조 스크립트는 코드를 실행하지 않는다`() {
         val selectors = listOf("div[", "div.a} body { color: red", "div.a) { x", "div.a/* x")
+        var colorFound = 0
         hostile.forEach { value ->
             selectors.forEach { selector ->
                 HtmlEngine("<html><body><div id=\"t\">t</div></body></html>").use { engine ->
                     engine.eval("document.getElementById('t').setAttribute('title', ${JsScripts.jsString(value)});")
                     val details = rule(selector, mapOf("title" to value), text = value)
-                    listOf("hidden", "color", "click").forEach { type ->
+                    listOf("hidden", "click").forEach { type ->
                         assertEquals("$type $value", 1, highlight(engine, type, details))
                     }
+                    val colorHighlighted = highlight(engine, "color", details)
                     engine.eval(JsScripts.CLEAR_HIGHLIGHT_SCRIPT)
+                    // HtmlUnit 셀렉터 엔진은 속성값 문자열 안의 이스케이프된 따옴표를 매칭하지 못한다 → 색상은 실제로 칠해진 수와 같은지로 본다.
+                    assertEquals("color $value", coloredCount(engine, details), colorHighlighted)
+                    colorFound += colorHighlighted
                     assertEquals(value, "undefined", engine.string("typeof window.pwned"))
                 }
             }
         }
+        assertTrue("색상 강조가 한 번도 대상을 찾지 못하면 비교가 공허하다", colorFound >= selectors.size * (hostile.size - 1))
     }
 }

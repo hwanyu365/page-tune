@@ -29,6 +29,9 @@ open class SafeWebViewClient(
     private val tracker = MainDocumentTracker()
     private var prompt: Dialog? = null
 
+    var lastLoadedUrl: String? = null
+        private set
+
     fun loadChecked(view: WebView, input: String?, onRejected: () -> Unit): String? {
         val url = input?.let { UrlPolicy.normalizeInput(it) }
         if (url == null) {
@@ -36,6 +39,7 @@ open class SafeWebViewClient(
             return null
         }
         tracker.start(url)
+        lastLoadedUrl = url
         view.loadUrl(url)
         return url
     }

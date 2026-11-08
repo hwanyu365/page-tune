@@ -127,7 +127,7 @@ class PluginEditActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         if (!editLoaded) return
-        val pageUrl = if (loadError != null) failedUrl else binding.wvInspector.url
+        val pageUrl = EditState.pageToRestore(loadError != null, failedUrl, binding.wvInspector.url, webClient.lastLoadedUrl)
         outState.putString(
             STATE_EDIT,
             EditState(binding.etInpPname.text.toString(), binding.etInpTaddr.text.toString(), tempActions.toList(), initialSnapshot, pageUrl).encode()

@@ -16,6 +16,10 @@ data class EditState(val name: String, val testUrl: String, val rules: List<Plug
         .toString()
 
     companion object {
+        /** 첫 커밋 전에는 WebView 주소가 비어 있다 → 마지막으로 연 주소로 다시 연다. */
+        fun pageToRestore(loadFailed: Boolean, failedUrl: String?, webViewUrl: String?, lastLoadedUrl: String?): String? =
+            (if (loadFailed) failedUrl else webViewUrl) ?: lastLoadedUrl
+
         fun decode(text: String): EditState? = runCatching {
             val o = JSONObject(text)
             val i = o.getJSONObject("initial")

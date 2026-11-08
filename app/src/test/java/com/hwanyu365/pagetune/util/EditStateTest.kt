@@ -55,4 +55,19 @@ class EditStateTest {
         assertNull(EditState.decode("not json"))
         assertNull(EditState.decode("{}"))
     }
+
+    @Test
+    fun `TC#57 로드 중 재생성되면 WebView 주소 대신 마지막으로 연 주소를 복원한다`() {
+        assertEquals("https://b.com/", EditState.pageToRestore(loadFailed = false, failedUrl = null, webViewUrl = null, lastLoadedUrl = "https://b.com/"))
+        val restored = EditState.decode(state.copy(pageUrl = EditState.pageToRestore(false, null, null, "https://b.com/")).encode())!!
+        assertEquals("https://b.com/", restored.pageUrl)
+    }
+
+    @Test
+    fun `TC#57 로드가 끝난 페이지는 WebView 주소, 실패한 페이지는 실패한 주소를 복원한다`() {
+        assertEquals("https://b.com/next", EditState.pageToRestore(false, null, "https://b.com/next", "https://b.com/"))
+        assertEquals("https://down.test/", EditState.pageToRestore(true, "https://down.test/", "https://down.test/", "https://b.com/"))
+        assertEquals("https://b.com/", EditState.pageToRestore(true, null, null, "https://b.com/"))
+        assertNull(EditState.pageToRestore(false, null, null, null))
+    }
 }

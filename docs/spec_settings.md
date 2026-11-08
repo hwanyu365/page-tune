@@ -83,7 +83,7 @@
 | 결정 | 선택 | 기각한 대안 | 근거 |
 | --- | --- | --- | --- |
 | `D#1` 화면 구현 [NFR#3] | 일반 Activity + 고정 항목 레이아웃 | `androidx.preference` 의 `PreferenceFragmentCompat` | 바꾸는 값이 없어 Preference 의 저장 기능을 쓰지 않는다. 런타임 의존성이 늘어난다 |
-| `D#2` 라이선스 진입 위치 [FR#1] | 설정 화면 안으로 옮김 | 오버플로에 그대로 두고 설정에도 추가 | 같은 항목이 두 곳에 있으면 메뉴가 늘고 위치 안내가 둘이 된다. 라이선스는 앱 정보와 같은 성격이다 |
+| `D#2` 라이선스 진입 위치 [FR#1] | 설정 화면 안으로 옮김 (소유자 승인, 2026-11-08) | 오버플로에 그대로 두고 설정에도 추가 | 같은 항목이 두 곳에 있으면 메뉴가 늘고 위치 안내가 둘이 된다. 라이선스는 앱 정보와 같은 성격이다 |
 | `D#3` 처리방침 열기 [FR#3] | 다른 앱(브라우저) | 앱 열람 WebView, 앱에 처리방침 원문 포함 | 열람 화면은 웹페이지 id 를 전제로 한다. 원문을 포함하면 게시본과 두 벌이 되어 어긋날 수 있다 (`spec_store.md` FR#4 의 단일 원본) |
 
 ## 7. 테스트 및 검증 기준
@@ -95,7 +95,8 @@
 | `TC#3` | 처리방침 → 브라우저에 게시 페이지, 브라우저를 모두 비활성화한 기기 → 안내와 주소 표시 | [FR#3] | 수동, 에뮬레이터 |
 | `TC#4` | 처리방침 주소 문자열 리소스가 `https://hwanyu365.github.io/page-tune/privacy` 이고 `translatable="false"` | [FR#3] | 단위 (`ResourceRulesTest`) |
 | `TC#5` | 영어·한국어, 글꼴 200% 에서 세 항목 잘림 없음, 항목 높이 48dp 이상 | [NFR#1] [NFR#2] | 수동 |
-| `TC#6` | `app/build.gradle` dependencies 와 매니페스트 권한 변경 없음, 병합 매니페스트의 설정 Activity 가 `exported="false"` | [NFR#3] | PR diff + 병합 매니페스트 확인 |
+| `TC#6` | `app/build.gradle` dependencies 와 매니페스트 권한 변경 없음 | [NFR#3] | PR diff 확인 |
+| `TC#7` | 앱 매니페스트에서 설정 Activity 의 `android:exported` 가 `"false"` 로 명시돼 있다 | [NFR#3] | 단위 (`StoreListingTest` 의 매니페스트 파싱과 같은 방식). mutation: 구현 PR 에서 `true` 로 바꿔 실패하는지 확인 |
 
 ## 부록. 변경 이력
 

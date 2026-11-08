@@ -94,6 +94,7 @@ open class SafeWebViewClient(
 
     override fun onReceivedError(view: WebView?, request: WebResourceRequest, error: WebResourceError) {
         super.onReceivedError(view, request, error)
+        if (request.isForMainFrame) loadingUrl = null
         classifyLoadError(error.errorCode, request.isForMainFrame)?.let { onLoadError(it, request.url.toString()) }
     }
 

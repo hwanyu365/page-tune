@@ -195,7 +195,7 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 | `TC#9` | 탭 누르기·밀기로 전환, 각 탭 툴바 삭제가 그 탭에만 작용, Tunes 탭에서 Tune 을 지운 뒤 웹페이지 탭으로 밀면 연결 표시 갱신, 회전 후 보던 탭 유지, 선택 모드 중 탭 전환 → 선택 모드·되돌리기 창 닫힘 | [FR#7] | 수동, 에뮬레이터 |
 | `TC#10` | 시각 회귀: §5 의 화면 × 영어·한국어 × 글꼴 100%·200% 를 변경 전후로 찍어 잘림·겹침이 없고 역할별 모양이 같음 | [NFR#2] [US#1] | 수동, 에뮬레이터. 확인한 화면 목록을 PR 본문에 남긴다 |
 | `TC#11` | `./gradlew :app:dependencies --configuration releaseRuntimeClasspath` 의 아티팩트 집합이 변경 전과 같음, `app/build.gradle` 에 compose 0건 | [NFR#3] | 로컬. 결과를 PR 본문에 남긴다 |
-| `TC#12` | 검증 명령 통과. `ResourceRulesTest` 의 `spec_tune_edit.md` TC#22 테스트는 리소스 이름만 `onPrimary`·`brandOnSurface` 로 바꾸고 값 단언(`#171717`, `#ff7347`)은 그대로 둔다 | [NFR#4] | 자동 (검증 명령). 이름 변경은 Red 테스트 수정이므로 저장소 소유자 승인 후 진행한다 |
+| `TC#12` | 검증 명령 통과. `ResourceRulesTest` 의 `spec_tune_edit.md` TC#22 테스트는 리소스 이름만 `onPrimary`·`brandOnSurface` 로 바꾸고 값 단언(`#171717`, `#ff7347`)은 그대로 둔다 | [NFR#4] | 자동 (검증 명령). Red 테스트의 이름 변경은 저장소 소유자 승인을 받았다 (2026-11-08 세션). 값 단언을 바꾸거나 지우는 것은 승인 범위 밖이다 |
 
 ### 통합·실기기 확인
 

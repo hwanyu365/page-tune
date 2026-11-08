@@ -262,7 +262,7 @@ class WebBrowserActivity : AppCompatActivity() {
         val wv = binding.wvBrowser
         @Suppress("DEPRECATION")
         val remainingPx = wv.contentHeight * wv.scale - (wv.scrollY + wv.height)
-        atPageEnd = PageEnd.reached(remainingPx / resources.displayMetrics.density)
+        atPageEnd = PageEnd.reached(wv.contentHeight, remainingPx / resources.displayMetrics.density)
         refreshNavButtons()
     }
 
@@ -274,8 +274,8 @@ class WebBrowserActivity : AppCompatActivity() {
         binding.layoutGnbStack.visibility = if (stacked) View.VISIBLE else View.GONE
         binding.btnStackPrev.visibility = if (gnbPrevAction != null) View.VISIBLE else View.GONE
         binding.btnStackNext.visibility = if (gnbNextAction != null) View.VISIBLE else View.GONE
-        binding.tvPullBottom.translationY =
-            if (stacked) -PageEnd.stackHeightDp(navButtonCount()) * resources.displayMetrics.density else 0f
+        val stackHeight = listOf(binding.btnStackPrev, binding.btnStackNext).filter { it.visibility == View.VISIBLE }.sumOf { it.layoutParams.height }
+        binding.tvPullBottom.translationY = if (stacked) -stackHeight.toFloat() else 0f
     }
 
 

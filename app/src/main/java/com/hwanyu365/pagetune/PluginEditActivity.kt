@@ -32,6 +32,7 @@ import com.hwanyu365.pagetune.save.executeSave
 import com.hwanyu365.pagetune.save.planSave
 import com.hwanyu365.pagetune.ui.view.ColorPickerDialog
 import com.hwanyu365.pagetune.util.EditSnapshot
+import com.hwanyu365.pagetune.util.EditState
 import com.hwanyu365.pagetune.util.EditStep
 import com.hwanyu365.pagetune.util.ElementLabel
 import com.hwanyu365.pagetune.util.JsScripts
@@ -68,6 +69,7 @@ class PluginEditActivity : AppCompatActivity() {
     private lateinit var sheet: BottomSheetBehavior<View>
     private var imeExtra = 0
     private var initialSnapshot = EditSnapshot.of("", "", emptyList())
+    private var editLoaded = false
 
     private var pageLoaded = false
     private var loadError: LoadErrorKind? = null
@@ -106,14 +108,40 @@ class PluginEditActivity : AppCompatActivity() {
             override fun handleOnBackPressed() = requestExit()
         })
 
-        if (pluginId != -1L) {
+        val restored = savedInstanceState?.getString(STATE_EDIT)?.let(EditState::decode)
+        if (restored != null) {
+            restoreEdit(restored)
+        } else if (pluginId != -1L) {
             loadPluginData()
         } else {
             loadUrl?.let { binding.etInpTaddr.setText(it) }
             initialSnapshot = currentSnapshot()
+            editLoaded = true
             loadUrl?.let { webClient.loadChecked(binding.wvInspector, it, ::showUnopenableAddress) }
         }
         updateStep()
+    }
+
+    // 글꼴 크기·화면 밀도 변경은 화면을 다시 만든다 → 저장하지 않은 편집과 변경 판정 기준을 함께 넘긴다.
+    // DB 에서 읽기 전에 다시 만들어지면 넘길 편집이 없으므로 다시 읽게 둔다.
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        if (!editLoaded) return
+        val pageUrl = if (loadError != null) failedUrl else binding.wvInspector.url
+        outState.putString(
+            STATE_EDIT,
+            EditState(binding.etInpPname.text.toString(), binding.etInpTaddr.text.toString(), tempActions.toList(), initialSnapshot, pageUrl).encode()
+        )
+    }
+
+    private fun restoreEdit(state: EditState) {
+        binding.etInpPname.setText(state.name)
+        binding.etInpTaddr.setText(state.testUrl)
+        tempActions.addAll(state.rules)
+        initialSnapshot = state.initial
+        editLoaded = true
+        refreshActionsListUI()
+        state.pageUrl?.let { webClient.loadChecked(binding.wvInspector, it, ::showUnopenableAddress) }
     }
 
     override fun onDestroy() {
@@ -284,6 +312,7 @@ class PluginEditActivity : AppCompatActivity() {
         binding.tvLoadErrorMessage.setText(message)
         binding.btnLoadRetry.visibility = if (url != null) View.VISIBLE else View.GONE
         binding.layoutLoadError.visibility = View.VISIBLE
+        sheet.state = BottomSheetBehavior.STATE_COLLAPSED
         if (selectedElementJson != null) hideActionConfigPanel()
         updateStep()
     }
@@ -354,9 +383,13 @@ class PluginEditActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
             binding.layoutEditMain.updatePadding(left = bars.left, top = bars.top, right = bars.right)
-            val bottomInset = maxOf(bars.bottom, insets.getInsets(WindowInsetsCompat.Type.ime()).bottom)
-            imeExtra = bottomInset - bars.bottom
-            container.updatePadding(left = sheetSide + bars.left, right = sheetSide + bars.right, bottom = sheetBottom + bottomInset)
+            val bottom = SheetHeight.bottomInset(
+                bars.bottom,
+                insets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures()).bottom,
+                insets.getInsets(WindowInsetsCompat.Type.ime()).bottom,
+            )
+            imeExtra = bottom.imeExtra
+            container.updatePadding(left = sheetSide + bars.left, right = sheetSide + bars.right, bottom = sheetBottom + bottom.padding)
             updateSheetPeek()
             insets
         }
@@ -397,6 +430,7 @@ class PluginEditActivity : AppCompatActivity() {
                 pluginWithActions.plugin.testUrl?.let { binding.etInpTaddr.setText(it) }
                 tempActions.addAll(pluginWithActions.actions)
                 initialSnapshot = currentSnapshot()
+                editLoaded = true
                 refreshActionsListUI()
                 (loadUrl ?: pluginWithActions.plugin.testUrl)?.let { webClient.loadChecked(binding.wvInspector, it, ::showUnopenableAddress) }
             }
@@ -689,6 +723,7 @@ class PluginEditActivity : AppCompatActivity() {
         const val EXTRA_LINK_WEBPAGE_ID = "link_webpage_id"
         const val EXTRA_SAVED_PLUGIN_ID = "saved_plugin_id"
         private const val HIGHLIGHT_MS = 3000L
+        private const val STATE_EDIT = "edit_state"
     }
 
     // Inner class bridge for element selection callback

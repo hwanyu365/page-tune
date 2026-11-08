@@ -12,9 +12,9 @@ class EditLoadPathTest {
         .map { it.groupValues[1] to it.groupValues[2] }.toList()
 
     @Test
-    fun `TC#52 사용자가 입력한 주소만 주소 칸 오류, 앱이 고른 주소는 다시 시도 없는 열 수 없는 주소로 거부한다`() {
+    fun `TC#52 사용자가 입력한 주소만 주소 칸 오류, 앱이 고른 주소(복원한 페이지 주소 포함)는 다시 시도 없는 열 수 없는 주소로 거부한다`() {
         assertEquals(
-            listOf("it" to "showUnopenableAddress", "url" to "showAddressError", "it" to "showUnopenableAddress", "it" to "showUnopenableAddress"),
+            listOf("it" to "showUnopenableAddress", "it" to "showUnopenableAddress", "url" to "showAddressError", "it" to "showUnopenableAddress", "it" to "showUnopenableAddress"),
             handlers(),
         )
     }
@@ -22,5 +22,12 @@ class EditLoadPathTest {
     @Test
     fun `TC#52 다시 시도는 실패한 주소를 같은 거부 처리로 연다`() {
         assertEquals(1, Regex("""failedUrl\?\.let \{ webClient\.loadChecked\(binding\.wvInspector, it, ::showUnopenableAddress\) \}""").findAll(edit).count())
+    }
+
+    @Test
+    fun `TC#58 로드 실패 표시는 펼친 시트를 접어 인라인 오류를 가리지 않는다`() {
+        val body = edit.substringAfter("private fun showLoadError(").substringBefore("\n    }\n")
+
+        assertEquals(1, Regex("""sheet\.state = BottomSheetBehavior\.STATE_COLLAPSED""").findAll(body).count())
     }
 }

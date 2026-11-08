@@ -288,7 +288,6 @@ class WebBrowserActivity : AppCompatActivity() {
         binding.tvPullBottom.translationY = if (stacked) -stackHeight.toFloat() else 0f
     }
 
-
     private fun refreshTuneUi() {
         refreshNavButtons()
 

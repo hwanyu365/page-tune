@@ -200,6 +200,7 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 | `TC#11` | `./gradlew :app:dependencies --configuration releaseRuntimeClasspath` 의 아티팩트 집합이 변경 전과 같음, `app/build.gradle` 에 compose 0건 | [NFR#3] | 로컬. 결과를 PR 본문에 남긴다 |
 | `TC#12` | 검증 명령 통과. `ResourceRulesTest` 의 `spec_tune_edit.md` TC#22 테스트는 리소스 이름만 `onPrimary`·`brandOnSurface` 로 바꾸고 값 단언(`#171717`, `#ff7347`)은 그대로 둔다 | [NFR#4] | 자동 (검증 명령). Red 테스트의 이름 변경은 저장소 소유자 승인을 받았다 (2026-11-08 세션). 값 단언을 바꾸거나 지우는 것은 승인 범위 밖이다 |
 | `TC#13` | 앱 스타일이 `materialThemeOverlay` 로 지정한 overlay 는 그 위젯의 Material3 기본 overlay 를 부모로 둔다: `Widget.Material3.Button.*` 계열 → `ThemeOverlay.Material3.Button.*`, `Widget.Material3.TextInputLayout.*` 계열 → `ThemeOverlay.Material3.TextInputEditText.*`, `Widget.Material3.TabLayout` 계열 → `ThemeOverlay.Material3.TabLayout` | [FR#5] [D#1] | 단위 (리소스 XML 파싱). 부모가 빈 overlay 는 M3 위젯의 컨테이너 속성을 지워 버튼 배경이 마젠타로 그려진다. mutation: 버튼 overlay 부모를 빈 값으로 바꿔 실패하는지 확인 |
+| `TC#14` | `values-ko` 문자열에서 영문·숫자 바로 뒤에 공백을 두고 조사(을·를·이·가·은·는·으로·로·의·에·와·과·도)가 단어로 오는 경우 0건 | [`specification.md` UI 문구] | 단위 (리소스 XML). mutation: 문자열 하나를 "Tune 을"로 되돌려 실패하는지 확인 |
 
 ### 통합·실기기 확인
 
@@ -210,3 +211,4 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 - GH-51: 최초 작성 (GH-52 범위)
 - GH-52: NFR#3·D#4 viewpager2 해석 버전 정정, TC#13 추가
 - GH-68: §4.1 대비 표에 스낵바 행 (`colorPrimaryInverse` = `onPrimary`)
+- GH-74: TC#14 한국어 조사 붙여 쓰기

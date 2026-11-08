@@ -29,9 +29,9 @@
     <string name="intro_1_title">Tune 만들기</string>
     <string name="intro_1_body">Tune 탭에서 사이트를 열고 페이지의 요소를 골라 숨기거나 색상을 바꿔요.</string>
     <string name="intro_2_title">웹페이지 등록</string>
-    <string name="intro_2_body">웹페이지 탭에서 페이지를 등록하고 Tune 을 연결해요.</string>
+    <string name="intro_2_body">웹페이지 탭에서 페이지를 등록하고 Tune을 연결해요.</string>
     <string name="intro_3_title">빠른 메뉴</string>
-    <string name="intro_3_body">페이지를 보는 중 오른쪽 위 빠른 메뉴로 Tune 을 켜고 끄거나 편집해요.</string>
+    <string name="intro_3_body">페이지를 보는 중 오른쪽 위 빠른 메뉴로 Tune을 켜고 끄거나 편집해요.</string>
     <string name="whats_new_title">새 소식</string>
     <string name="whats_new_version">버전 %s</string>
     <string name="whats_new_10200">• 어두운 Material 디자인으로 새 단장\n• 웹페이지·Tune 카드, 삭제 후 실행취소\n• 단계별 Tune 편집과 색상 프리셋\n• 열람 중 오류 화면·외부 링크·설정</string>
@@ -170,9 +170,9 @@
     <string name="settings_privacy_summary">브라우저에서 열기</string>
     <string name="settings_no_browser">처리방침을 열 수 있는 앱이 없어요. 주소: %s</string>
 
-    <string name="empty_tunes_message">아직 Tune 이 없어요. Tune 은 페이지의 일부를 숨기고 색상을 바꿔요.</string>
+    <string name="empty_tunes_message">아직 Tune이 없어요. Tune은 페이지의 일부를 숨기고 색상을 바꿔요.</string>
     <string name="empty_tunes_action">Tune 만들기</string>
-    <string name="empty_webpages_message">아직 웹페이지가 없어요. 웹페이지를 추가하면 Tune 으로 볼 수 있어요.</string>
+    <string name="empty_webpages_message">아직 웹페이지가 없어요. 웹페이지를 추가하면 Tune으로 볼 수 있어요.</string>
     <string name="empty_webpages_action">웹페이지 추가</string>
     <string name="menu_licenses">오픈소스 라이선스</string>
     <string name="edit_sheet_handle_cd">패널 펼치기/접기</string>

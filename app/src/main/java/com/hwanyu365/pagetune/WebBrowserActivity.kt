@@ -25,8 +25,6 @@ import com.hwanyu365.pagetune.db.PluginAction
 import com.hwanyu365.pagetune.databinding.ActivityWebBrowserBinding
 import com.hwanyu365.pagetune.util.JsScripts
 import com.hwanyu365.pagetune.util.LoadErrorKind
-import com.hwanyu365.pagetune.util.NavButtonsAutoHide
-import com.hwanyu365.pagetune.util.NavButtonsState
 import com.hwanyu365.pagetune.util.SafeWebViewClient
 import com.hwanyu365.pagetune.util.installSafeDownloads
 import com.hwanyu365.pagetune.util.TuneRuleCounts
@@ -34,6 +32,7 @@ import com.hwanyu365.pagetune.util.padForInsets
 import com.hwanyu365.pagetune.util.PullNavigation
 import com.hwanyu365.pagetune.util.PullSide
 import com.hwanyu365.pagetune.util.PullState
+import com.hwanyu365.pagetune.util.PageEnd
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,7 +52,7 @@ class WebBrowserActivity : AppCompatActivity() {
     private lateinit var webClient: SafeWebViewClient
     private var loadError: LoadErrorKind? = null
     private var failedUrl: String? = null
-    private var navState = NavButtonsState()
+    private var atPageEnd = false
     private var pullState = PullState()
     private val mHitRect = Rect()
     private var originalUrlHost: String? = null
@@ -130,8 +129,10 @@ class WebBrowserActivity : AppCompatActivity() {
                 android.webkit.CookieManager.getInstance().flush()
                 binding.pbBrowserLoading.visibility = View.GONE
                 if (loadError == null) binding.layoutLoadError.visibility = View.GONE
-                navState = NavButtonsAutoHide.onPageLoaded()
+                atPageEnd = false
                 refreshNavButtons()
+                // 스크롤할 수 없는 페이지는 스크롤 이벤트가 오지 않는다 → 로드 직후 한 번 판정해야 맨 아래 버튼이 나온다.
+                view?.post { onBrowserScroll() }
                 if (tuneEnabled) {
                     applyColorActions()
                     applyHiddenActions()
@@ -167,10 +168,10 @@ class WebBrowserActivity : AppCompatActivity() {
         }
         binding.wvBrowser.webViewClient = webClient
         binding.wvBrowser.installSafeDownloads(this, binding.root)
-        binding.wvBrowser.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY -> onBrowserScroll(scrollY - oldScrollY) }
+        binding.wvBrowser.setOnScrollChangeListener { _, _, _, _, _ -> onBrowserScroll() }
         // 회전해도 화면을 다시 만들지 않고(configChanges) 스크롤 이벤트도 오지 않는다 → 크기가 바뀌면 맨 아래 여부를 다시 판정한다.
         binding.wvBrowser.addOnLayoutChangeListener { v, l, t, r, b, ol, ot, or, ob ->
-            if (r - l != or - ol || b - t != ob - ot) v.post { onBrowserScroll(0) }
+            if (r - l != or - ol || b - t != ob - ot) v.post { onBrowserScroll() }
         }
 
         binding.wvBrowser.webChromeClient = object : WebChromeClient() {
@@ -186,14 +187,6 @@ class WebBrowserActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        binding.btnGnbPrev.setOnClickListener {
-            triggerClickAction(gnbPrevAction)
-        }
-
-        binding.btnGnbNext.setOnClickListener {
-            triggerClickAction(gnbNextAction)
-        }
-
         binding.btnStackPrev.setOnClickListener { triggerClickAction(gnbPrevAction) }
         binding.btnStackNext.setOnClickListener { triggerClickAction(gnbNextAction) }
 
@@ -265,12 +258,11 @@ class WebBrowserActivity : AppCompatActivity() {
         refreshTuneUi()
     }
 
-    private fun onBrowserScroll(dyPx: Int) {
+    private fun onBrowserScroll() {
         val wv = binding.wvBrowser
-        val density = resources.displayMetrics.density
         @Suppress("DEPRECATION")
         val remainingPx = wv.contentHeight * wv.scale - (wv.scrollY + wv.height)
-        navState = NavButtonsAutoHide.onScroll(navState, dyPx / density, remainingPx / density)
+        atPageEnd = PageEnd.reached(remainingPx / resources.displayMetrics.density)
         refreshNavButtons()
     }
 
@@ -278,14 +270,12 @@ class WebBrowserActivity : AppCompatActivity() {
 
     private fun refreshNavButtons() {
         val active = tuneEnabled && loadError == null
-        val stacked = active && navState.atEnd && navButtonCount() > 0
-        binding.btnGnbPrev.visibility = View.GONE
-        binding.btnGnbNext.visibility = View.GONE
+        val stacked = active && atPageEnd && navButtonCount() > 0
         binding.layoutGnbStack.visibility = if (stacked) View.VISIBLE else View.GONE
         binding.btnStackPrev.visibility = if (gnbPrevAction != null) View.VISIBLE else View.GONE
         binding.btnStackNext.visibility = if (gnbNextAction != null) View.VISIBLE else View.GONE
         binding.tvPullBottom.translationY =
-            if (stacked) -NavButtonsAutoHide.stackHeightDp(navButtonCount()) * resources.displayMetrics.density else 0f
+            if (stacked) -PageEnd.stackHeightDp(navButtonCount()) * resources.displayMetrics.density else 0f
     }
 
 
@@ -522,7 +512,6 @@ class WebBrowserActivity : AppCompatActivity() {
     private fun setupGestureControls() {
         val hasGesture = (gestureTopAction != null || gestureBottomAction != null)
         binding.wvBrowser.setOnTouchListener { _, motionEvent ->
-            if (motionEvent.actionMasked == MotionEvent.ACTION_DOWN) navState = NavButtonsAutoHide.onTouch(navState)
             onPullTouch(motionEvent)
             mGestureDetector?.onTouchEvent(motionEvent) ?: false
         }

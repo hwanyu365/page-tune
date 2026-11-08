@@ -36,7 +36,7 @@
 | 목록 카드·아바타·선택 모드·삭제 되돌리기를 고친다 | `spec_page_view.md` FR#1, FR#3, FR#24~FR#26, §6.7, §6.8 / Tunes 탭은 `spec_tune_edit.md` FR#1, FR#3, FR#30 |
 | 시작 안내·업데이트 후 새 소식을 고친다 | `spec_page_view.md` FR#27, FR#34, §6.13 |
 | Tune 편집 단계 안내·요소 라벨·규칙 강조·색 선택·로드 오류를 고친다 | `spec_tune_edit.md` FR#24~FR#28, §6.11~§6.14 |
-| 이전/다음 버튼 모양·자동 숨김·맨 아래 2단을 고친다 | `spec_page_view.md` FR#9, FR#28, FR#37, §6.9 |
+| 이전/다음 버튼 모양·맨 아래 판정을 고친다 | `spec_page_view.md` FR#9, FR#28, FR#37, §6.9 |
 | 끝에서 당겨 이동을 고친다 | `spec_page_view.md` FR#36, §6.14 / 동작 방식은 `spec_tune_edit.md` FR#31 |
 | 열람·편집 WebView 의 오류 화면·인증서 오류·외부 링크·다운로드를 고친다 | `spec_page_view.md` FR#29~FR#33, §6.10~§6.12 (보안 경계) |
 | 설정 화면을 고친다 | `spec_settings.md` |

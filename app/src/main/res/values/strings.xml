@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">PageTune</string>
 
-    <string name="tab_webpages">Web pages</string>
+    <string name="tab_webpages">Pages</string>
     <string name="tab_tunes">Tunes</string>
 
     <string name="cancel">Cancel</string>
@@ -33,7 +33,7 @@
     <string name="intro_1_title">Make a Tune</string>
     <string name="intro_1_body">In the Tunes tab, open a site and pick elements on the page to hide them or change their colors.</string>
     <string name="intro_2_title">Add a web page</string>
-    <string name="intro_2_body">In the Web pages tab, add a page and connect a Tune to it.</string>
+    <string name="intro_2_body">In the Pages tab, add a page and connect a Tune to it.</string>
     <string name="intro_3_title">Use the quick menu</string>
     <string name="intro_3_body">While viewing a page, open the quick menu at the top right to turn the Tune on or off or edit it.</string>
     <string name="whats_new_title">What\'s new</string>

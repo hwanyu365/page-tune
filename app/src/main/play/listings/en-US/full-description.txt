@@ -7,7 +7,7 @@ Save the web pages you visit often and attach a Tune to each one. A Tune is a se
 • Prev/Next navigation - map a large on-screen button or a double tap on the top or bottom of the page to the site's own previous and next links.
 
 How it works
-1. Add a web page from the Web pages tab.
+1. Add a web page from the Pages tab.
 2. In the Tunes tab, create a Tune, choose Pick element, and tap what you want to change on the page.
 3. Save the Tune and attach it to your web page. It is applied each time you open that page.
 4. Use the quick menu while reading to turn the Tune on or off, refresh, or share the link.

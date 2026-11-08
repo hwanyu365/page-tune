@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="tab_webpages">웹페이지</string>
-    <string name="tab_tunes">Tune</string>
+    <string name="tab_webpages">Pages</string>
+    <string name="tab_tunes">Tunes</string>
 
     <string name="cancel">취소</string>
     <string name="save">저장</string>
@@ -27,9 +27,9 @@
     <string name="intro_next">다음</string>
     <string name="intro_start">시작하기</string>
     <string name="intro_1_title">Tune 만들기</string>
-    <string name="intro_1_body">Tune 탭에서 사이트를 열고 페이지의 요소를 골라 숨기거나 색상을 바꿔요.</string>
+    <string name="intro_1_body">Tunes 탭에서 사이트를 열고 페이지의 요소를 골라 숨기거나 색상을 바꿔요.</string>
     <string name="intro_2_title">웹페이지 등록</string>
-    <string name="intro_2_body">웹페이지 탭에서 페이지를 등록하고 Tune을 연결해요.</string>
+    <string name="intro_2_body">Pages 탭에서 페이지를 등록하고 Tune을 연결해요.</string>
     <string name="intro_3_title">빠른 메뉴</string>
     <string name="intro_3_body">페이지를 보는 중 오른쪽 위 빠른 메뉴로 Tune을 켜고 끄거나 편집해요.</string>
     <string name="whats_new_title">새 소식</string>

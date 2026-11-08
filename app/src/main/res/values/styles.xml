@@ -4,7 +4,7 @@
         <item name="colorOnPrimary">@color/onPrimary</item>
         <item name="colorPrimaryContainer">@color/primary</item>
         <item name="colorOnPrimaryContainer">@color/onPrimary</item>
-        <item name="colorPrimaryInverse">@color/primary</item>
+        <item name="colorPrimaryInverse">@color/onPrimary</item>
         <!-- M3 기본 보라 계열이 secondary·tertiary 를 읽는 위젯으로 새지 않게 토큰에 묶는다. -->
         <item name="colorSecondary">@color/primary</item>
         <item name="colorOnSecondary">@color/onPrimary</item>

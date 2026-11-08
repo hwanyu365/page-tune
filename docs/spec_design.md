@@ -123,6 +123,7 @@
 | `primary` (아이콘·막대) | `surface` / `surfaceContainerHigh` | 5.13 / 4.11 | 3 (비텍스트) |
 | `onSurface` | `scrim`(`#D9171717`)을 흰 배경에 합성한 `#3a3a3a` | 8.62 | 4.5 |
 | `onPrimary` | `avatar1`~`avatar8` | 최소 6.65 (`avatar1`) | 4.5 |
+| `onPrimary` (스낵바 액션, `colorPrimaryInverse`) / `surface` (스낵바 글자, `colorOnSurfaceInverse`) | `onSurface` (스낵바 배경, `colorSurfaceInverse`) | 13.58 / 13.58 | 4.5 |
 
 - `primary` 를 표면 위 글자색으로 쓰지 않는다 → `primary` / `surfaceContainer` = 4.44:1 로 4.5:1 미달 (D#1).
 - 칩·보조 글자를 투명도로 흐리게 하지 않는다 → 투명도는 배경에 따라 대비가 바뀐다. "흐림" 은 `onSurfaceVariant` 글자로 나타낸다.
@@ -208,3 +209,4 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 
 - GH-51: 최초 작성 (GH-52 범위)
 - GH-52: NFR#3·D#4 viewpager2 해석 버전 정정, TC#13 추가
+- GH-68: §4.1 대비 표에 스낵바 행 (`colorPrimaryInverse` = `onPrimary`)

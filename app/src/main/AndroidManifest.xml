@@ -28,7 +28,8 @@
 
         <activity
             android:name=".PluginEditActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden" />
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:windowSoftInputMode="stateHidden" />
 
         <activity
             android:name=".SettingsActivity"

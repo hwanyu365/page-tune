@@ -23,7 +23,7 @@ class SelectionMode(private val activity: AppCompatActivity, private val listene
     }
 
     fun update(count: Int) {
-        mode?.title = activity.resources.getQuantityString(R.plurals.list_selected_count, count, count)
+        mode?.title = count.toString()
     }
 
     fun finish() {

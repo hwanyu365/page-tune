@@ -13,9 +13,6 @@
     <string name="list_none_selected">선택한 항목이 없어요</string>
     <string name="list_more_options">더보기</string>
     <string name="list_edit">편집</string>
-    <plurals name="list_selected_count">
-        <item quantity="other">%d개 선택</item>
-    </plurals>
     <string name="list_undo">실행취소</string>
     <string name="list_delete_failed">삭제하지 못했어요</string>
     <string name="list_restore_failed">되살리지 못했어요</string>
@@ -30,7 +27,7 @@
     <string name="intro_next">다음</string>
     <string name="intro_start">시작하기</string>
     <string name="intro_1_title">Tune 만들기</string>
-    <string name="intro_1_body">Tunes 탭에서 사이트를 열고 페이지의 요소를 골라 숨기거나 색상을 바꿔요.</string>
+    <string name="intro_1_body">Tune 탭에서 사이트를 열고 페이지의 요소를 골라 숨기거나 색상을 바꿔요.</string>
     <string name="intro_2_title">웹페이지 등록</string>
     <string name="intro_2_body">웹페이지 탭에서 페이지를 등록하고 Tune 을 연결해요.</string>
     <string name="intro_3_title">빠른 메뉴</string>

@@ -9,6 +9,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
 import com.hwanyu365.pagetune.databinding.ActivityMainBinding
+import com.hwanyu365.pagetune.ui.showIntroIfNeeded
 import com.hwanyu365.pagetune.ui.fragment.PluginsFragment
 import com.hwanyu365.pagetune.ui.fragment.TabPage
 import com.hwanyu365.pagetune.ui.fragment.WebPagesFragment
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity() {
                     .forEach { it.onTabLeft() }
             }
         })
+        showIntroIfNeeded(this)
     }
 
     private fun tabClass(position: Int): Class<out Fragment> =

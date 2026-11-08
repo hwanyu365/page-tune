@@ -4,13 +4,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.hwanyu365.pagetune.util.Selection
 import com.hwanyu365.pagetune.databinding.ItemPluginBinding
 import com.hwanyu365.pagetune.db.Plugin
+import com.hwanyu365.pagetune.ui.bindAvatar
+import com.hwanyu365.pagetune.util.DomainAvatar
+import com.hwanyu365.pagetune.util.Selection
 
 class PluginAdapter(
     private val onEditClick: (Plugin) -> Unit,
-    private val onCopyClick: (Plugin) -> Unit
+    private val onMoreClick: (View, Plugin) -> Unit,
+    private val onLongPress: (Plugin) -> Unit,
+    private val onSelectionChanged: (Int) -> Unit,
 ) : RecyclerView.Adapter<PluginAdapter.ViewHolder>() {
 
     private var items = listOf<Plugin>()
@@ -23,15 +27,17 @@ class PluginAdapter(
         notifyDataSetChanged()
     }
 
-    fun setDeleteMode(enabled: Boolean) {
+    fun setDeleteMode(enabled: Boolean, selectedId: Long? = null) {
         isDeleteMode = enabled
         selection.clear()
+        selectedId?.let { selection.set(it, true) }
         notifyDataSetChanged()
     }
 
     fun selectAll(select: Boolean) {
         if (select) selection.selectAll(items.map { it.id }) else selection.clear()
         notifyDataSetChanged()
+        onSelectionChanged(selection.ids().size)
     }
 
     fun getSelectedIds(): List<Long> = selection.ids()
@@ -48,27 +54,30 @@ class PluginAdapter(
 
     inner class ViewHolder(private val binding: ItemPluginBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: Plugin) {
+            val avatar = DomainAvatar.of(item.testUrl, item.name)
+            bindAvatar(binding.avatar, binding.tvAvatar, binding.ivAvatarWeb, avatar)
             binding.tvPluginName.text = item.name
+            binding.tvHost.text = avatar.host
+            binding.tvHost.visibility = if (avatar.host.isEmpty()) View.GONE else View.VISIBLE
 
+            binding.btnMore.visibility = if (isDeleteMode) View.GONE else View.VISIBLE
+            binding.chkDelete.visibility = if (isDeleteMode) View.VISIBLE else View.GONE
             if (isDeleteMode) {
-                binding.chkDelete.visibility = View.VISIBLE
-                binding.btnEditPlugin.visibility = View.GONE
-                binding.btnCopyPlugin.visibility = View.GONE
                 binding.chkDelete.isChecked = selection.contains(item.id)
-
                 itemView.setOnClickListener {
                     selection.toggle(item.id)
-                    notifyItemChanged(adapterPosition)
+                    notifyItemChanged(bindingAdapterPosition)
+                    onSelectionChanged(selection.ids().size)
                 }
-                binding.chkDelete.setOnClickListener { selection.set(item.id, binding.chkDelete.isChecked) }
+                itemView.setOnLongClickListener(null)
+                binding.chkDelete.setOnClickListener {
+                    selection.set(item.id, binding.chkDelete.isChecked)
+                    onSelectionChanged(selection.ids().size)
+                }
             } else {
-                binding.chkDelete.visibility = View.GONE
-                binding.btnEditPlugin.visibility = View.VISIBLE
-                binding.btnCopyPlugin.visibility = View.VISIBLE
-
                 itemView.setOnClickListener { onEditClick(item) }
-                binding.btnEditPlugin.setOnClickListener { onEditClick(item) }
-                binding.btnCopyPlugin.setOnClickListener { onCopyClick(item) }
+                itemView.setOnLongClickListener { onLongPress(item); true }
+                binding.btnMore.setOnClickListener { onMoreClick(it, item) }
             }
         }
     }

@@ -35,4 +35,23 @@ interface PluginDao {
 
     @Query("DELETE FROM plugins WHERE id IN (:ids)")
     suspend fun deletePluginsByIds(ids: List<Long>)
+
+    @Transaction
+    @Query("SELECT * FROM plugins WHERE id IN (:ids)")
+    suspend fun getPluginsWithActionsByIds(ids: List<Long>): List<PluginWithActions>
+
+    @Query("SELECT id FROM plugins WHERE id IN (:ids)")
+    suspend fun existingPluginIds(ids: List<Long>): List<Long>
+
+    @Query("SELECT id FROM plugin_actions WHERE id IN (:ids)")
+    suspend fun existingActionIds(ids: List<Long>): List<Long>
+
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insertNewPlugins(plugins: List<Plugin>)
+
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insertNewActions(actions: List<PluginAction>)
+
+    @Query("SELECT EXISTS(SELECT 1 FROM plugins)")
+    suspend fun hasAny(): Boolean
 }

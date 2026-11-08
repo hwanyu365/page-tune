@@ -11,9 +11,34 @@
 
     <string name="list_select_all">모두 선택</string>
     <string name="list_none_selected">선택한 항목이 없어요</string>
+    <string name="list_more_options">더보기</string>
+    <string name="list_edit">편집</string>
+    <plurals name="list_selected_count">
+        <item quantity="other">%d개 선택</item>
+    </plurals>
+    <string name="list_undo">실행취소</string>
+    <string name="list_delete_failed">삭제하지 못했어요</string>
+    <string name="list_restore_failed">되살리지 못했어요</string>
+    <plurals name="webpage_deleted">
+        <item quantity="other">웹페이지 %d개 삭제됨</item>
+    </plurals>
+    <plurals name="tune_deleted">
+        <item quantity="other">Tune %d개 삭제됨</item>
+    </plurals>
 
-    <string name="webpage_edit_cd">웹페이지 편집</string>
-    <string name="webpage_item_tune">Tune: %s</string>
+    <string name="intro_skip">건너뛰기</string>
+    <string name="intro_next">다음</string>
+    <string name="intro_start">시작하기</string>
+    <string name="intro_1_title">Tune 만들기</string>
+    <string name="intro_1_body">Tunes 탭에서 사이트를 열고 페이지의 요소를 골라 숨기거나 색상을 바꿔요.</string>
+    <string name="intro_2_title">웹페이지 등록</string>
+    <string name="intro_2_body">웹페이지 탭에서 페이지를 등록하고 Tune 을 연결해요.</string>
+    <string name="intro_3_title">빠른 메뉴</string>
+    <string name="intro_3_body">페이지를 보는 중 오른쪽 위 빠른 메뉴로 Tune 을 켜고 끄거나 편집해요.</string>
+    <string name="whats_new_title">새 소식</string>
+    <string name="whats_new_version">버전 %s</string>
+    <string name="whats_new_10200">• 어두운 Material 디자인으로 새 단장\n• 웹페이지·Tune 카드, 삭제 후 실행취소\n• 단계별 Tune 편집과 색상 프리셋\n• 열람 중 오류 화면·외부 링크·설정</string>
+
     <string name="webpage_item_tune_none">Tune 없음</string>
     <string name="webpage_tune_none">없음</string>
     <string name="webpage_delete_title">웹페이지 삭제</string>
@@ -27,7 +52,6 @@
     <string name="webpage_dialog_tune_label">Tune</string>
     <string name="webpage_error_fill_all">제목과 주소를 입력해 주세요</string>
 
-    <string name="tune_edit_cd">Tune 편집</string>
     <string name="tune_duplicate">복제</string>
     <string name="tune_duplicated">Tune을 복제했어요</string>
     <string name="tune_copy_name">%s (복사본)</string>

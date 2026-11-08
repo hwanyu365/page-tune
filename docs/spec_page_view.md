@@ -198,9 +198,10 @@
   - 연결된 요소가 새 창 링크(`target` 이 `_self`·`_top`·`_parent` 밖, `<base target>` 포함)이면 클릭하지 않고 그 주소를, 클릭 처리기가 `window.open` 을 부르면 새 창을 열지 않고 그 주소를 받아 §6.11 링크 분류로 현재 WebView 에서 연다 [요구사항] GH-55 (소유자 결정 2026-11-08)
     - 분류 입력은 주 프레임·사용자 조작 있음·리다이렉트 아님이다 → 사용자가 버튼을 누른 것이다.
     - 근거: 버튼은 주입 스크립트로 `click()` 하므로 사용자 활성화가 없다 → N2 에서 새 창이 팝업으로 막혀 아무것도 열리지 않는다 (에뮬레이터 실측, GH-55 PR).
-    - 두 번 탭(FR#10)은 이 처리를 쓰지 않는다 → 결정 범위가 이전/다음 버튼이다.
+    - 두 번 탭(FR#10)도 같은 처리를 쓴다 → 사용자가 직접 한 조작이라 근거가 같다 (리드 결정 2026-11-08).
 - `FR#10` 위/아래 두 번 탭 클릭 연결이 있으면, 화면 위쪽 N% 또는 아래쪽 N% 에서 두 번 탭할 때 연결된 요소를 클릭한다 [as-built]
   - N 은 위쪽 규칙의 값을 우선하고, 없으면 아래쪽 규칙의 값이다.
+  - 연결된 요소가 새 창 대상이면 FR#9 와 같이 그 주소를 §6.11 링크 분류로 현재 WebView 에서 연다 [요구사항] GH-55
 - `FR#28` 사용자가 페이지를 아래로 스크롤하면 이전/다음 버튼을 숨기고, 위로 스크롤하거나 페이지 끝에 닿거나 페이지 로드가 끝나면 다시 보인다 [요구사항] GH-55
   - 판정은 §6.9 의 순수 함수다.
   - 로드 후 사용자가 화면을 만진 뒤의 스크롤만 센다 → 시작 위치 적용(FR#8)처럼 스크립트가 움직인 스크롤로는 숨기지 않는다.
@@ -785,8 +786,8 @@ intent 구성 (`intent://나머지#Intent;키=값;…;end`)
 | `TC#54` | 주소 입력 분류 U1~U5: U1 빈 값·공백만 → 오류. U2 `https://a`·`http://a`·`HTTPS://a`·`Http://a` → 허용, scheme 소문자. U3 L4 목록 9개(`javascript:x` `data:x` `file:///a` `content://x` `blob:https://a/1` `filesystem:https://a/t` `about:blank` `chrome://x` `view-source:https://a`)와 `FILE:///a`·`JavaScript:x`·`mailto:a@b`·`intent://x#Intent;end`·`ftp://a` → 오류. U4 `example.com` → `https://example.com`, `localhost:8080/x` → `https://localhost:8080/x`, `example.com:443` → `https://example.com:443`. U5 `https://`·`https:///a` → 오류. 허용 결과를 다시 넣으면 같은 값 | [FR#2] [FR#35] [NFR#5] | 단위. mutation: 구현 PR 에서 U2~U5 를 하나씩 지우기, 소문자 비교 지우기, 포트 예외 지우기를 각각 해 실패하는지 확인 |
 | `TC#55` | debug 빌드에서 DB 의 웹페이지 주소를 `content://x` 와 `javascript:alert(1)` 로 바꿔 열람 → 로드 없이 열 수 없는 주소 화면(다시 시도 없음), 행은 목록에 남고 편집 다이얼로그에 그 값이 보임, `https://` 로 고쳐 저장 후 열람 → 열림 | [FR#35] | 수동, 에뮬레이터 (`adb shell run-as` 로 DB 수정, 확인 후 원복) |
 | `TC#56` | U6 소스 검사: `app/src/main/java` 에서 `.loadUrl(` 이 래퍼 함수 본문 한 곳에만 있고, 그 본문이 `loadUrl` 전에 주소 입력 분류 함수를 부른다 | [FR#35] [NFR#5] | 단위 (소스 읽기, TC#43 과 같은 방식). mutation: 구현 PR 에서 Activity 하나에 `webView.loadUrl(x)` 직접 호출 추가, 래퍼의 분류 호출 제거를 각각 해 실패하는지 확인 |
-| `TC#57` | 이전/다음 버튼 스크립트(HtmlUnit 픽스처): `target="_blank"`·이름 붙은 `target` 링크와 그 자식 요소 → 클릭하지 않고 절대 주소 반환, `<base target="_blank">` 아래 대상 없는 링크 → 주소 반환, 클릭 처리기의 `window.open('/x')` → 처리기는 실행되고 절대 주소 반환·`window.open` 원래 함수로 복원, `target="_self"` 링크·일반 버튼 → 그대로 클릭·반환 없음, 가로채지 않는 호출(두 번 탭) → 새 창 링크도 그대로 클릭 | [FR#9] | 단위 (`spec_tune_edit.md` §6.8 엔진) |
-| `TC#58` | 이전/다음 연결이 `target="_blank"` http 링크 → 같은 열람 WebView 에서 열림, `window.open('http…')` 버튼 → 같은 WebView, `target="_blank"` `mailto:` 링크 → 확인 창, `target="_blank"` `file:` 링크 → 아무것도 안 열림 | [FR#9] [FR#31] | 수동, 에뮬레이터 (TC#47 픽스처) |
+| `TC#57` | 이전/다음 버튼 스크립트(HtmlUnit 픽스처): `target="_blank"`·이름 붙은 `target` 링크와 그 자식 요소 → 클릭하지 않고 절대 주소 반환, `<base target="_blank">` 아래 대상 없는 링크 → 주소 반환, 클릭 처리기의 `window.open('/x')` → 처리기는 실행되고 절대 주소 반환·`window.open` 원래 함수로 복원, `target="_self"` 링크·일반 버튼 → 그대로 클릭·반환 없음. 이전/다음 버튼과 두 번 탭은 같은 스크립트 하나를 쓴다 | [FR#9] [FR#10] | 단위 (`spec_tune_edit.md` §6.8 엔진) |
+| `TC#58` | 이전/다음 연결이 `target="_blank"` http 링크 → 같은 열람 WebView 에서 열림, `window.open('http…')` 버튼 → 같은 WebView, `target="_blank"` `mailto:` 링크 → 확인 창, `target="_blank"` `file:` 링크 → 아무것도 안 열림. 위쪽 두 번 탭 연결이 `target="_blank"` http 링크 → 같은 열람 WebView 에서 열림 | [FR#9] [FR#10] [FR#31] | 수동, 에뮬레이터 (TC#47 픽스처) |
 | `TC#49` | 앱 매니페스트에 `uses-permission` 이 `INTERNET` 하나이고 `<queries>` 가 없다 | [NFR#6] | 단위 (`StoreListingTest` TC#13 에 단언 추가) |
 | `TC#50` | `docs/privacy.md` 한국어·영어 "공유" 절에 다른 앱으로 링크 주소를 넘기는 서술이 있다 | [FR#31] | 단위 (`StoreListingTest`) |
 | `TC#51` | v1.1.1 태그 빌드에 웹페이지 2개 → 새 빌드(태그 v1.2.0, 목록에 10200 과 문구)로 덮어 설치 → 시작 안내 없이 새 소식 다이얼로그, 확인 → 재실행 시 없음. 같은 새 빌드 새 설치 → 시작 안내만, 닫은 뒤 새 소식 없음. 새 소식 표시 중 프로세스 종료 → 재실행 시 다시 보임. 영어·한국어 | [FR#34] | 수동, 에뮬레이터. 태그는 로컬 빌드용 `VERSION_TAG` 로만 준다 |
@@ -805,4 +806,4 @@ intent 구성 (`intent://나머지#Intent;키=값;…;end`)
 - GH-42: 색상 대체 블록 조건과 83 미만 WebView 확인 (TC#22, TC#28)
 - GH-51: 목록 카드·삭제 되돌리기·시작 안내(GH-53), 이전/다음 버튼·로드 오류·외부 링크(GH-55) 요구사항 추가
 - GH-53: FR#34 에 UX 2차 릴리스 versionCode 10200 명시, §6.8 id 청크·삭제 실패 안내, TC#34 청크 조건
-- GH-55: 외부 앱 항상 확인(D#12·L6·L7 재정의), 이전/다음 버튼의 새 창 대상 처리(FR#9, TC#57·TC#58)
+- GH-55: 외부 앱 항상 확인(D#12·L6·L7 재정의), 이전/다음 버튼·두 번 탭의 새 창 대상 처리(FR#9, FR#10, TC#57·TC#58)

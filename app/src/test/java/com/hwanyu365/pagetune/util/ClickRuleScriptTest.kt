@@ -5,7 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class NavButtonClickScriptTest {
+class ClickRuleScriptTest {
 
     private val page = """
         <html><body>
@@ -22,7 +22,7 @@ class NavButtonClickScriptTest {
 
     private fun press(engine: HtmlEngine, id: String): String {
         engine.eval("window.clicked = 'none';")
-        return engine.eval(JsScripts.getClickEventScript(details(id), captureNewWindow = true))?.toString() ?: "null"
+        return engine.eval(JsScripts.getClickEventScript(details(id)))?.toString() ?: "null"
     }
 
     @Test
@@ -62,11 +62,11 @@ class NavButtonClickScriptTest {
     }
 
     @Test
-    fun `TC#57 가로채지 않는 호출은 새 창 링크도 클릭한다`() {
+    fun `TC#57 두 번 탭과 버튼이 쓰는 한 스크립트가 새 창 링크 주소를 돌려준다`() {
         HtmlEngine(page).use { engine ->
             engine.eval("window.clicked = 'none';")
-            engine.eval(JsScripts.getClickEventScript(details("blank")))
-            assertEquals("blank", engine.string("window.clicked"))
+            assertEquals("http://fixture.test/next", engine.eval(JsScripts.getClickEventScript(details("blank"))).toString())
+            assertEquals("none", engine.string("window.clicked"))
         }
     }
 }

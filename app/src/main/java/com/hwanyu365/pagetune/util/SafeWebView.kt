@@ -55,7 +55,7 @@ open class SafeWebViewClient(
         }
     }
 
-    /** 사용자가 누른 버튼이 새 창으로 열려던 주소는 WebView 이동 판정을 거치지 않으므로 같은 분류를 여기서 적용한다. */
+    /** 사용자가 직접 한 클릭 연결 조작이 새 창으로 열려던 주소는 WebView 이동 판정을 거치지 않으므로 같은 분류를 여기서 적용한다. */
     fun openUserLink(view: WebView, url: String) {
         when (val decision = UrlPolicy.classifyLink(url, isMainFrame = true, hasGesture = true, isRedirect = false, activity.packageName)) {
             LinkDecision.InWebView -> loadChecked(view, url) {}

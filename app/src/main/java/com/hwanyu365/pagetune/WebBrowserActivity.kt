@@ -182,11 +182,11 @@ class WebBrowserActivity : AppCompatActivity() {
 
     private fun setupListeners() {
         binding.btnGnbPrev.setOnClickListener {
-            pressNavButton(gnbPrevAction)
+            triggerClickAction(gnbPrevAction)
         }
 
         binding.btnGnbNext.setOnClickListener {
-            pressNavButton(gnbNextAction)
+            triggerClickAction(gnbNextAction)
         }
 
         binding.btnLoadErrorRetry.setOnClickListener {
@@ -446,12 +446,6 @@ class WebBrowserActivity : AppCompatActivity() {
     private fun triggerClickAction(action: PluginAction?) {
         if (action == null) return
         val script = JsScripts.getClickEventScript(action.targetSelector)
-        binding.wvBrowser.evaluateJavascript(script, null)
-    }
-
-    private fun pressNavButton(action: PluginAction?) {
-        if (action == null) return
-        val script = JsScripts.getClickEventScript(action.targetSelector, captureNewWindow = true)
         binding.wvBrowser.evaluateJavascript(script) { result ->
             val url = runCatching { JSONTokener(result).nextValue() as? String }.getOrNull() ?: return@evaluateJavascript
             webClient.openUserLink(binding.wvBrowser, url)

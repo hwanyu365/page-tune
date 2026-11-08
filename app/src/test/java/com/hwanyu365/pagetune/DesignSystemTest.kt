@@ -190,6 +190,20 @@ class DesignSystemTest {
     }
 
     @Test
+    fun `TC#3 스낵바 액션·메시지 글자는 스낵바 배경 대비 4_5 이상이다`() {
+        val c = colorResources()
+        val theme = styleElements.getValue("AppTheme").descendants().filter { it.tagName == "item" }
+            .associate { it.getAttribute("name") to it.textContent.trim().removePrefix("@color/") }
+        fun token(attr: String) = rgb(c.getValue(theme.getValue(attr)))
+        val background = token("colorSurfaceInverse")
+
+        for (fg in listOf("colorPrimaryInverse", "colorOnSurfaceInverse")) {
+            val r = ratio(token(fg), background)
+            assertTrue("$fg / colorSurfaceInverse = $r", r >= 4.5)
+        }
+    }
+
+    @Test
     fun `TC#4 레이아웃과 Kotlin 은 글자 크기를 직접 지정하지 않는다`() {
         val inLayouts = layouts.filter { "android:textSize" in it.readText() }.map { it.name }
         val inKotlin = kotlinSources.filter { Regex("""\btextSize\s*=|setTextSize\(""").containsMatchIn(it.readText()) }.map { it.name }

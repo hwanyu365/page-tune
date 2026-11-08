@@ -331,6 +331,21 @@ class PluginEditActivity : AppCompatActivity() {
         sheet = BottomSheetBehavior.from(container)
         sheet.isDraggable = false
         sheet.state = BottomSheetBehavior.STATE_COLLAPSED
+        // 접힌 높이 아래에는 시스템 바 여백이 아니라 스크롤 영역의 첫 줄이 놓여, 그대로 그리면 내비게이션 바 위에 겹친다.
+        binding.scrollBottomConfig.visibility = View.INVISIBLE
+        sheet.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            // 애니메이션 없이 상태만 바뀌면 onSlide 가 오지 않으므로 정착 상태도 맞춘다.
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                when (newState) {
+                    BottomSheetBehavior.STATE_COLLAPSED -> binding.scrollBottomConfig.visibility = View.INVISIBLE
+                    BottomSheetBehavior.STATE_EXPANDED -> binding.scrollBottomConfig.visibility = View.VISIBLE
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                binding.scrollBottomConfig.visibility = if (slideOffset > 0) View.VISIBLE else View.INVISIBLE
+            }
+        })
 
         // BottomSheetBehavior 는 부모 padding 을 반영하지 않으므로 시스템 바 inset 을 루트가 아닌 각 자식에 나눠 준다.
         val density = resources.displayMetrics.density

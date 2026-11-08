@@ -66,21 +66,26 @@ class DesignSystemTest {
             parse(f).descendants().filter { it.tagName == "color" }.map { it.getAttribute("name") to it.textContent.trim() }.toList()
         }.toMap()
 
+    private val styleElements = File(res, "values").listFiles().orEmpty().filter { it.extension == "xml" }
+        .flatMap { f -> parse(f).descendants().filter { it.tagName == "style" }.toList() }
+        .associateBy { it.getAttribute("name") }
+
+    private val styles = styleElements.mapValues { it.value.getAttribute("parent") }
+
+    // parent="" 는 부모가 없다는 뜻이고, parent 속성이 없으면 이름의 점 앞부분이 부모다.
+    private fun parentOf(name: String): String {
+        val e = styleElements.getValue(name)
+        return if (e.hasAttribute("parent")) e.getAttribute("parent").removePrefix("@style/") else name.substringBeforeLast('.', "")
+    }
+
+    private fun rootOf(name: String): String {
+        var cur = name
+        while (cur in styles) cur = parentOf(cur)
+        return cur
+    }
+
     @Test
     fun `TC#1 모든 화면 테마는 Theme_Material3_Dark 를 최상위 부모로 둔 앱 테마 계열이다`() {
-        val styles = File(res, "values").listFiles().orEmpty().filter { it.extension == "xml" }
-            .flatMap { f -> parse(f).descendants().filter { it.tagName == "style" }.toList() }
-            .associate { it.getAttribute("name") to it.getAttribute("parent") }
-
-        fun parentOf(name: String): String =
-            styles[name]?.takeIf { it.isNotEmpty() }?.removePrefix("@style/") ?: name.substringBeforeLast('.', "")
-
-        fun rootOf(name: String): String {
-            var cur = name
-            while (cur in styles) cur = parentOf(cur)
-            return cur
-        }
-
         val manifest = parse(File("src/main/AndroidManifest.xml"))
         val application = manifest.descendants().first { it.tagName == "application" }
         val appTheme = application.getAttribute("android:theme").removePrefix("@style/")
@@ -226,6 +231,26 @@ class DesignSystemTest {
     fun `TC#6 Kotlin 은 플랫폼·AppCompat AlertDialog 를 쓰지 않는다`() {
         val offenders = kotlinSources.filter { Regex("""android\.app\.AlertDialog|androidx\.appcompat\.app\.AlertDialog""").containsMatchIn(it.readText()) }.map { it.name }
 
+        assertEquals(emptyList<String>(), offenders)
+    }
+
+    @Test
+    fun `TC#13 위젯 스타일의 materialThemeOverlay 는 그 위젯의 Material3 overlay 를 부모로 둔다`() {
+        val expected = mapOf(
+            "Widget.Material3.Button" to "ThemeOverlay.Material3.Button",
+            "Widget.Material3.TextInputLayout" to "ThemeOverlay.Material3.TextInputEditText",
+        )
+        val checked = mutableListOf<String>()
+        val offenders = styleElements.mapNotNull { (name, e) ->
+            val overlay = e.descendants().firstOrNull { it.tagName == "item" && it.getAttribute("name") == "materialThemeOverlay" }
+                ?.textContent?.trim()?.removePrefix("@style/") ?: return@mapNotNull null
+            val widget = expected.keys.firstOrNull { rootOf(name).startsWith(it) } ?: return@mapNotNull null
+            checked += name
+            val root = rootOf(overlay)
+            "$name → $overlay → '$root'".takeUnless { root.startsWith(expected.getValue(widget)) }
+        }
+
+        assertTrue("검사 대상 스타일이 없다", checked.isNotEmpty())
         assertEquals(emptyList<String>(), offenders)
     }
 }

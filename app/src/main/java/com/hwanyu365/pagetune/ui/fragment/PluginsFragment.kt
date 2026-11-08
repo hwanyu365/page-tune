@@ -18,7 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class PluginsFragment : Fragment() {
+class PluginsFragment : Fragment(), TabPage {
 
     private lateinit var binding: FragmentPluginsBinding
     private lateinit var db: AppDatabase
@@ -144,10 +144,8 @@ class PluginsFragment : Fragment() {
         return super.onOptionsItemSelected(item)
     }
 
-    // ViewPager2 는 보이지 않게 된 탭의 메뉴를 끈다. 그 시점이 탭을 떠난 때다.
-    override fun setMenuVisibility(menuVisible: Boolean) {
-        super.setMenuVisibility(menuVisible)
-        if (!menuVisible && this::adapter.isInitialized && adapter.isDeleteMode) exitDeleteMode()
+    override fun onTabLeft() {
+        if (this::adapter.isInitialized && adapter.isDeleteMode) exitDeleteMode()
     }
 
     private fun enterDeleteMode() {

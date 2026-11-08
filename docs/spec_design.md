@@ -83,7 +83,7 @@
   - 새 조합을 쓰면 §4.1 대비 표에 비율과 함께 추가한다.
 - `NFR#2` 모든 화면이 영어·한국어, 시스템 글꼴 100%·200% 에서 잘리거나 겹치지 않는다 [요구사항] GH-52
 - `NFR#3` 런타임 의존성의 아티팩트 집합을 바꾸지 않는다 [요구사항] GH-52
-  - `androidx.viewpager2:viewpager2` 는 Material 1.14.0 이 이미 `compile` 범위로 끌어온다(1.0.0) [as-built] → 직접 쓰므로 같은 버전으로 명시 선언만 한다 (D#4).
+  - `androidx.viewpager2:viewpager2` 는 Material 1.14.0 이 이미 `compile` 범위로 끌어온다(요청 1.0.0, recyclerview 1.4.0 의 constraint 로 해석 1.1.0-beta02) [as-built] → 직접 쓰므로 Material 이 요청하는 1.0.0 으로 명시 선언만 한다. 해석 버전은 그대로 1.1.0-beta02 다 (D#4).
 - `NFR#4` 기존 단위·수동 TC 가 그대로 통과한다. 단 리소스 이름에 기대는 테스트는 §7 TC#12 를 따른다 [요구사항] GH-52
 
 ## 4. 데이터 및 API 스펙
@@ -178,7 +178,7 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 | `D#1` 표면 위 강조 글자색 [FR#2] [NFR#1] | 앱 토큰 `brandOnSurface`(`#ff7347`)를 두고 텍스트 버튼·탭·칩 스타일에 `materialThemeOverlay` 로 연결 | `primary` 를 `#ff7347` 로 바꿈, `#ff4103` 글자 허용 | M3 텍스트 버튼은 `primary` 를 글자색으로 쓴다 → `#ff4103` 은 카드·다이얼로그 위에서 4.5:1 미달. `primary` 자체를 바꾸면 브랜드 색 유지 결정(#51)과 충돌한다. M3 에 "표면 위 브랜드 글자" 역할 토큰이 없어 공통 제약의 M3 이름 규칙에서 이 하나만 앱 이름을 쓴다. 값은 `spec_tune_edit.md` D#5 와 같다 |
 | `D#2` 다크 고정·dynamic color 미적용 [FR#1] | 다크 고정 | DayNight, Material You | 소유자 결정(#51). dynamic color 는 브랜드 색을 기기 배경화면 색으로 바꾼다 |
 | `D#3` 컴포넌트 교체 단위 [FR#5] | 테마 전환과 컴포넌트 교체를 한 이슈(GH-52)에서 | 화면별로 나눠 교체 | Material 3 테마로 바꾸는 순간 남은 AppCompat·플랫폼 위젯이 다른 색 체계로 그려진다 → 중간 상태가 오히려 불일치를 키운다 |
-| `D#4` ViewPager2 의존성 [FR#7] [NFR#3] | Material 이 끌어오는 1.0.0 을 명시 선언 | 전이 의존성에 기댐, 최신 버전 선언 | 직접 쓰는 라이브러리를 선언해 Material 버전이 바뀌어도 컴파일이 깨지지 않게 한다. 같은 버전이라 APK 아티팩트 집합이 바뀌지 않는다 |
+| `D#4` ViewPager2 의존성 [FR#7] [NFR#3] | Material 이 요청하는 1.0.0 을 명시 선언 | 전이 의존성에 기댐, 최신 버전 선언 | 직접 쓰는 라이브러리를 선언해 Material 버전이 바뀌어도 컴파일이 깨지지 않게 한다. 해석 버전은 recyclerview constraint 가 정하는 1.1.0-beta02 그대로라 APK 아티팩트 집합이 바뀌지 않는다 |
 | `D#5` 오버레이 배경 [FR#6] | `#171717` 85% | 50% 검정 유지, 불투명 배경 | 50% 검정은 흰 페이지 위 3.95:1. 85% 는 흰 페이지 위 합성색 `#3a3a3a` 에서 `onSurface` 8.62:1, 페이지가 비쳐 보여 오버레이임을 알 수 있다 |
 | `D#6` 드롭다운 [§4.4] | `Spinner` 유지 | exposed dropdown(`TextInputLayout` + `AutoCompleteTextView`) | 이슈 범위의 교체 목록(UX-2)에 없다. 트리거 드롭다운은 소형 화면 높이 보장(`spec_tune_edit.md` TC#12)이 걸려 있어 함께 바꾸면 회귀 범위가 커진다 |
 
@@ -198,6 +198,7 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 | `TC#10` | 시각 회귀: §5 의 화면 × 영어·한국어 × 글꼴 100%·200% 를 변경 전후로 찍어 잘림·겹침이 없고 역할별 모양이 같음 | [NFR#2] [US#1] | 수동, 에뮬레이터. 확인한 화면 목록을 PR 본문에 남긴다 |
 | `TC#11` | `./gradlew :app:dependencies --configuration releaseRuntimeClasspath` 의 아티팩트 집합이 변경 전과 같음, `app/build.gradle` 에 compose 0건 | [NFR#3] | 로컬. 결과를 PR 본문에 남긴다 |
 | `TC#12` | 검증 명령 통과. `ResourceRulesTest` 의 `spec_tune_edit.md` TC#22 테스트는 리소스 이름만 `onPrimary`·`brandOnSurface` 로 바꾸고 값 단언(`#171717`, `#ff7347`)은 그대로 둔다 | [NFR#4] | 자동 (검증 명령). Red 테스트의 이름 변경은 저장소 소유자 승인을 받았다 (2026-11-08 세션). 값 단언을 바꾸거나 지우는 것은 승인 범위 밖이다 |
+| `TC#13` | 앱 스타일이 `materialThemeOverlay` 로 지정한 overlay 는 그 위젯의 Material3 기본 overlay 를 부모로 둔다: `Widget.Material3.Button.*` 계열 → `ThemeOverlay.Material3.Button.*`, `Widget.Material3.TextInputLayout.*` 계열 → `ThemeOverlay.Material3.TextInputEditText.*` | [FR#5] [D#1] | 단위 (리소스 XML 파싱). 부모가 빈 overlay 는 M3 위젯의 컨테이너 속성을 지워 버튼 배경이 마젠타로 그려진다. mutation: 버튼 overlay 부모를 빈 값으로 바꿔 실패하는지 확인 |
 
 ### 통합·실기기 확인
 
@@ -206,3 +207,4 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 ## 부록. 변경 이력
 
 - GH-51: 최초 작성 (GH-52 범위)
+- GH-52: NFR#3·D#4 viewpager2 해석 버전 정정, TC#13 추가

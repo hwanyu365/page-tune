@@ -42,6 +42,14 @@ class SourceRulesTest {
     }
 
     @Test
+    fun `TC#59 확인 창은 대상을 보이고 중복·수명 가드를 거친다`() {
+        val src = code(sources.single { it.name == "SafeWebView.kt" })
+        val confirm = Regex("""fun confirmExternal\((.*?)\n    }""", RegexOption.DOT_MATCHES_ALL).find(src)!!.groupValues[1]
+        assertTrue("대상 표시 없음", "ExternalPrompt.describe(" in confirm && "setMessage(" in confirm)
+        assertTrue("중복·수명 가드 없음", "ExternalPrompt.canShow(" in confirm)
+    }
+
+    @Test
     fun `TC#56 loadUrl 은 래퍼 한 곳에서 주소 입력 분류 뒤에만 부른다`() {
         assertEquals(listOf("SafeWebView.kt"), occurrences(".loadUrl("))
         val src = code(sources.single { it.name == "SafeWebView.kt" })

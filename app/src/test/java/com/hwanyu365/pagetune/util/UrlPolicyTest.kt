@@ -73,7 +73,7 @@ class UrlPolicyTest {
     @Test
     fun `TC#45 L8 intent 주소는 intent 구성 결과를 쓴다`() {
         assertEquals(External(ExternalTarget.IntentTarget("https://x", "com.x", null)), link("intent://x#Intent;scheme=https;package=com.x;end"))
-        assertEquals(External(ExternalTarget.IntentTarget("https://x", null, null)), link("intent:x#Intent;scheme=https;end"))
+        assertEquals(External(ExternalTarget.IntentTarget("mailto:a@b", null, null)), link("intent:a@b#Intent;scheme=mailto;end"))
         assertEquals(External(ExternalTarget.IntentTarget("https://x", null, null)), link("INTENT://x#Intent;scheme=https;end"))
         assertEquals(Block, link("intent://x#Intent;scheme=https"))
     }
@@ -90,6 +90,20 @@ class UrlPolicyTest {
         assertNull(UrlPolicy.parseIntent("intent://x;scheme=https;end", appId))
         assertNull(UrlPolicy.parseIntent("intent://x#Intent;scheme=https;end;extra", appId))
         assertEquals(ExternalTarget.IntentTarget(null, null, null), UrlPolicy.parseIntent("intent://x#Intent;end", appId))
+    }
+
+    @Test
+    fun `TC#46 I4 data 는 intent 뒤 나머지를 그대로 이어 붙인다`() {
+        assertEquals("https://a/b", UrlPolicy.parseIntent("intent://a/b#Intent;scheme=https;end", appId)?.data)
+        assertEquals("geo:1,2", UrlPolicy.parseIntent("intent:1,2#Intent;scheme=geo;end", appId)?.data)
+        assertEquals("mailto:a@b", UrlPolicy.parseIntent("INTENT:a@b#Intent;scheme=mailto;end", appId)?.data)
+    }
+
+    @Test
+    fun `TC#46 앞뒤 공백은 링크 분류와 같이 잘라 읽는다`() {
+        val padded = "  intent://x#Intent;scheme=https;package=com.x;end \n"
+        assertEquals(ExternalTarget.IntentTarget("https://x", "com.x", null), UrlPolicy.parseIntent(padded, appId))
+        assertEquals(External(ExternalTarget.IntentTarget("https://x", "com.x", null)), link(padded))
     }
 
     @Test

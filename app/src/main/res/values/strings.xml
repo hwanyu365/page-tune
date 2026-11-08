@@ -144,6 +144,13 @@
     <string name="external_confirm_title">Open in another app?</string>
     <string name="external_confirm_open">Open</string>
     <string name="external_no_app">No app can open this link</string>
+    <string name="external_target_app">App: %1$s</string>
+    <string name="external_target_email">Email to: %1$s</string>
+    <string name="external_target_phone">Phone number: %1$s</string>
+    <string name="external_target_address">Address: %1$s</string>
+    <string name="external_target_unknown">Unknown app</string>
+    <string name="external_fallback">If the app isn’t installed, opens: %1$s</string>
+    <string name="external_no_fallback">If the app isn’t installed, nothing opens</string>
     <string name="download_prompt">Downloads open in your browser</string>
     <string name="download_open_in_browser">Open in browser</string>
     <string name="download_unsupported">This download isn’t supported</string>

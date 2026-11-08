@@ -37,11 +37,11 @@ object UrlPolicy {
         return LinkDecision.External(target)
     }
 
-    fun parseIntent(url: String, appId: String): ExternalTarget.IntentTarget? {
+    fun parseIntent(raw: String, appId: String): ExternalTarget.IntentTarget? {
+        val url = raw.trim()
         val at = url.indexOf(INTENT_BLOCK)
         if (at < 0 || !url.endsWith(";end")) return null
-        val prefix = if (url.startsWith("intent://", ignoreCase = true)) "intent://".length else "intent:".length
-        val rest = url.substring(prefix, at)
+        val rest = url.substring("intent:".length, at)
         val fields = url.substring(at + INTENT_BLOCK.length, url.length - "end".length).split(';')
             .mapNotNull { f -> f.indexOf('=').takeIf { it > 0 }?.let { f.substring(0, it) to f.substring(it + 1) } }
             .toMap()
@@ -51,7 +51,7 @@ object UrlPolicy {
         if (scheme != null && scheme.lowercase() in BLOCKED) return null
         if (pkg == appId) return null
         val fallback = value("S.browser_fallback_url")?.takeIf { scheme(it) in WEB }
-        return ExternalTarget.IntentTarget(scheme?.let { "$it://$rest" }, pkg, fallback)
+        return ExternalTarget.IntentTarget(scheme?.let { "$it:$rest" }, pkg, fallback)
     }
 
     fun isBrowserDownload(url: String): Boolean = scheme(url) in WEB

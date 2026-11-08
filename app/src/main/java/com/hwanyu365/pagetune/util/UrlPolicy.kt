@@ -33,7 +33,7 @@ object UrlPolicy {
         if (lower == "about:blank" || lower == "about:srcdoc") return LinkDecision.InWebView
         if (scheme in BLOCKED) return LinkDecision.Block
         if (!isMainFrame || (!hasGesture && !isRedirect)) return LinkDecision.Block
-        val target = if (scheme == "intent") parseIntent(url, appId) ?: return LinkDecision.Block else ExternalTarget.View(url)
+        val target = if (scheme == "intent") parseIntent(url, appId) ?: return LinkDecision.Block else ExternalTarget.View(url.trim())
         return LinkDecision.External(target)
     }
 

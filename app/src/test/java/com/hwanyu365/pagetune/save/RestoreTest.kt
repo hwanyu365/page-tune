@@ -27,6 +27,7 @@ private class FakeListStore(
     var rules = rules.associateBy { it.id }
     var transactions = 0
     var outsideCalls = 0
+    val idCallSizes = mutableListOf<Int>()
 
     override suspend fun <T> inTransaction(block: suspend ListWrites.() -> T): T {
         transactions++
@@ -37,25 +38,29 @@ private class FakeListStore(
         fun touch() {
             if (!open) outsideCalls++
         }
+        fun touch(ids: List<Long>) {
+            touch()
+            idCallSizes += ids.size
+        }
         val tx = object : ListWrites {
-            override suspend fun webPagesByIds(ids: List<Long>): List<WebPage> { touch(); return ids.mapNotNull { p[it] } }
-            override suspend fun deleteWebPages(ids: List<Long>) { touch(); ids.forEach { p.remove(it) } }
-            override suspend fun existingWebPageIds(ids: List<Long>): List<Long> { touch(); return ids.filter { it in p } }
+            override suspend fun webPagesByIds(ids: List<Long>): List<WebPage> { touch(ids); return ids.mapNotNull { p[it] } }
+            override suspend fun deleteWebPages(ids: List<Long>) { touch(ids); ids.forEach { p.remove(it) } }
+            override suspend fun existingWebPageIds(ids: List<Long>): List<Long> { touch(ids); return ids.filter { it in p } }
             override suspend fun insertWebPages(pages: List<WebPage>) {
                 touch()
                 if (failOnPageInsert) throw IllegalStateException("disk full")
                 pages.forEach { p[it.id] = it }
             }
             override suspend fun tunesByIds(ids: List<Long>): List<PluginWithActions> {
-                touch()
+                touch(ids)
                 return ids.mapNotNull { id -> t[id]?.let { PluginWithActions(it, r.values.filter { a -> a.pluginId == id }) } }
             }
             override suspend fun deleteTunes(ids: List<Long>) {
-                touch()
+                touch(ids)
                 ids.forEach { id -> t.remove(id); r.values.filter { it.pluginId == id }.forEach { r.remove(it.id) } }
             }
-            override suspend fun existingTuneIds(ids: List<Long>): List<Long> { touch(); return ids.filter { it in t } }
-            override suspend fun existingRuleIds(ids: List<Long>): List<Long> { touch(); return ids.filter { it in r } }
+            override suspend fun existingTuneIds(ids: List<Long>): List<Long> { touch(ids); return ids.filter { it in t } }
+            override suspend fun existingRuleIds(ids: List<Long>): List<Long> { touch(ids); return ids.filter { it in r } }
             override suspend fun insertTunes(tunes: List<Plugin>) {
                 touch()
                 tunes.forEach { tune ->
@@ -238,5 +243,39 @@ class RestoreTest {
 
         assertTrue(store.tunes.isEmpty())
         assertEquals(mapOf(11L to stray), store.rules)
+    }
+
+    private val many = (1L..1001L).toList()
+
+    @Test
+    fun `TC#34 id 1000개 이상 삭제·복원은 호출마다 900개 이하로 나눠 블록 하나에서 모두 반영한다`() = runBlocking {
+        val store = FakeListStore(pages = many.map { page(it) })
+
+        val snapshot = deleteWebPagesWithSnapshot(many, store)
+        assertEquals(1001, snapshot.size)
+        assertTrue(store.pages.isEmpty())
+        assertEquals(1, store.transactions)
+
+        restoreWebPages(planWebPageRestore(snapshot)!!, store)
+        assertEquals(many.toSet(), store.pages.keys)
+        assertEquals(2, store.transactions)
+        assertTrue("호출별 id 수 ${store.idCallSizes}", store.idCallSizes.all { it <= 900 })
+        assertEquals(1001 * 3, store.idCallSizes.sum())
+    }
+
+    @Test
+    fun `TC#48 Tune 1000개 이상 삭제, 규칙 1000개 이상 복원은 호출마다 900개 이하로 나눠 블록 하나에서 모두 반영한다`() = runBlocking {
+        val tunes = many.map { Plugin(id = it, name = "n$it", testUrl = null) }
+        val store = FakeListStore(tunes = tunes)
+        val snapshot = deleteTunesWithSnapshot(many, store)
+        assertEquals(1001, snapshot.size)
+        assertTrue(store.tunes.isEmpty())
+
+        val manyRules = many.map { rule(it, 4) }
+        restoreTunes(planTuneRestore(listOf(PluginWithActions(tune, manyRules)))!!, store)
+        assertEquals(manyRules.associateBy { it.id }, store.rules)
+        assertEquals(2, store.transactions)
+        assertTrue("호출별 id 수 ${store.idCallSizes}", store.idCallSizes.all { it <= 900 })
+        assertEquals(1001 * 2 + 1 + 1001, store.idCallSizes.sum())
     }
 }

@@ -33,22 +33,27 @@ fun planWebPageRestore(snapshot: List<WebPage>): List<WebPage>? = snapshot.takeI
 fun planTuneRestore(snapshot: List<PluginWithActions>): TuneRestorePlan? =
     snapshot.takeIf { it.isNotEmpty() }?.let { s -> TuneRestorePlan(s.map { it.plugin }, s.flatMap { it.actions }.sortedBy { it.id }) }
 
+// minSdk 24~35 의 SQLite 바인딩 변수 상한(999) 아래로 IN (:ids) 를 나눈다.
+private const val ID_CHUNK = 900
+
+private suspend fun <T> List<Long>.inChunks(query: suspend (List<Long>) -> List<T>): List<T> = chunked(ID_CHUNK).flatMap { query(it) }
+
 suspend fun deleteWebPagesWithSnapshot(ids: List<Long>, store: ListStore): List<WebPage> = store.inTransaction {
-    webPagesByIds(ids).also { deleteWebPages(ids) }
+    ids.inChunks { webPagesByIds(it) }.also { ids.chunked(ID_CHUNK).forEach { deleteWebPages(it) } }
 }
 
 // 저장소 삽입이 덮어쓰기여도 기존 행을 지우지 않도록 같은 트랜잭션 안에서 먼저 충돌을 확인한다.
 suspend fun restoreWebPages(plan: List<WebPage>, store: ListStore): Unit = store.inTransaction {
-    if (existingWebPageIds(plan.map { it.id }).isNotEmpty()) throw RestoreConflictException()
+    if (plan.map { it.id }.inChunks { existingWebPageIds(it) }.isNotEmpty()) throw RestoreConflictException()
     insertWebPages(plan)
 }
 
 suspend fun deleteTunesWithSnapshot(ids: List<Long>, store: ListStore): List<PluginWithActions> = store.inTransaction {
-    tunesByIds(ids).also { deleteTunes(ids) }
+    ids.inChunks { tunesByIds(it) }.also { ids.chunked(ID_CHUNK).forEach { deleteTunes(it) } }
 }
 
 suspend fun restoreTunes(plan: TuneRestorePlan, store: ListStore): Unit = store.inTransaction {
-    if (existingTuneIds(plan.tunes.map { it.id }).isNotEmpty() || existingRuleIds(plan.rules.map { it.id }).isNotEmpty()) {
+    if (plan.tunes.map { it.id }.inChunks { existingTuneIds(it) }.isNotEmpty() || plan.rules.map { it.id }.inChunks { existingRuleIds(it) }.isNotEmpty()) {
         throw RestoreConflictException()
     }
     insertTunes(plan.tunes)

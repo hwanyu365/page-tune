@@ -17,6 +17,7 @@
         <item quantity="other">%d개 선택</item>
     </plurals>
     <string name="list_undo">실행취소</string>
+    <string name="list_delete_failed">삭제하지 못했어요</string>
     <string name="list_restore_failed">되살리지 못했어요</string>
     <plurals name="webpage_deleted">
         <item quantity="other">웹페이지 %d개 삭제됨</item>

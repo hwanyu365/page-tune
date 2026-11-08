@@ -2,6 +2,7 @@ package com.hwanyu365.pagetune.ui.fragment
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.PopupMenu
 import android.widget.Toast
@@ -14,6 +15,7 @@ import com.hwanyu365.pagetune.R
 import com.hwanyu365.pagetune.db.AppDatabase
 import com.hwanyu365.pagetune.databinding.FragmentPluginsBinding
 import com.hwanyu365.pagetune.db.Plugin
+import com.hwanyu365.pagetune.save.RestoreConflictException
 import com.hwanyu365.pagetune.save.RoomListStore
 import com.hwanyu365.pagetune.save.deleteTunesWithSnapshot
 import com.hwanyu365.pagetune.save.planTuneRestore
@@ -180,7 +182,15 @@ class PluginsFragment : Fragment(), TabPage {
     private fun delete(ids: List<Long>) {
         val store = RoomListStore(db)
         mainScope.launch {
-            val snapshot = withContext(Dispatchers.IO) { deleteTunesWithSnapshot(ids, store) }
+            val snapshot = try {
+                withContext(Dispatchers.IO) { deleteTunesWithSnapshot(ids, store) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "delete failed", e)
+                Toast.makeText(requireContext(), R.string.list_delete_failed, Toast.LENGTH_SHORT).show()
+                return@launch
+            }
             selectionMode.finish()
             loadPlugins()
             val plan = planTuneRestore(snapshot) ?: return@launch
@@ -188,14 +198,21 @@ class PluginsFragment : Fragment(), TabPage {
                 mainScope.launch {
                     try {
                         withContext(Dispatchers.IO) { restoreTunes(plan, store) }
+                    } catch (e: RestoreConflictException) {
+                        Toast.makeText(requireContext(), R.string.list_restore_failed, Toast.LENGTH_SHORT).show()
                     } catch (e: CancellationException) {
                         throw e
                     } catch (e: Exception) {
+                        Log.e(TAG, "restore failed", e)
                         Toast.makeText(requireContext(), R.string.list_restore_failed, Toast.LENGTH_SHORT).show()
                     }
                     loadPlugins()
                 }
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "PluginsFragment"
     }
 }

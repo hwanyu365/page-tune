@@ -118,6 +118,38 @@ class RuleHighlightDomTest {
         }
     }
 
+    private fun pick(engine: HtmlEngine, css: String) {
+        engine.eval(JsScripts.ELEMENT_PICKER_SCRIPT)
+        engine.click(css)
+    }
+
+    @Test
+    fun `TC#41 선택 중인 요소를 강조했다가 해제하면 선택 테두리로 돌아온다`() {
+        HtmlEngine(page).use { engine ->
+            pick(engine, "#keep")
+            val selected = outline(engine, "#keep")
+            assertTrue(selected.isNotEmpty())
+
+            assertEquals(1, highlight(engine, "color", rule("#keep", tag = "p", id = "keep")))
+            engine.eval(JsScripts.CLEAR_HIGHLIGHT_SCRIPT)
+
+            assertEquals(selected, outline(engine, "#keep"))
+        }
+    }
+
+    @Test
+    fun `TC#41 강조 중 선택이 다른 요소로 옮겨 가면 해제 때 이전 선택 테두리를 남기지 않는다`() {
+        HtmlEngine("<html><body><div id=\"box\"><p id=\"child\">c</p></div></body></html>").use { engine ->
+            pick(engine, "#child")
+            assertEquals(1, highlight(engine, "color", rule("#child", tag = "p", id = "child")))
+            engine.eval("window.webPluginSelectParent();")
+            engine.eval(JsScripts.CLEAR_HIGHLIGHT_SCRIPT)
+
+            assertEquals("", outline(engine, "#child"))
+            assertTrue(outline(engine, "#box").isNotEmpty())
+        }
+    }
+
     private val hostile = listOf(
         "');window.pwned=1;//",
         "</script><script>window.pwned=2</script>",

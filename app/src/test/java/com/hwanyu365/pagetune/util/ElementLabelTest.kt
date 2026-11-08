@@ -63,4 +63,16 @@ class ElementLabelTest {
         assertNull(ElementLabel.of("not json"))
         assertNull(ElementLabel.of(""))
     }
+
+    @Test
+    fun `TC#39 선택 스크립트가 저장하는 textContent 는 라벨 최대 길이와 같은 길이로 잘린다`() {
+        HtmlEngine("<html><body><p id=\"t\">${"가".repeat(40)}</p></body></html>").use { engine ->
+            engine.eval(JsScripts.ELEMENT_PICKER_SCRIPT)
+            engine.click("#t")
+            val text = JSONObject(engine.lastSelection().first).getString("textContent")
+
+            assertEquals(ElementLabel.MAX, text.length)
+            assertEquals(text, ElementLabel.of(info("p", text))!!.text)
+        }
+    }
 }

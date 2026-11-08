@@ -26,6 +26,27 @@ class HexColorTest {
     }
 
     @Test
+    fun `TC#43 경계 전체 일치 16진 아닌 글자가 섞이면 길이가 맞아도 없음`() {
+        listOf("#123456;color:red", "#12345;", "a;}", "#ab;", "1a2;}3", "#12 456").forEach { assertNull(it, HexColor.parse(it)) }
+    }
+
+    @Test
+    fun `TC#43 경계 길이 3자리·6자리 밖은 없음`() {
+        listOf("#1", "#12", "#1234", "#12345", "#1234567", "#12345678", "#123456789").forEach { assertNull(it, HexColor.parse(it)) }
+    }
+
+    @Test
+    fun `TC#43 경계 맨 앞 샵은 하나만 뗀다`() {
+        listOf("##123456", "##abc", "###fff").forEach { assertNull(it, HexColor.parse(it)) }
+    }
+
+    @Test
+    fun `TC#43 경계 앞뒤 공백·탭·개행은 자른다`() {
+        assertEquals("#AABBCC", HexColor.parse("\t#abc\n"))
+        assertEquals("#123456", HexColor.parse("  123456  "))
+    }
+
+    @Test
     fun `TC#43 프리셋은 12개 이하의 해석 가능한 대문자 RRGGBB 이고 필수 색을 포함한다`() {
         val presets = ColorPresets.ALL
         assertTrue(presets.size <= 12)

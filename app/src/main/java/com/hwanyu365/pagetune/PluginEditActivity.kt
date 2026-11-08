@@ -107,11 +107,9 @@ class PluginEditActivity : AppCompatActivity() {
         if (pluginId != -1L) {
             loadPluginData()
         } else {
-            loadUrl?.let {
-                binding.etInpTaddr.setText(it)
-                webClient.loadChecked(binding.wvInspector, it, ::showUnopenableAddress)
-            }
+            loadUrl?.let { binding.etInpTaddr.setText(it) }
             initialSnapshot = currentSnapshot()
+            loadUrl?.let { webClient.loadChecked(binding.wvInspector, it, ::showUnopenableAddress) }
         }
         updateStep()
     }
@@ -192,7 +190,7 @@ class PluginEditActivity : AppCompatActivity() {
         }
 
         binding.btnLoadRetry.setOnClickListener {
-            failedUrl?.let { webClient.loadChecked(binding.wvInspector, it, ::showAddressError) }
+            failedUrl?.let { webClient.loadChecked(binding.wvInspector, it, ::showUnopenableAddress) }
         }
 
         binding.btnSelectorDetails.setOnClickListener {
@@ -379,10 +377,10 @@ class PluginEditActivity : AppCompatActivity() {
             if (pluginWithActions != null) {
                 binding.etInpPname.setText(pluginWithActions.plugin.name)
                 pluginWithActions.plugin.testUrl?.let { binding.etInpTaddr.setText(it) }
-                (loadUrl ?: pluginWithActions.plugin.testUrl)?.let { webClient.loadChecked(binding.wvInspector, it, ::showUnopenableAddress) }
                 tempActions.addAll(pluginWithActions.actions)
-                refreshActionsListUI()
                 initialSnapshot = currentSnapshot()
+                refreshActionsListUI()
+                (loadUrl ?: pluginWithActions.plugin.testUrl)?.let { webClient.loadChecked(binding.wvInspector, it, ::showUnopenableAddress) }
             }
         }
     }
@@ -636,7 +634,7 @@ class PluginEditActivity : AppCompatActivity() {
         }
     }
 
-    // 저장된 주소는 다시 시도해도 같은 결과라 다시 시도 없이 보인다.
+    // 앱이 고른 주소(저장 주소·로드 주소·실패한 주소)의 거부는 다시 시도해도 같은 결과라 다시 시도 없이 보인다.
     private fun showUnopenableAddress() = showLoadError(LoadErrorKind.BAD_ADDRESS, null)
 
     private fun showAddressError() {

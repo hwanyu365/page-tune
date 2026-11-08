@@ -6,7 +6,7 @@ data class ElementLabel(val kind: Kind, val text: String?) {
     enum class Kind { LINK, IMAGE, BUTTON, INPUT, FRAME, MEDIA, AREA }
 
     companion object {
-        private const val MAX = 30
+        const val MAX = 30
         private val WHITESPACE = Regex("""\s+""")
 
         fun of(detailsJson: String): ElementLabel? {

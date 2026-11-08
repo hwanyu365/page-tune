@@ -36,6 +36,8 @@ object JsScripts {
         }
     """.trimIndent()
 
+    private const val SELECT_OUTLINE = "3px solid #ff9800"
+
     /**
      * Tune 편집 화면의 요소 선택 스크립트.
      * 누른 요소의 요소 정보와 그 셀렉터가 현재 문서에서 매칭하는 수를 AndroidBridge 로 보낸다.
@@ -85,7 +87,7 @@ object JsScripts {
                 var details = {
                     selector: getCssSelector(el),
                     tagName: el.tagName ? el.tagName.toLowerCase() : "",
-                    textContent: el.textContent ? el.textContent.trim().substring(0, 30) : "",
+                    textContent: el.textContent ? el.textContent.trim().substring(0, ${ElementLabel.MAX}) : "",
                     id: stableId(el),
                     attributes: {}
                 };
@@ -113,7 +115,7 @@ object JsScripts {
                     window.prevHighlighted.style.removeProperty('outline');
                 }
                 window.prevHighlighted = el;
-                el.style.setProperty('outline', '3px solid #ff9800', 'important'); // Orange outline
+                el.style.setProperty('outline', '$SELECT_OUTLINE', 'important');
             }
 
             window.currentlySelectedElement = null;
@@ -241,7 +243,9 @@ object JsScripts {
                     targets = [];
                 }
 
+                // 선택 테두리는 선택 스크립트가 해제할 때 속성째 지운다 → 선택 중인 요소의 원래 값은 빈 값으로 본다.
                 var saved = targets.map(function(el) {
+                    if (el === window.currentlySelectedElement) return { el: el, value: '', priority: '' };
                     return { el: el, value: el.style.getPropertyValue('outline'), priority: el.style.getPropertyPriority('outline') };
                 });
                 targets.forEach(function(el) {
@@ -250,14 +254,14 @@ object JsScripts {
                             if (n.style.display === 'none') n.style.removeProperty('display');
                         }
                     }
-                    el.style.setProperty('outline', '3px solid #ff9800', 'important');
+                    el.style.setProperty('outline', '$SELECT_OUTLINE', 'important');
                 });
                 window.webPluginHighlighted = targets;
 
                 window.webPluginClearRuleHighlight = function() {
                     saved.forEach(function(s) {
-                        if (s.el === window.currentlySelectedElement) return;
-                        if (s.value) s.el.style.setProperty('outline', s.value, s.priority);
+                        if (s.el === window.currentlySelectedElement) s.el.style.setProperty('outline', '$SELECT_OUTLINE', 'important');
+                        else if (s.value) s.el.style.setProperty('outline', s.value, s.priority);
                         else s.el.style.removeProperty('outline');
                     });
                     window.webPluginHighlighted = [];

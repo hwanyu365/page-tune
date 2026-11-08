@@ -291,7 +291,7 @@
 | `TC#22` | `getColorScriptFor`: `id` 필드와 무관하게 규칙 셀렉터 = 저장 `selector` (불안정 id + 구조 경로 → 구조 경로, `id`=`a` + selector `#a` → `#a`). 대체 블록 생성 함수(신규, `buildColorCss` 와 별도): 저장 속성이 있으면 `@supports selector(*) and (not selector(…))` 블록을 만들고 없으면 빈 문자열. CSS 계약을 통과한 셀렉터 → `getColorScriptFor` 출력 = `buildColorCss` 출력 + 대체 블록, 통과하지 못한 셀렉터 → 대체 규칙만 (`spec_tune_edit.md` §6.9, TC#34) | [FR#21] [FR#22] | 단위. `JSONObject` 파싱은 test 전용 `org.json:json` 으로 실행된다 (`spec_tune_edit.md` D#10) |
 | `TC#23` | 픽스처: 숨기기·클릭 연결 각각 (a) selector 무효 → 태그·속성 전부 일치 요소에만 동작, 속성 하나만 일치하는 요소는 영향 없음 (b) 속성값에 따옴표·`@click` 속성 → 예외 없이 동작 (c) 저장 속성 없음 → 아무 요소에도 동작 안 함 (d) 같은 Tune 의 정상 규칙은 그대로 동작 (e) 셀렉터는 유효하지만 0개 → 3단계도 전부 일치 기준 (색상은 이 경우 대체하지 않는 것이 의도된 예외 → TC#28) (f) 요소 정보가 JSON 이 아님 → 그 규칙만 건너뜀 | [FR#22] | 단위 (`spec_tune_edit.md` §6.8 엔진) |
 | `TC#24` | 기기 언어 영어·한국어 → 웹페이지 탭·다이얼로그·열람 화면·빠른 메뉴 문구가 해당 언어 | [NFR#2] | 수동. lint 검사는 `spec_tune_edit.md` TC#20 이 앱 전체를 덮는다 |
-| `TC#25` | TalkBack 라벨·48dp·글꼴 200%: 웹페이지 탭·다이얼로그·빠른 메뉴 | [NFR#3] | 수동 |
+| `TC#25` | 접근성 라벨(content-desc)·48dp·글꼴 200%: 웹페이지 탭·다이얼로그·빠른 메뉴 | [NFR#3] | 수동 |
 | `TC#26` | 스키마 스냅샷 변경 없음, Tune 끄기 후 앱 재시작 시 DB 변화 없음 | [NFR#1] | 수동 + `app/schemas/` 확인 |
 | `TC#27` | `app/build.gradle` dependencies 변경이 HtmlUnit·`org.json:json` 의 `testImplementation` 추가뿐 | [NFR#4] | PR diff 확인 |
 | `TC#28` | 실제 WebView: 셀렉터 무효 색상 규칙에 대체 셀렉터가 적용되고 정상 색상 규칙은 그대로, 숨기기·클릭의 TC#23 (a)(b) 를 픽스처로 한 번 재현. 셀렉터가 유효하지만 0개인 색상 규칙 → 대체 셀렉터가 적용되지 않음 (`spec_tune_edit.md` D#8 의 색상 예외 고정). Chromium 83 미만 WebView → 계약을 통과한 색상 규칙은 무효·0개 모두 대체가 적용되지 않음, 계약을 통과하지 못한 규칙은 대체 적용 (`spec_tune_edit.md` D#9) | [FR#22] | 수동, 에뮬레이터 (83 이상 1대, 83 미만 1대). `@supports selector()` 와 엔진·Chromium 차이를 실제 WebView 에서 확인 |

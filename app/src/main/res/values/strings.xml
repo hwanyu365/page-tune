@@ -74,8 +74,6 @@
     <string name="edit_pick_on">Picking element</string>
     <string name="edit_pick_off">Pick element</string>
     <string name="edit_selected_none">No element selected</string>
-    <string name="edit_selected">Selected: %s</string>
-    <string name="edit_selected_with_text">Selected: “%1$s” (%2$s)</string>
     <string name="edit_selected_error">Couldn’t read the element</string>
     <string name="edit_match_count">Matches %d</string>
     <string name="edit_match_none">Matches %d · May not be found after reload</string>
@@ -119,6 +117,31 @@
     <string name="edit_start_set">Start position set to %s</string>
     <string name="edit_name_required">Enter a Tune name</string>
     <string name="edit_saved">Tune saved</string>
+    <string name="edit_step">Step %1$d/4 · %2$s</string>
+    <string name="edit_step_address">Address</string>
+    <string name="edit_step_pick">Pick element</string>
+    <string name="edit_step_rule">Rule</string>
+    <string name="edit_step_save">Save</string>
+    <string name="edit_step_address_hint">Enter the page address and tap Load</string>
+    <string name="edit_step_pick_hint">Turn on Pick element and tap what you want to change</string>
+    <string name="edit_step_rule_hint">Choose what to do and tap Add rule</string>
+    <string name="edit_step_save_hint">Enter a name and tap Save, or pick another element</string>
+    <string name="edit_label_with_text">%1$s · %2$s</string>
+    <string name="element_kind_link">Link</string>
+    <string name="element_kind_image">Image</string>
+    <string name="element_kind_button">Button</string>
+    <string name="element_kind_input">Input field</string>
+    <string name="element_kind_frame">Embedded page</string>
+    <string name="element_kind_media">Media</string>
+    <string name="element_kind_area">Area</string>
+    <string name="edit_details_show">Details</string>
+    <string name="edit_details_hide">Hide details</string>
+    <string name="edit_rule_delete_cd">Delete rule</string>
+    <string name="edit_rule_not_found">Couldn’t find this element on the page</string>
+    <string name="color_hex_hint">Color code (#RRGGBB)</string>
+    <string name="color_hex_error">Enter 3 or 6 hex digits</string>
+    <string name="color_advanced_show">Advanced (RGB)</string>
+    <string name="color_advanced_hide">Hide advanced</string>
 
     <string name="color_channel_r" translatable="false">R</string>
     <string name="color_channel_g" translatable="false">G</string>

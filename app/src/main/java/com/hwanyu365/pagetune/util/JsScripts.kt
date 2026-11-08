@@ -36,6 +36,8 @@ object JsScripts {
         }
     """.trimIndent()
 
+    private const val SELECT_OUTLINE = "3px solid #ff9800"
+
     /**
      * Tune 편집 화면의 요소 선택 스크립트.
      * 누른 요소의 요소 정보와 그 셀렉터가 현재 문서에서 매칭하는 수를 AndroidBridge 로 보낸다.
@@ -85,7 +87,7 @@ object JsScripts {
                 var details = {
                     selector: getCssSelector(el),
                     tagName: el.tagName ? el.tagName.toLowerCase() : "",
-                    textContent: el.textContent ? el.textContent.trim().substring(0, 30) : "",
+                    textContent: el.textContent ? el.textContent.trim().substring(0, ${ElementLabel.MAX}) : "",
                     id: stableId(el),
                     attributes: {}
                 };
@@ -113,7 +115,7 @@ object JsScripts {
                     window.prevHighlighted.style.removeProperty('outline');
                 }
                 window.prevHighlighted = el;
-                el.style.setProperty('outline', '3px solid #ff9800', 'important'); // Orange outline
+                el.style.setProperty('outline', '$SELECT_OUTLINE', 'important');
             }
 
             window.currentlySelectedElement = null;
@@ -172,47 +174,133 @@ object JsScripts {
         })();
     """.trimIndent()
 
+    private val HIDE_FIND_JS = """
+        function webPluginFindHideTargets(info) {
+            if (info.id) {
+                var el = document.getElementById(info.id);
+                if (el) return [el];
+            }
+            var els = webPluginQueryAll(info.selector);
+            if (els.length > 0) return els;
+            return webPluginAttrMatches(info, false);
+        }
+    """.trimIndent()
+
+    private val CLICK_FIND_JS = """
+        function normalizeText(text) {
+            if (!text) return "";
+            // Remove numbers, parentheses, brackets, whitespace, and special characters
+            return text.replace(/[0-9\(\)\[\]\s\-\.\,\:\;\/\\?\!\&\_\#\+\=\*\~\`\^]/g, '').trim().toLowerCase();
+        }
+
+        function webPluginFindClickTarget(info) {
+            if (info.id) {
+                var el = document.getElementById(info.id);
+                if (el) return el;
+            }
+
+            if (info.textContent) {
+                var targetNorm = normalizeText(info.textContent);
+                if (targetNorm) {
+                    var tag = info.tagName || '*';
+                    var els = document.getElementsByTagName(tag);
+                    for (var i = 0; i < els.length; i++) {
+                        var elNorm = normalizeText(els[i].textContent);
+                        if (elNorm && (elNorm.indexOf(targetNorm) !== -1 || targetNorm.indexOf(elNorm) !== -1)) {
+                            return els[i];
+                        }
+                    }
+                }
+            }
+
+            var byAttrs = webPluginAttrMatches(info, true);
+            if (byAttrs.length > 0) return byAttrs[0];
+
+            return webPluginQueryAll(info.selector)[0] || null;
+        }
+    """.trimIndent()
+
+    /**
+     * 규칙의 요소를 그 규칙이 실제로 적용되는 찾기 순서로 찾아 테두리를 그리고, 찾은 수를 돌려준다.
+     * 숨기기 규칙은 해제할 때까지 요소와 접힌 부모를 보이게 두고, 숨기기 재적용도 그 요소를 건너뛴다.
+     */
+    fun getHighlightScript(actionType: String, detailsJson: String): String {
+        val unhide = actionType == "hidden"
+        val find = when (actionType) {
+            "click" -> "[webPluginFindClickTarget(info)].filter(Boolean)"
+            "color" -> colorSelectors(detailsJson).let { (primary, fallback) -> "webPluginFindColorTargets(${primary?.let(::jsString)}, ${fallback?.let(::jsString)})" }
+            else -> "webPluginFindHideTargets(info)"
+        }
+        return """
+            (function() {
+                $ELEMENT_MATCH_JS
+                $HIDE_FIND_JS
+                $CLICK_FIND_JS
+
+                // 색상은 CSS 로 칠한다 → 브라우저가 원래 셀렉터를 해석하지 못할 때만 대체 셀렉터가 적용된다.
+                function webPluginFindColorTargets(primary, fallback) {
+                    if (primary) {
+                        try { return Array.from(document.querySelectorAll(primary)); } catch (e) {}
+                    }
+                    return fallback ? Array.from(document.querySelectorAll(fallback)) : [];
+                }
+
+                $CLEAR_HIGHLIGHT_SCRIPT
+
+                var targets = [];
+                try {
+                    var info = JSON.parse(${jsString(detailsJson)});
+                    targets = $find;
+                } catch (e) {
+                    targets = [];
+                }
+
+                // 선택 테두리는 선택 스크립트가 해제할 때 속성째 지운다 → 선택 중인 요소의 원래 값은 빈 값으로 본다.
+                var saved = targets.map(function(el) {
+                    if (el === window.currentlySelectedElement) return { el: el, value: '', priority: '' };
+                    return { el: el, value: el.style.getPropertyValue('outline'), priority: el.style.getPropertyPriority('outline') };
+                });
+                targets.forEach(function(el) {
+                    if ($unhide) {
+                        for (var n = el; n && n !== document.body && n !== document.documentElement; n = n.parentElement) {
+                            if (n.style.display === 'none') n.style.removeProperty('display');
+                        }
+                    }
+                    el.style.setProperty('outline', '$SELECT_OUTLINE', 'important');
+                });
+                window.webPluginHighlighted = targets;
+
+                window.webPluginClearRuleHighlight = function() {
+                    saved.forEach(function(s) {
+                        if (s.el === window.currentlySelectedElement) s.el.style.setProperty('outline', '$SELECT_OUTLINE', 'important');
+                        else if (s.value) s.el.style.setProperty('outline', s.value, s.priority);
+                        else s.el.style.removeProperty('outline');
+                    });
+                    window.webPluginHighlighted = [];
+                    window.webPluginClearRuleHighlight = null;
+                    if ($unhide && window.webPluginApplyHide) window.webPluginApplyHide();
+                };
+
+                if (targets.length > 0) {
+                    try { targets[0].scrollIntoView({ block: 'center' }); } catch (e) {}
+                }
+                return targets.length;
+            })();
+        """.trimIndent()
+    }
+
+    const val CLEAR_HIGHLIGHT_SCRIPT = "if (window.webPluginClearRuleHighlight) window.webPluginClearRuleHighlight();"
+
     /** 요소 정보로 찾은 첫 요소를 클릭한다. 단계마다 찾지 못하면 다음 단계로 넘어간다. */
     fun getClickEventScript(detailsJson: String): String {
         return """
             (function() {
                 $ELEMENT_MATCH_JS
-
-                function normalizeText(text) {
-                    if (!text) return "";
-                    // Remove numbers, parentheses, brackets, whitespace, and special characters
-                    return text.replace(/[0-9\(\)\[\]\s\-\.\,\:\;\/\\\?\!\&\_\#\+\=\*\~\`\^]/g, '').trim().toLowerCase();
-                }
-
-                function findElement(info) {
-                    if (info.id) {
-                        var el = document.getElementById(info.id);
-                        if (el) return el;
-                    }
-
-                    if (info.textContent) {
-                        var targetNorm = normalizeText(info.textContent);
-                        if (targetNorm) {
-                            var tag = info.tagName || '*';
-                            var els = document.getElementsByTagName(tag);
-                            for (var i = 0; i < els.length; i++) {
-                                var elNorm = normalizeText(els[i].textContent);
-                                if (elNorm && (elNorm.indexOf(targetNorm) !== -1 || targetNorm.indexOf(elNorm) !== -1)) {
-                                    return els[i];
-                                }
-                            }
-                        }
-                    }
-
-                    var byAttrs = webPluginAttrMatches(info, true);
-                    if (byAttrs.length > 0) return byAttrs[0];
-
-                    return webPluginQueryAll(info.selector)[0] || null;
-                }
+                $CLICK_FIND_JS
 
                 try {
                     var info = JSON.parse(${jsString(detailsJson)});
-                    var target = findElement(info);
+                    var target = webPluginFindClickTarget(info);
                     if (!target) {
                         console.error("WebPlugin: Target element not found for click.");
                         return null;
@@ -246,8 +334,8 @@ object JsScripts {
     fun getColorScriptFor(actions: List<PluginAction>): String {
         val rules = actions.mapNotNull { action ->
             runCatching { JSONObject(action.targetSelector) }.getOrNull()?.let { info ->
-                val selector = info.optString("selector")
-                Triple(selector.takeIf(::isCssSafeSelector), colorFallbackSelector(info), action.styleCss ?: "")
+                val (selector, fallback) = colorSelectors(info)
+                Triple(selector, fallback, action.styleCss ?: "")
             }
         }
         val primary = buildColorCss(rules.mapNotNull { (selector, _, decls) -> selector?.let { it to decls } })
@@ -281,6 +369,13 @@ object JsScripts {
         if (rule.isEmpty()) return ""
         return if (selector == null) rule else "@supports selector(*) and (not selector($selector)) { $rule }"
     }
+
+    /** 색상 규칙의 (CSS 계약을 통과한 원래 셀렉터, 대체 셀렉터). 색상 적용과 강조가 같은 대상을 고르도록 둘 다 이 결과만 쓴다. */
+    fun colorSelectors(info: JSONObject): Pair<String?, String?> =
+        info.optString("selector").takeIf(::isCssSafeSelector) to colorFallbackSelector(info)
+
+    private fun colorSelectors(detailsJson: String): Pair<String?, String?> =
+        runCatching { JSONObject(detailsJson) }.getOrNull()?.let(::colorSelectors) ?: (null to null)
 
     /** 태그명 + 저장 속성 전부 일치를 속성 셀렉터로 표현한다. 저장 속성이 없으면 태그만으로 찾지 않으므로 null. */
     fun colorFallbackSelector(info: JSONObject): String? {
@@ -414,25 +509,17 @@ object JsScripts {
             (function() {
                 $ELEMENT_MATCH_JS
 
-                var actionDetailsList = [${details.joinToString(", ") { jsString(it) }}];
+                $HIDE_FIND_JS
 
-                function findElement(info) {
-                    if (info.id) {
-                        var el = document.getElementById(info.id);
-                        if (el) return [el];
-                    }
-                    var els = webPluginQueryAll(info.selector);
-                    if (els.length > 0) return els;
-                    return webPluginAttrMatches(info, false);
-                }
+                var actionDetailsList = [${details.joinToString(", ") { jsString(it) }}];
 
                 function applyHide() {
                     actionDetailsList.forEach(function(detailsStr) {
                         try {
                             var info = JSON.parse(detailsStr);
-                            var targets = findElement(info);
+                            var targets = webPluginFindHideTargets(info);
                             targets.forEach(function(el) {
-                                if (el && el.style.display !== 'none') {
+                                if (el && el.style.display !== 'none' && (window.webPluginHighlighted || []).indexOf(el) === -1) {
                                     console.log("WebPlugin: hiding element", el);
                                     el.style.setProperty('display', 'none', 'important');
                                     // Collapse empty parent containers
@@ -471,6 +558,7 @@ object JsScripts {
 
                 // Initial run
                 applyHide();
+                window.webPluginApplyHide = applyHide;
 
                 // Start observing DOM changes
                 if (window.webPluginObserver) {

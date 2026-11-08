@@ -7,6 +7,8 @@ data class EditSnapshot(val name: String, val testUrl: String, val rules: List<P
 
     fun differsFrom(other: EditSnapshot): Boolean = this != other
 
+    fun rulesDifferFrom(other: EditSnapshot): Boolean = rules != other.rules
+
     companion object {
         fun of(name: String, testUrl: String, rules: List<PluginAction>) =
             EditSnapshot(name.trim(), testUrl.trim(), rules.map { it.copy(id = 0, pluginId = 0) })

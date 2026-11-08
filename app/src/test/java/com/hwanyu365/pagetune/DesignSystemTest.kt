@@ -239,6 +239,7 @@ class DesignSystemTest {
         val expected = mapOf(
             "Widget.Material3.Button" to "ThemeOverlay.Material3.Button",
             "Widget.Material3.TextInputLayout" to "ThemeOverlay.Material3.TextInputEditText",
+            "Widget.Material3.TabLayout" to "ThemeOverlay.Material3.TabLayout",
         )
         val checked = mutableListOf<String>()
         val offenders = styleElements.mapNotNull { (name, e) ->

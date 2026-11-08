@@ -52,11 +52,11 @@
     </style>
 
     <!-- M3 는 표면 위 강조 글자에 colorPrimary 를 쓴다. 표면 위에서 4.5:1 을 넘는 brandOnSurface 로 바꿔 끼운다. -->
-    <style name="ThemeOverlay.App.BrandOnSurface" parent="">
+    <!-- overlay 는 위젯의 M3 overlay 를 부모로 둬야 한다 → 빈 부모면 버튼 컨테이너 속성 등이 사라져 배경이 마젠타로 그려진다. -->
+    <style name="ThemeOverlay.App.TabLayout.BrandOnSurface" parent="ThemeOverlay.Material3.TabLayout">
         <item name="colorPrimary">@color/brandOnSurface</item>
     </style>
 
-    <!-- 버튼 스타일은 M3 버튼 overlay 의 컨테이너 속성을 그대로 물려받아야 배경이 풀린다. -->
     <style name="ThemeOverlay.App.Button.BrandOnSurface" parent="ThemeOverlay.Material3.Button.TextButton">
         <item name="colorPrimary">@color/brandOnSurface</item>
     </style>
@@ -67,7 +67,7 @@
     </style>
 
     <style name="Widget.App.TabLayout" parent="Widget.Material3.TabLayout">
-        <item name="materialThemeOverlay">@style/ThemeOverlay.App.BrandOnSurface</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.TabLayout.BrandOnSurface</item>
         <item name="tabIndicatorColor">@color/primary</item>
         <item name="android:background">@color/surfaceContainerLow</item>
         <item name="tabTextAppearance">@style/TextAppearance.Material3.LabelLarge</item>

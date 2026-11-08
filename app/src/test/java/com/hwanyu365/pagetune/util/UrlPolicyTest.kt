@@ -23,6 +23,12 @@ class UrlPolicyTest {
     private fun view(url: String) = External(ExternalTarget.View(url))
 
     @Test
+    fun `TC#45 L9 외부 scheme 주소는 앞뒤 공백을 뺀 값으로 넘긴다`() {
+        assertEquals(view("mailto:a@b"), link(" mailto:a@b\n"))
+        assertEquals(view("tel:010"), link("\ttel:010 "))
+    }
+
+    @Test
     fun `TC#45 L1 scheme 을 구할 수 없으면 막는다`() {
         for (url in listOf("", ":abc", "abc", "1a:b")) assertEquals(url, Block, link(url))
     }

@@ -13,16 +13,17 @@ data class PullState(
     val side: PullSide? = null,
     val distance: Float = 0f,
     val peak: Float = 0f,
+    val armedAtMs: Long? = null,
 ) {
     val showing: Boolean get() = side != null && distance >= PullNavigation.SLOP_DP
-    val ready: Boolean get() = side != null && distance >= PullNavigation.THRESHOLD_DP
 }
 
-/** 좌표는 dp 다. */
+/** 좌표는 dp, 시각은 ms 다. */
 object PullNavigation {
     const val SLOP_DP = 8f
-    const val THRESHOLD_DP = 72f
+    const val THRESHOLD_DP = 160f
     const val CANCEL_DP = 16f
+    const val HOLD_MS = 300L
 
     // 손가락을 댈 때 이미 끝이어야 한다 → 관성으로 끝에 닿은 채 이어지는 당기기는 후보가 없다.
     fun onDown(x: Float, y: Float, atTop: Boolean, atBottom: Boolean, topEnabled: Boolean, bottomEnabled: Boolean) =
@@ -32,7 +33,7 @@ object PullNavigation {
 
     fun onCancel() = PullState()
 
-    fun onMove(state: PullState, x: Float, y: Float): PullState {
+    fun onMove(state: PullState, x: Float, y: Float, nowMs: Long): PullState {
         val dx = x - state.startX
         val dy = y - state.startY
         val horizontal = abs(dx) > abs(dy) && abs(dx) > SLOP_DP
@@ -51,8 +52,13 @@ object PullNavigation {
             side = side,
             distance = distance,
             peak = max(state.peak, distance),
+            armedAtMs = if (distance >= THRESHOLD_DP) state.armedAtMs ?: nowMs else null,
         )
     }
 
-    fun onUp(state: PullState): PullSide? = state.side.takeIf { state.ready }
+    // 문턱을 넘은 채 잠깐 멈춰야 한다 → 끝에서 습관적으로 한 번 더 쓸어 올리는 스크롤은 멈춤 없이 지나가 이동하지 않는다.
+    fun isReady(state: PullState, nowMs: Long): Boolean =
+        state.side != null && state.armedAtMs != null && nowMs - state.armedAtMs >= HOLD_MS
+
+    fun onUp(state: PullState, nowMs: Long): PullSide? = state.side.takeIf { isReady(state, nowMs) }
 }

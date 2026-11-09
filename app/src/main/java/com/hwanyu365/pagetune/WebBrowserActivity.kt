@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -63,6 +64,7 @@ class WebBrowserActivity : AppCompatActivity() {
     private var ruleCounts = TuneRuleCounts()
     private var pluginId: Long? = null
     private val handler = Handler(Looper.getMainLooper())
+    private val refreshPull = Runnable { refreshPullIndicator() }
     private val hideToolbar = Runnable { binding.layoutQuickToolbar.visibility = View.GONE }
     private val hideStatus = Runnable { binding.tvTuneStatus.visibility = View.GONE }
     private val editLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -486,9 +488,14 @@ class WebBrowserActivity : AppCompatActivity() {
                 )
             }
             MotionEvent.ACTION_POINTER_DOWN -> pullState = PullNavigation.onSecondPointer(pullState)
-            MotionEvent.ACTION_MOVE -> pullState = PullNavigation.onMove(pullState, x, y)
+            MotionEvent.ACTION_MOVE -> {
+                val wasArmed = pullState.armedAtMs != null
+                pullState = PullNavigation.onMove(pullState, x, y, e.eventTime)
+                // 손가락을 멈추면 MOVE 가 오지 않는다 → 멈춤 시간이 지난 뒤 안내를 직접 갱신한다.
+                if (!wasArmed && pullState.armedAtMs != null) handler.postDelayed(refreshPull, PullNavigation.HOLD_MS)
+            }
             MotionEvent.ACTION_UP -> {
-                when (PullNavigation.onUp(pullState)) {
+                when (PullNavigation.onUp(pullState, e.eventTime)) {
                     PullSide.TOP -> triggerClickAction(pullTopAction)
                     PullSide.BOTTOM -> triggerClickAction(pullBottomAction)
                     null -> Unit
@@ -504,7 +511,7 @@ class WebBrowserActivity : AppCompatActivity() {
         fun show(view: TextView, side: PullSide) {
             val visible = pullState.showing && pullState.side == side
             view.visibility = if (visible) View.VISIBLE else View.GONE
-            if (visible) view.setText(if (pullState.ready) R.string.browser_pull_release else R.string.browser_pull)
+            if (visible) view.setText(if (PullNavigation.isReady(pullState, SystemClock.uptimeMillis())) R.string.browser_pull_release else R.string.browser_pull)
         }
         show(binding.tvPullTop, PullSide.TOP)
         show(binding.tvPullBottom, PullSide.BOTTOM)

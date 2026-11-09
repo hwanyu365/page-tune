@@ -15,19 +15,19 @@ class PullNavigationTest {
     private fun PullState.up(t: Long = 300) = PullNavigation.onUp(this, t)
 
     @Test
-    fun `TC#60 맨 위에서 아래로 160dp 당겨 0_3초 멈춘 뒤 떼면 위 당기기`() {
-        assertEquals(PullSide.TOP, down(atTop = true).move(160f).up())
+    fun `TC#60 맨 위에서 아래로 72dp 당겨 0_3초 멈춘 뒤 떼면 위 당기기`() {
+        assertEquals(PullSide.TOP, down(atTop = true).move(72f).up())
     }
 
     @Test
-    fun `TC#60 맨 아래에서 위로 160dp 당겨 0_3초 멈춘 뒤 떼면 아래 당기기`() {
-        assertEquals(PullSide.BOTTOM, down(atBottom = true).move(-160f).up())
+    fun `TC#60 맨 아래에서 위로 72dp 당겨 0_3초 멈춘 뒤 떼면 아래 당기기`() {
+        assertEquals(PullSide.BOTTOM, down(atBottom = true).move(-72f).up())
     }
 
     @Test
     fun `TC#60 문턱 미만이면 누르지 않는다`() {
-        assertNull(down(atTop = true).move(159f).up(1000))
-        assertNull(down(atBottom = true).move(-159f).up(1000))
+        assertNull(down(atTop = true).move(71f).up(1000))
+        assertNull(down(atBottom = true).move(-71f).up(1000))
     }
 
     @Test
@@ -52,7 +52,7 @@ class PullNavigationTest {
 
     @Test
     fun `TC#60 문턱 아래로 내려갔다 다시 넘으면 시간을 새로 센다`() {
-        val s = down(atTop = true).move(170f, t = 0).move(155f, t = 100).move(165f, t = 200)
+        val s = down(atTop = true).move(80f, t = 0).move(65f, t = 100).move(75f, t = 200)
         assertNull(s.up(450))
         assertEquals(PullSide.TOP, s.up(500))
     }
@@ -72,19 +72,19 @@ class PullNavigationTest {
     }
 
     @Test
-    fun `TC#60 8dp 부터 안내를 보이고 160dp 에서 0_3초 뒤 준비다`() {
+    fun `TC#60 8dp 부터 안내를 보이고 72dp 에서 0_3초 뒤 준비다`() {
         val s = down(atTop = true)
         assertFalse(s.move(7f).showing)
         assertTrue(s.move(8f).showing)
-        assertFalse(PullNavigation.isReady(s.move(159f), 1000))
-        assertFalse(PullNavigation.isReady(s.move(160f, t = 0), 299))
-        assertTrue(PullNavigation.isReady(s.move(160f, t = 0), 300))
+        assertFalse(PullNavigation.isReady(s.move(71f), 1000))
+        assertFalse(PullNavigation.isReady(s.move(72f, t = 0), 299))
+        assertTrue(PullNavigation.isReady(s.move(72f, t = 0), 300))
         assertEquals(PullSide.TOP, s.move(8f).side)
     }
 
     @Test
     fun `TC#60 문턱을 넘었다 되돌려 떼면 누르지 않는다`() {
-        assertNull(down(atTop = true).move(170f).move(100f).up(1000))
+        assertNull(down(atTop = true).move(100f).move(60f).up(1000))
     }
 
     @Test

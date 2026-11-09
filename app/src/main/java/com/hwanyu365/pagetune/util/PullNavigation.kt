@@ -22,7 +22,7 @@ data class PullState(
 /** 좌표는 dp, 시각은 ms 다. */
 object PullNavigation {
     const val SLOP_DP = 8f
-    const val THRESHOLD_DP = 160f
+    const val THRESHOLD_DP = 72f
     const val CANCEL_DP = 16f
     const val HOLD_MS = 300L
 

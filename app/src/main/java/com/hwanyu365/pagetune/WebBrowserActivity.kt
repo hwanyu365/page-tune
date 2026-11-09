@@ -492,7 +492,10 @@ class WebBrowserActivity : AppCompatActivity() {
                 val wasArmed = pullState.armedAtMs != null
                 pullState = PullNavigation.onMove(pullState, x, y, e.eventTime)
                 // 손가락을 멈추면 MOVE 가 오지 않는다 → 멈춤 시간이 지난 뒤 안내를 직접 갱신한다.
-                if (!wasArmed && pullState.armedAtMs != null) handler.postDelayed(refreshPull, PullNavigation.HOLD_MS)
+                if (!wasArmed && pullState.armedAtMs != null) {
+                    handler.removeCallbacks(refreshPull)
+                    handler.postDelayed(refreshPull, PullNavigation.HOLD_MS)
+                }
             }
             MotionEvent.ACTION_UP -> {
                 when (PullNavigation.onUp(pullState, e.eventTime)) {
@@ -504,6 +507,7 @@ class WebBrowserActivity : AppCompatActivity() {
             }
             MotionEvent.ACTION_CANCEL -> pullState = PullNavigation.onCancel()
         }
+        if (pullState.armedAtMs == null) handler.removeCallbacks(refreshPull)
         refreshPullIndicator()
     }
 

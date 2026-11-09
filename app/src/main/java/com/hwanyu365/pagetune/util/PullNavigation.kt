@@ -14,6 +14,7 @@ data class PullState(
     val distance: Float = 0f,
     val peak: Float = 0f,
     val armedAtMs: Long? = null,
+    val armedAtDistance: Float = 0f,
 ) {
     val showing: Boolean get() = side != null && distance >= PullNavigation.SLOP_DP
 }
@@ -46,17 +47,23 @@ object PullNavigation {
         // 문턱 아래로 되돌릴 때까지 기다리지 않고 조금만 되돌려도 취소한다 → 많이 당긴 뒤에도 취소가 쉽다.
         val reversed = state.peak - distance >= CANCEL_DP
         if (horizontal || reversed) return PullState(state.startX, state.startY)
-        return state.copy(
+        val next = state.copy(
             canTop = state.canTop && dy >= -SLOP_DP,
             canBottom = state.canBottom && dy <= SLOP_DP,
             side = side,
             distance = distance,
             peak = max(state.peak, distance),
-            armedAtMs = if (distance >= THRESHOLD_DP) state.armedAtMs ?: nowMs else null,
         )
+        // 문턱 위에서도 8dp 넘게 움직이면 멈춘 것이 아니다 → 멈춘 지점에서 시간을 다시 센다.
+        val still = state.armedAtMs != null && abs(distance - state.armedAtDistance) <= SLOP_DP
+        return when {
+            distance < THRESHOLD_DP -> next.copy(armedAtMs = null)
+            still -> next
+            else -> next.copy(armedAtMs = nowMs, armedAtDistance = distance)
+        }
     }
 
-    // 문턱을 넘은 채 잠깐 멈춰야 한다 → 끝에서 습관적으로 한 번 더 쓸어 올리는 스크롤은 멈춤 없이 지나가 이동하지 않는다.
+    // 문턱을 넘은 채 0.3초 멈춰야 한다 → 끝에서 습관적으로 한 번 더 쓸어 올리는 스크롤은 멈춤 없이 지나가 이동하지 않는다.
     fun isReady(state: PullState, nowMs: Long): Boolean =
         state.side != null && state.armedAtMs != null && nowMs - state.armedAtMs >= HOLD_MS
 

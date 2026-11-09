@@ -36,10 +36,18 @@ class PullNavigationTest {
     }
 
     @Test
-    fun `TC#60 멈춘 시간은 문턱을 처음 넘은 때부터 센다`() {
-        val s = down(atTop = true).move(100f, t = 0).move(160f, t = 200).move(200f, t = 400)
+    fun `TC#60 문턱 위에서 8dp 이내로만 움직이면 멈춘 것으로 센다`() {
+        val s = down(atTop = true).move(100f, t = 0).move(160f, t = 200).move(168f, t = 400)
         assertNull(s.up(499))
         assertEquals(PullSide.TOP, s.up(500))
+    }
+
+    @Test
+    fun `TC#60 문턱 위에서 계속 당기면 멈춘 지점부터 시간을 새로 센다`() {
+        val s = down(atBottom = true).move(-160f, t = 0).move(-200f, t = 250).move(-260f, t = 400)
+        assertNull(s.up(500))
+        assertNull(s.up(699))
+        assertEquals(PullSide.BOTTOM, s.up(700))
     }
 
     @Test

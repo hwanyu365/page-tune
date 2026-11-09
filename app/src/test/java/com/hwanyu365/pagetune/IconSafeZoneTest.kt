@@ -43,7 +43,7 @@ class IconSafeZoneTest {
     }
 
     @Test
-    fun `TC#10 foreground·monochrome 는 획 끝까지 안전 영역 반지름 이내다`() {
+    fun `TC#410 foreground·monochrome 는 획 끝까지 안전 영역 반지름 이내다`() {
         for (f in listOf("drawable/ic_launcher_foreground.xml", "drawable/ic_launcher_monochrome.xml")) {
             val r = maxRadius(f)
             assertTrue("$f 최대 반지름 $r > $safeRadius", r <= safeRadius)
@@ -51,7 +51,7 @@ class IconSafeZoneTest {
     }
 
     @Test
-    fun `TC#11 foreground 와 monochrome 은 같은 도형이다`() {
+    fun `TC#411 foreground 와 monochrome 은 같은 도형이다`() {
         assertEquals(
             attr("drawable/ic_launcher_foreground.xml", "pathData"),
             attr("drawable/ic_launcher_monochrome.xml", "pathData"),
@@ -59,7 +59,7 @@ class IconSafeZoneTest {
     }
 
     @Test
-    fun `TC#12 아이콘 배경은 전용 색 리소스이고 값이 171717 이다`() {
+    fun `TC#412 아이콘 배경은 전용 색 리소스이고 값이 171717 이다`() {
         val background = Regex("""<background android:drawable="([^"]*)"""")
             .find(File(res, "mipmap-anydpi-v26/ic_launcher.xml").readText())!!.groupValues[1]
         assertEquals("@color/ic_launcher_background", background)

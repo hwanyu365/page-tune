@@ -14,7 +14,7 @@ class StoreListingTest {
     private val limits = mapOf("title.txt" to 30, "short-description.txt" to 80, "full-description.txt" to 4000)
 
     @Test
-    fun `TC#1 listing 파일은 모든 언어에 있고 글자 수 제한 이하다`() {
+    fun `TC#401 listing 파일은 모든 언어에 있고 글자 수 제한 이하다`() {
         for (locale in locales) for ((name, max) in limits) {
             val f = File(listings, "$locale/$name")
             assertTrue("$f 없음", f.isFile)
@@ -24,7 +24,7 @@ class StoreListingTest {
     }
 
     @Test
-    fun `TC#2 listing 은 광고 차단을 문구로 쓰지 않는다`() {
+    fun `TC#402 listing 은 광고 차단을 문구로 쓰지 않는다`() {
         val banned = listOf("ad block", "adblock", "광고 차단", "광고차단")
         for (locale in locales) for (name in limits.keys) {
             val text = File(listings, "$locale/$name").readText().lowercase()
@@ -33,7 +33,7 @@ class StoreListingTest {
     }
 
     @Test
-    fun `TC#3 개인정보 처리방침은 한국어·영어 본문과 이슈 URL 을 갖고 이메일이 없다`() {
+    fun `TC#403 개인정보 처리방침은 한국어·영어 본문과 이슈 URL 을 갖고 이메일이 없다`() {
         val text = File("../docs/privacy.md").readText()
         assertTrue("# PageTune 개인정보 처리방침" in text)
         assertTrue("# PageTune Privacy Policy" in text)
@@ -47,14 +47,14 @@ class StoreListingTest {
     private fun section(text: String, heading: String) = text.substringAfter("## $heading\n").substringBefore("\n## ")
 
     @Test
-    fun `TC#38 개인정보 처리방침의 기기 저장 절에 마지막으로 본 버전 설정값이 있다`() {
+    fun `TC#138 개인정보 처리방침의 기기 저장 절에 마지막으로 본 버전 설정값이 있다`() {
         val text = File("../docs/privacy.md").readText()
         assertTrue("마지막으로 본 앱 버전" in section(text, "기기에 저장하는 정보"))
         assertTrue("last app version you saw" in section(text, "Information stored on your device"))
     }
 
     @Test
-    fun `TC#13 매니페스트의 권한·백업 설정이 방침 서술과 맞는다`() {
+    fun `TC#413 매니페스트의 권한·백업 설정이 방침 서술과 맞는다`() {
         val manifest = File("src/main/AndroidManifest.xml").readText()
         val permissions = Regex("""<uses-permission android:name="([^"]+)"""").findAll(manifest).map { it.groupValues[1] }.toList()
         assertEquals(listOf("android.permission.INTERNET"), permissions)
@@ -69,14 +69,14 @@ class StoreListingTest {
     }
 
     @Test
-    fun `TC#49 매니페스트는 다른 앱을 미리 조회하는 선언이 없다`() {
+    fun `TC#149 매니페스트는 다른 앱을 미리 조회하는 선언이 없다`() {
         val manifest = File("src/main/AndroidManifest.xml").readText()
         assertFalse("<queries" in manifest)
         assertFalse("QUERY_ALL_PACKAGES" in manifest)
     }
 
     @Test
-    fun `TC#50 처리방침 공유 절은 링크·다운로드 주소를 다른 앱에 넘기는 것을 밝힌다`() {
+    fun `TC#150 처리방침 공유 절은 링크·다운로드 주소를 다른 앱에 넘기는 것을 밝힌다`() {
         val policy = File("../docs/privacy.md").readText().replace("\r\n", "\n")
         fun section(title: String) = policy.substringAfter("## $title\n").substringBefore("\n## ")
         val ko = section("공유")
@@ -86,7 +86,7 @@ class StoreListingTest {
     }
 
     @Test
-    fun `TC#7 설정 화면은 다른 앱이 열 수 없다`() {
+    fun `TC#307 설정 화면은 다른 앱이 열 수 없다`() {
         val manifest = File("src/main/AndroidManifest.xml").readText()
         val activity = Regex("""<activity\b[^>]*android:name="\.SettingsActivity"[^>]*>""").find(manifest)
         assertTrue("SettingsActivity 선언 없음", activity != null)
@@ -94,7 +94,7 @@ class StoreListingTest {
     }
 
     @Test
-    fun `TC#14 listing 은 백업 예외를 밝힌다`() {
+    fun `TC#414 listing 은 백업 예외를 밝힌다`() {
         for ((locale, phrase) in listOf("ko-KR" to "Google 계정", "en-US" to "Google account")) {
             val text = File(listings, "$locale/full-description.txt").readText()
             assertTrue("$locale 전체 설명에 '$phrase' 없음", phrase in text)
@@ -102,7 +102,7 @@ class StoreListingTest {
     }
 
     @Test
-    fun `TC#15 listing 은 특정 사이트·커뮤니티를 가리키지 않는다`() {
+    fun `TC#415 listing 은 특정 사이트·커뮤니티를 가리키지 않는다`() {
         val issues = "https://github.com/hwanyu365/page-tune/issues"
         val names = listOf("ruliweb", "dcinside", "clien", "ppomppu", "fmkorea", "theqoo", "inven", "bobaedream", "mlbpark", "todayhumor", "instiz", "naver", "daum")
         val urlPatterns = listOf("www.", ".com", ".co.kr", ".net", ".kr", "http")
@@ -126,7 +126,7 @@ class StoreListingTest {
         File(listings, "$locale/graphics/$type").listFiles().orEmpty().filter { it.isFile }.sortedBy { it.name }
 
     @Test
-    fun `TC#16 스토어 아이콘은 언어마다 512x512 RGBA PNG 한 장이다`() {
+    fun `TC#416 스토어 아이콘은 언어마다 512x512 RGBA PNG 한 장이다`() {
         for (locale in locales) {
             val files = graphics(locale, "icon")
             assertEquals("$locale icon", 1, files.size)
@@ -135,7 +135,7 @@ class StoreListingTest {
     }
 
     @Test
-    fun `TC#17 대표 이미지는 언어마다 1024x500 알파 없는 PNG 한 장이다`() {
+    fun `TC#417 대표 이미지는 언어마다 1024x500 알파 없는 PNG 한 장이다`() {
         for (locale in locales) {
             val files = graphics(locale, "feature-graphic")
             assertEquals("$locale feature-graphic", 1, files.size)
@@ -144,7 +144,7 @@ class StoreListingTest {
     }
 
     @Test
-    fun `TC#18 폰 스크린샷은 언어마다 4~8장이고 Play 크기·비율 제한 안이다`() {
+    fun `TC#418 폰 스크린샷은 언어마다 4~8장이고 Play 크기·비율 제한 안이다`() {
         for (locale in locales) {
             val files = graphics(locale, "phone-screenshots")
             assertTrue("$locale 스크린샷 ${files.size}장", files.size in 4..8)

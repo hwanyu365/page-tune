@@ -85,7 +85,7 @@ class DesignSystemTest {
     }
 
     @Test
-    fun `TC#1 모든 화면 테마는 Theme_Material3_Dark 를 최상위 부모로 둔 앱 테마 계열이다`() {
+    fun `TC#201 모든 화면 테마는 Theme_Material3_Dark 를 최상위 부모로 둔 앱 테마 계열이다`() {
         val manifest = parse(File("src/main/AndroidManifest.xml"))
         val application = manifest.descendants().first { it.tagName == "application" }
         val appTheme = application.getAttribute("android:theme").removePrefix("@style/")
@@ -100,13 +100,13 @@ class DesignSystemTest {
     }
 
     @Test
-    fun `TC#2 색 리소스는 토큰과 아이콘 배경색뿐이고 값이 스펙과 같다`() {
+    fun `TC#202 색 리소스는 토큰과 아이콘 배경색뿐이고 값이 스펙과 같다`() {
         assertEquals(tokens + ("ic_launcher_background" to "#171717"), colorResources())
         assertEquals("color 상태 목록도 색 리소스다", emptyList<File>(), res.listFiles().orEmpty().filter { it.name.startsWith("color") })
     }
 
     @Test
-    fun `TC#2 레이아웃·메뉴·drawable 에 색 리터럴이 없다`() {
+    fun `TC#202 레이아웃·메뉴·drawable 에 색 리터럴이 없다`() {
         val drawables = xmlFiles("drawable").filter { !it.name.startsWith("ic_launcher") && parse(it).tagName != "vector" }
         val offenders = (layouts + xmlFiles("menu") + drawables).flatMap { f ->
             listOf(parse(f)).plus(parse(f).descendants()).flatMap { it.attrs() }
@@ -134,7 +134,7 @@ class DesignSystemTest {
     )
 
     @Test
-    fun `TC#2 Kotlin 은 허용 목록 밖에서 색을 직접 지정하지 않는다`() {
+    fun `TC#202 Kotlin 은 허용 목록 밖에서 색을 직접 지정하지 않는다`() {
         val offenders = kotlinSources.flatMap { f ->
             val allowed = colorAllowlist[f.name].orEmpty()
             f.readLines().withIndex().flatMap { (i, line) ->
@@ -170,7 +170,7 @@ class DesignSystemTest {
     }
 
     @Test
-    fun `TC#3 토큰 조합의 대비가 글자 4_5, 비텍스트 3 이상이다`() {
+    fun `TC#203 토큰 조합의 대비가 글자 4_5, 비텍스트 3 이상이다`() {
         val c = colorResources()
         fun t(name: String) = rgb(c.getValue(name))
         val surfaces = listOf("surface", "surfaceContainerLow", "surfaceContainer", "surfaceContainerHigh")
@@ -190,7 +190,7 @@ class DesignSystemTest {
     }
 
     @Test
-    fun `TC#3 스낵바 액션·메시지 글자는 스낵바 배경 대비 4_5 이상이다`() {
+    fun `TC#203 스낵바 액션·메시지 글자는 스낵바 배경 대비 4_5 이상이다`() {
         val c = colorResources()
         val theme = styleElements.getValue("AppTheme").descendants().filter { it.tagName == "item" }
             .associate { it.getAttribute("name") to it.textContent.trim().removePrefix("@color/") }
@@ -204,7 +204,7 @@ class DesignSystemTest {
     }
 
     @Test
-    fun `TC#4 레이아웃과 Kotlin 은 글자 크기를 직접 지정하지 않는다`() {
+    fun `TC#204 레이아웃과 Kotlin 은 글자 크기를 직접 지정하지 않는다`() {
         val inLayouts = layouts.filter { "android:textSize" in it.readText() }.map { it.name }
         val inKotlin = kotlinSources.filter { Regex("""\btextSize\s*=|setTextSize\(""").containsMatchIn(it.readText()) }.map { it.name }
 
@@ -212,7 +212,7 @@ class DesignSystemTest {
     }
 
     @Test
-    fun `TC#5 레이아웃 여백은 0dp 또는 간격 스케일 값이다`() {
+    fun `TC#205 레이아웃 여백은 0dp 또는 간격 스케일 값이다`() {
         val scale = setOf("0dp", "4dp", "8dp", "12dp", "16dp", "24dp")
         val offenders = layouts.flatMap { f ->
             parse(f).let { listOf(it) + it.descendants() }.flatMap { it.attrs() }
@@ -224,7 +224,7 @@ class DesignSystemTest {
     }
 
     @Test
-    fun `TC#6 레이아웃은 교체 대상 위젯과 단독 편집칸을 쓰지 않는다`() {
+    fun `TC#206 레이아웃은 교체 대상 위젯과 단독 편집칸을 쓰지 않는다`() {
         val banned = setOf("androidx.appcompat.widget.Toolbar", "androidx.cardview.widget.CardView")
         val editTexts = setOf("EditText", "com.hwanyu365.pagetune.ui.view.NoAutofillEditText", "com.google.android.material.textfield.TextInputEditText")
         val offenders = layouts.flatMap { f ->
@@ -243,14 +243,14 @@ class DesignSystemTest {
     }
 
     @Test
-    fun `TC#6 Kotlin 은 플랫폼·AppCompat AlertDialog 를 쓰지 않는다`() {
+    fun `TC#206 Kotlin 은 플랫폼·AppCompat AlertDialog 를 쓰지 않는다`() {
         val offenders = kotlinSources.filter { Regex("""android\.app\.AlertDialog|androidx\.appcompat\.app\.AlertDialog""").containsMatchIn(it.readText()) }.map { it.name }
 
         assertEquals(emptyList<String>(), offenders)
     }
 
     @Test
-    fun `TC#13 위젯 스타일의 materialThemeOverlay 는 그 위젯의 Material3 overlay 를 부모로 둔다`() {
+    fun `TC#213 위젯 스타일의 materialThemeOverlay 는 그 위젯의 Material3 overlay 를 부모로 둔다`() {
         val expected = mapOf(
             "Widget.Material3.Button" to "ThemeOverlay.Material3.Button",
             "Widget.Material3.TextInputLayout" to "ThemeOverlay.Material3.TextInputEditText",

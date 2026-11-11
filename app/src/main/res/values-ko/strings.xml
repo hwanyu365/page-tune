@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="tab_webpages">웹페이지</string>
-    <string name="tab_tunes">Tune</string>
+    <string name="tab_webpages">Pages</string>
+    <string name="tab_tunes">Tunes</string>
 
     <string name="cancel">취소</string>
     <string name="save">저장</string>
@@ -13,9 +13,6 @@
     <string name="list_none_selected">선택한 항목이 없어요</string>
     <string name="list_more_options">더보기</string>
     <string name="list_edit">편집</string>
-    <plurals name="list_selected_count">
-        <item quantity="other">%d개 선택</item>
-    </plurals>
     <string name="list_undo">실행취소</string>
     <string name="list_delete_failed">삭제하지 못했어요</string>
     <string name="list_restore_failed">되살리지 못했어요</string>
@@ -32,9 +29,9 @@
     <string name="intro_1_title">Tune 만들기</string>
     <string name="intro_1_body">Tunes 탭에서 사이트를 열고 페이지의 요소를 골라 숨기거나 색상을 바꿔요.</string>
     <string name="intro_2_title">웹페이지 등록</string>
-    <string name="intro_2_body">웹페이지 탭에서 페이지를 등록하고 Tune 을 연결해요.</string>
+    <string name="intro_2_body">Pages 탭에서 페이지를 등록하고 Tune을 연결해요.</string>
     <string name="intro_3_title">빠른 메뉴</string>
-    <string name="intro_3_body">페이지를 보는 중 오른쪽 위 빠른 메뉴로 Tune 을 켜고 끄거나 편집해요.</string>
+    <string name="intro_3_body">페이지를 보는 중 오른쪽 위 빠른 메뉴로 Tune을 켜고 끄거나 편집해요.</string>
     <string name="whats_new_title">새 소식</string>
     <string name="whats_new_version">버전 %s</string>
     <string name="whats_new_10200">• 어두운 Material 디자인으로 새 단장\n• 웹페이지·Tune 카드, 삭제 후 실행취소\n• 단계별 Tune 편집과 색상 프리셋\n• 열람 중 오류 화면·외부 링크·설정</string>
@@ -67,8 +64,6 @@
     <string name="edit_pick_on">요소 선택 중</string>
     <string name="edit_pick_off">요소 선택</string>
     <string name="edit_selected_none">선택한 요소가 없어요</string>
-    <string name="edit_selected">선택: %s</string>
-    <string name="edit_selected_with_text">선택: “%1$s” (%2$s)</string>
     <string name="edit_selected_error">요소를 읽지 못했어요</string>
     <string name="edit_match_count">일치 %d</string>
     <string name="edit_match_none">일치 %d · 다시 불러오면 찾지 못할 수 있어요</string>
@@ -92,6 +87,8 @@
     <string name="edit_trigger_double_bottom">아래쪽 영역 두 번 탭</string>
     <string name="edit_trigger_button_prev">이전 버튼 (◁)</string>
     <string name="edit_trigger_button_next">다음 버튼 (▷)</string>
+    <string name="edit_trigger_pull_top">맨 위에서 아래로 당기기</string>
+    <string name="edit_trigger_pull_bottom">맨 아래에서 위로 당기기</string>
     <string name="edit_area_label">탭 영역 높이 (1~50%)</string>
     <string name="edit_area_hint">기본값 40%</string>
     <string name="edit_area_error">1~50 사이 값을 입력해 주세요</string>
@@ -112,6 +109,31 @@
     <string name="edit_start_set">시작 위치를 %s(으)로 설정했어요</string>
     <string name="edit_name_required">Tune 이름을 입력해 주세요</string>
     <string name="edit_saved">Tune을 저장했어요</string>
+    <string name="edit_step">단계 %1$d/4 · %2$s</string>
+    <string name="edit_step_address">주소</string>
+    <string name="edit_step_pick">요소 선택</string>
+    <string name="edit_step_rule">규칙</string>
+    <string name="edit_step_save">저장</string>
+    <string name="edit_step_address_hint">페이지 주소를 넣고 불러오기를 눌러요</string>
+    <string name="edit_step_pick_hint">요소 선택을 켜고 바꿀 요소를 눌러요</string>
+    <string name="edit_step_rule_hint">할 일을 고르고 규칙 추가를 눌러요</string>
+    <string name="edit_step_save_hint">이름을 넣고 저장을 눌러요. 다른 요소를 더 골라도 돼요</string>
+    <string name="edit_label_with_text">%1$s · %2$s</string>
+    <string name="element_kind_link">링크</string>
+    <string name="element_kind_image">이미지</string>
+    <string name="element_kind_button">버튼</string>
+    <string name="element_kind_input">입력칸</string>
+    <string name="element_kind_frame">삽입된 페이지</string>
+    <string name="element_kind_media">미디어</string>
+    <string name="element_kind_area">영역</string>
+    <string name="edit_details_show">자세히</string>
+    <string name="edit_details_hide">자세히 접기</string>
+    <string name="edit_rule_delete_cd">규칙 삭제</string>
+    <string name="edit_rule_not_found">페이지에서 요소를 찾을 수 없어요</string>
+    <string name="color_hex_hint">색 코드 (#RRGGBB)</string>
+    <string name="color_hex_error">16진수 3자리나 6자리를 넣어요</string>
+    <string name="color_advanced_show">고급 (RGB)</string>
+    <string name="color_advanced_hide">고급 접기</string>
 
     <string name="browser_prev">이전</string>
     <string name="browser_next">다음</string>
@@ -150,9 +172,9 @@
     <string name="settings_privacy_summary">브라우저에서 열기</string>
     <string name="settings_no_browser">처리방침을 열 수 있는 앱이 없어요. 주소: %s</string>
 
-    <string name="empty_tunes_message">아직 Tune 이 없어요. Tune 은 페이지의 일부를 숨기고 색상을 바꿔요.</string>
+    <string name="empty_tunes_message">아직 Tune이 없어요. Tune은 페이지의 일부를 숨기고 색상을 바꿔요.</string>
     <string name="empty_tunes_action">Tune 만들기</string>
-    <string name="empty_webpages_message">아직 웹페이지가 없어요. 웹페이지를 추가하면 Tune 으로 볼 수 있어요.</string>
+    <string name="empty_webpages_message">아직 웹페이지가 없어요. 웹페이지를 추가하면 Tune으로 볼 수 있어요.</string>
     <string name="empty_webpages_action">웹페이지 추가</string>
     <string name="menu_licenses">오픈소스 라이선스</string>
     <string name="edit_sheet_handle_cd">패널 펼치기/접기</string>
@@ -175,4 +197,7 @@
     <string name="tune_kind_color">색상 %d</string>
     <string name="tune_kind_click">이전/다음 이동 %d</string>
     <string name="tune_kind_start">시작 위치 %d</string>
+    <string name="whats_new_10300">• 페이지 맨 위·맨 아래에서 당겨 다음 글 같은 연결 요소를 누를 수 있어요. 이전/다음 이동 규칙으로 연결해요.</string>
+    <string name="browser_pull">당겨서 이동</string>
+    <string name="browser_pull_release">놓으면 이동</string>
 </resources>

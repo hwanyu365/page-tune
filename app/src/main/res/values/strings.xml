@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">PageTune</string>
 
-    <string name="tab_webpages">Web pages</string>
+    <string name="tab_webpages">Pages</string>
     <string name="tab_tunes">Tunes</string>
 
     <string name="cancel">Cancel</string>
@@ -15,10 +15,6 @@
     <string name="list_none_selected">No items selected</string>
     <string name="list_more_options">More options</string>
     <string name="list_edit">Edit</string>
-    <plurals name="list_selected_count">
-        <item quantity="one">%d selected</item>
-        <item quantity="other">%d selected</item>
-    </plurals>
     <string name="list_undo">Undo</string>
     <string name="list_delete_failed">Couldn\'t delete</string>
     <string name="list_restore_failed">Couldn\'t restore</string>
@@ -37,7 +33,7 @@
     <string name="intro_1_title">Make a Tune</string>
     <string name="intro_1_body">In the Tunes tab, open a site and pick elements on the page to hide them or change their colors.</string>
     <string name="intro_2_title">Add a web page</string>
-    <string name="intro_2_body">In the Web pages tab, add a page and connect a Tune to it.</string>
+    <string name="intro_2_body">In the Pages tab, add a page and connect a Tune to it.</string>
     <string name="intro_3_title">Use the quick menu</string>
     <string name="intro_3_body">While viewing a page, open the quick menu at the top right to turn the Tune on or off or edit it.</string>
     <string name="whats_new_title">What\'s new</string>
@@ -74,8 +70,6 @@
     <string name="edit_pick_on">Picking element</string>
     <string name="edit_pick_off">Pick element</string>
     <string name="edit_selected_none">No element selected</string>
-    <string name="edit_selected">Selected: %s</string>
-    <string name="edit_selected_with_text">Selected: “%1$s” (%2$s)</string>
     <string name="edit_selected_error">Couldn’t read the element</string>
     <string name="edit_match_count">Matches %d</string>
     <string name="edit_match_none">Matches %d · May not be found after reload</string>
@@ -99,6 +93,8 @@
     <string name="edit_trigger_double_bottom">Double tap bottom area</string>
     <string name="edit_trigger_button_prev">Prev button (◁)</string>
     <string name="edit_trigger_button_next">Next button (▷)</string>
+    <string name="edit_trigger_pull_top">Pull down at page top</string>
+    <string name="edit_trigger_pull_bottom">Pull up at page bottom</string>
     <string name="edit_area_label">Tap area height (1–50%)</string>
     <string name="edit_area_hint">Default: 40%</string>
     <string name="edit_area_error">Enter a value from 1 to 50</string>
@@ -119,6 +115,31 @@
     <string name="edit_start_set">Start position set to %s</string>
     <string name="edit_name_required">Enter a Tune name</string>
     <string name="edit_saved">Tune saved</string>
+    <string name="edit_step">Step %1$d/4 · %2$s</string>
+    <string name="edit_step_address">Address</string>
+    <string name="edit_step_pick">Pick element</string>
+    <string name="edit_step_rule">Rule</string>
+    <string name="edit_step_save">Save</string>
+    <string name="edit_step_address_hint">Enter the page address and tap Load</string>
+    <string name="edit_step_pick_hint">Turn on Pick element and tap what you want to change</string>
+    <string name="edit_step_rule_hint">Choose what to do and tap Add rule</string>
+    <string name="edit_step_save_hint">Enter a name and tap Save, or pick another element</string>
+    <string name="edit_label_with_text">%1$s · %2$s</string>
+    <string name="element_kind_link">Link</string>
+    <string name="element_kind_image">Image</string>
+    <string name="element_kind_button">Button</string>
+    <string name="element_kind_input">Input field</string>
+    <string name="element_kind_frame">Embedded page</string>
+    <string name="element_kind_media">Media</string>
+    <string name="element_kind_area">Area</string>
+    <string name="edit_details_show">Details</string>
+    <string name="edit_details_hide">Hide details</string>
+    <string name="edit_rule_delete_cd">Delete rule</string>
+    <string name="edit_rule_not_found">Couldn’t find this element on the page</string>
+    <string name="color_hex_hint">Color code (#RRGGBB)</string>
+    <string name="color_hex_error">Enter 3 or 6 hex digits</string>
+    <string name="color_advanced_show">Advanced (RGB)</string>
+    <string name="color_advanced_hide">Hide advanced</string>
 
     <string name="color_channel_r" translatable="false">R</string>
     <string name="color_channel_g" translatable="false">G</string>
@@ -188,4 +209,7 @@
     <string name="tune_kind_color">Color %d</string>
     <string name="tune_kind_click">Prev/Next navigation %d</string>
     <string name="tune_kind_start">Start position %d</string>
+    <string name="whats_new_10300">• Pull down at the top or up at the bottom of a page to tap a linked element, like the next post. Link it as a Prev/Next navigation rule.</string>
+    <string name="browser_pull">Pull to go</string>
+    <string name="browser_pull_release">Release to go</string>
 </resources>

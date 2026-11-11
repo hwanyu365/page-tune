@@ -32,7 +32,7 @@
 
 ### 3.1 사용자 스토리
 
-- `US#1` 사용자로서, 앱 버전과 라이선스, 개인정보 처리방침을 앱 안에서 확인하고 싶다 [요구사항] GH-55
+- `US#1` 사용자로서, 앱 버전과 라이선스, 개인정보 처리방침을 앱 안에서 확인하고 싶다 [요구사항] GH-55 → FR#2
 
 ### 3.2 기능 요구사항
 
@@ -90,13 +90,13 @@
 
 | TC | 시나리오 | 대상 | 비고 |
 | --- | --- | --- | --- |
-| `TC#1` | 메인 오버플로 → 설정 → 설정 화면, 오버플로에 오픈소스 라이선스 항목 없음, 위로·시스템 뒤로가기 → 메인 | [FR#1] | (수동) |
-| `TC#2` | 태그 빌드(e.g. `VERSION_TAG=v1.2.0`)를 설치 → 앱 정보의 버전이 `adb shell dumpsys package com.hwanyu365.pagetune` 의 `versionName` 과 같음. 라이선스 → 원문 표시 | [FR#2] | (수동) 에뮬레이터. 원문 내용은 `spec_tune_edit.md` TC#25 |
-| `TC#3` | 처리방침 → 브라우저에 게시 페이지, 브라우저를 모두 비활성화한 기기 → 안내와 주소 표시 | [FR#3] | (수동) 에뮬레이터 |
-| `TC#4` | 처리방침 주소 문자열 리소스가 `https://hwanyu365.github.io/page-tune/privacy` 이고 `translatable="false"` | [FR#3] | 단위 (`ResourceRulesTest`) |
-| `TC#5` | 영어·한국어, 글꼴 200% 에서 세 항목 잘림 없음, 항목 높이 48dp 이상 | [NFR#1] [NFR#2] | (수동) |
-| `TC#6` | `app/build.gradle` dependencies 와 매니페스트 권한 변경 없음 | [NFR#3] | PR diff 확인 |
-| `TC#7` | 앱 매니페스트에서 설정 Activity 의 `android:exported` 가 `"false"` 로 명시돼 있다 | [NFR#3] | 단위 (`StoreListingTest` 의 매니페스트 파싱과 같은 방식). mutation: 구현 PR 에서 `true` 로 바꿔 실패하는지 확인 |
+| `TC#301` | 메인 오버플로 → 설정 → 설정 화면, 오버플로에 오픈소스 라이선스 항목 없음, 위로·시스템 뒤로가기 → 메인 | [FR#1] | (수동) 수동 |
+| `TC#302` | 태그 빌드(e.g. `VERSION_TAG=v1.2.0`)를 설치 → 앱 정보의 버전이 `adb shell dumpsys package com.hwanyu365.pagetune` 의 `versionName` 과 같음. 라이선스 → 원문 표시 | [FR#2] | (수동) 수동, 에뮬레이터. 원문 내용은 `spec_tune_edit.md` TC#25 |
+| `TC#303` | 처리방침 → 브라우저에 게시 페이지, 브라우저를 모두 비활성화한 기기 → 안내와 주소 표시 | [FR#3] | (수동) 수동, 에뮬레이터 |
+| `TC#304` | 처리방침 주소 문자열 리소스가 `https://hwanyu365.github.io/page-tune/privacy` 이고 `translatable="false"` | [FR#3] | 단위 (`ResourceRulesTest`) |
+| `TC#305` | 영어·한국어, 글꼴 200% 에서 세 항목 잘림 없음, 항목 높이 48dp 이상 | [NFR#1] [NFR#2] | (수동) 수동 |
+| `TC#306` | `app/build.gradle` dependencies 와 매니페스트 권한 변경 없음 | [NFR#3] | (수동) PR diff 확인 |
+| `TC#307` | 앱 매니페스트에서 설정 Activity 의 `android:exported` 가 `"false"` 로 명시돼 있다 | [NFR#3] | 단위 (`StoreListingTest` 의 매니페스트 파싱과 같은 방식). mutation: 구현 PR 에서 `true` 로 바꿔 실패하는지 확인 |
 
 ## 부록. 변경 이력
 

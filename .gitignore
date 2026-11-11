@@ -22,5 +22,5 @@
 service-account*.json
 
 # 로컬 agent 상태
-.add/
+.adk/
 .claude/settings.local.json

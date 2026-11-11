@@ -38,9 +38,9 @@
 
 ### 사용자 스토리
 
-- `US#1` 사용자로서 런처에서 앱을 알아보고, 시스템 테마 아이콘에서도 어울리기를 원한다.
-- `US#2` 사용자로서 앱이 내 정보를 어떻게 다루는지 스토어에서 링크로 확인하기를 원한다.
-- `US#3` 저장소 소유자로서 스토어 문구를 PR 로 리뷰하고 버전 관리하기를 원한다.
+- `US#1` 사용자로서 런처에서 앱을 알아보고, 시스템 테마 아이콘에서도 어울리기를 원한다. → FR#1, FR#2
+- `US#2` 사용자로서 앱이 내 정보를 어떻게 다루는지 스토어에서 링크로 확인하기를 원한다. → FR#4
+- `US#3` 저장소 소유자로서 스토어 문구를 PR 로 리뷰하고 버전 관리하기를 원한다. → FR#6
 
 ### 기능 요구사항
 
@@ -130,27 +130,28 @@
 
 | TC | 대상 | 시나리오 | 비고 |
 | --- | --- | --- | --- |
-| `TC#1` | FR#6 | 모든 listing 파일이 존재하고 글자 수 제한 이하 | 단위 (`StoreListingTest`) |
-| `TC#2` | FR#7 | listing 에 "ad block"·"광고 차단" 이 없다 | 단위 |
-| `TC#3` | FR#4 | `docs/privacy.md` 에 한국어·영어 제목, GitHub 이슈 URL 이 있고 이메일 주소가 없다. 한국어·영어 시행일이 같다 | 단위 |
-| `TC#4` | FR#1~FR#3 | `assembleDebug` 성공, 병합 매니페스트의 `icon`·`roundIcon` 이 mipmap | 로컬 |
-| `TC#10` | FR#1 | 획 끝 포함 최대 반지름 ≤ 33dp (foreground·monochrome) | 단위 (`IconSafeZoneTest`) |
-| `TC#11` | FR#1 | foreground 와 monochrome path 가 같다 | 단위 |
-| `TC#12` | FR#1 | 적응형 background 가 `@color/ic_launcher_background`(`#171717`) | 단위 |
-| `TC#5` | FR#1 | API 36 에뮬레이터 런처에서 원형·사각 마스크와 테마 아이콘(monochrome)에서 잘림 없음 | (수동) 소유자 시안 확인 후 merge |
-| `TC#6` | FR#2 | API 24 에뮬레이터 런처에서 PNG 아이콘 표시 | (수동) |
-| `TC#13` | FR#5 | 매니페스트 `uses-permission` 이 `INTERNET` 뿐, `allowBackup="true"`, 백업 제외 규칙 없음, 방침에 Google 계정 백업 서술이 있고 "기기 밖으로 전송되지 않아요"류 단정이 없다 | 단위 (`StoreListingTest`). 단정 문구 검사는 알려진 두 문구만 막는다 → 다른 표현은 리뷰로 확인 |
-| `TC#14` | FR#5 | 두 로케일 전체 설명에 백업 예외 서술("Google 계정"/"Google account")이 있다 | 단위 |
-| `TC#15` | FR#7 | listing 에 알려진 국내 커뮤니티 이름 목록과 URL 패턴(`www.`·`.com`·`.kr`·`http`, 이슈 URL 제외)이 없다 | 단위. 목록 밖 사이트 이름은 걸러내지 못한다 → 리뷰에서 본다 |
-| `TC#7` | FR#5 | 병합 매니페스트에 라이브러리가 더하는 권한이 있으면 방침에 필요한지 판단 | 로컬. TC#13 은 앱 매니페스트만 본다 |
-| `TC#8` | FR#8 | `./gradlew publishReleaseBundle --dry-run` 에 `publishReleaseListing` 이 없다 | 로컬 |
-| `TC#9` | §4 | Pages 활성화 후 게시 URL 이 열린다 | 소유자 설정 후 확인 |
-| `TC#16` | FR#9 | 언어마다 `graphics/icon/` 에 PNG 한 장, 512x512, 색 형식 RGBA(6), 8-bit | 단위 (`StoreListingTest`), PNG IHDR |
-| `TC#17` | FR#10 | 언어마다 `graphics/feature-graphic/` 에 PNG 한 장, 1024x500, 색 형식 RGB(2), 8-bit | 단위 |
-| `TC#18` | FR#11 | 언어마다 `graphics/phone-screenshots/` 에 PNG 4~8장, 색 형식 RGB(2), 각 변 320~3840, 긴 변 ≤ 짧은 변 x2 | 단위 |
-| `TC#19` | FR#9~FR#11 | 그래픽을 직접 열어 도형이 foreground 와 같고, 화면에 example 도메인 외 사이트 이름이 없고, 문구가 해당 언어인지 확인 | (수동) PR 에 확인한 파일 목록을 남긴다 |
+| `TC#401` | FR#6 | 모든 listing 파일이 존재하고 글자 수 제한 이하 | 단위 (`StoreListingTest`) |
+| `TC#402` | FR#7 | listing 에 "ad block"·"광고 차단" 이 없다 | 단위 |
+| `TC#403` | FR#4 | `docs/privacy.md` 에 한국어·영어 제목, GitHub 이슈 URL 이 있고 이메일 주소가 없다. 한국어·영어 시행일이 같다 | 단위 |
+| `TC#404` | FR#1~FR#3 | `assembleDebug` 성공, 병합 매니페스트의 `icon`·`roundIcon` 이 mipmap | (수동) 로컬 |
+| `TC#410` | FR#1 | 획 끝 포함 최대 반지름 ≤ 33dp (foreground·monochrome) | 단위 (`IconSafeZoneTest`) |
+| `TC#411` | FR#1, NFR#2 | foreground 와 monochrome path 가 같다 | 단위 |
+| `TC#412` | FR#1 | 적응형 background 가 `@color/ic_launcher_background`(`#171717`) | 단위 |
+| `TC#405` | FR#1 | API 36 에뮬레이터 런처에서 원형·사각 마스크와 테마 아이콘(monochrome)에서 잘림 없음 | (수동) 수동. 소유자 시안 확인 후 merge |
+| `TC#406` | FR#2 | API 24 에뮬레이터 런처에서 PNG 아이콘 표시 | (수동) 수동 |
+| `TC#413` | FR#5 | 매니페스트 `uses-permission` 이 `INTERNET` 뿐, `allowBackup="true"`, 백업 제외 규칙 없음, 방침에 Google 계정 백업 서술이 있고 "기기 밖으로 전송되지 않아요"류 단정이 없다 | 단위 (`StoreListingTest`). 단정 문구 검사는 알려진 두 문구만 막는다 → 다른 표현은 리뷰로 확인 |
+| `TC#414` | FR#5 | 두 로케일 전체 설명에 백업 예외 서술("Google 계정"/"Google account")이 있다 | 단위 |
+| `TC#415` | FR#7 | listing 에 알려진 국내 커뮤니티 이름 목록과 URL 패턴(`www.`·`.com`·`.kr`·`http`, 이슈 URL 제외)이 없다 | 단위. 목록 밖 사이트 이름은 걸러내지 못한다 → 리뷰에서 본다 |
+| `TC#407` | FR#5 | 병합 매니페스트에 라이브러리가 더하는 권한이 있으면 방침에 필요한지 판단 | (수동) 로컬. TC#413 은 앱 매니페스트만 본다 |
+| `TC#408` | FR#8 | `./gradlew publishReleaseBundle --dry-run` 에 `publishReleaseListing` 이 없다 | (수동) 로컬 |
+| `TC#409` | FR#4 | Pages 활성화 후 게시 URL 이 열린다 | (수동) 소유자 설정 후 확인 |
+| `TC#416` | FR#9 | 언어마다 `graphics/icon/` 에 PNG 한 장, 512x512, 색 형식 RGBA(6), 8-bit | 단위 (`StoreListingTest`), PNG IHDR |
+| `TC#417` | FR#10 | 언어마다 `graphics/feature-graphic/` 에 PNG 한 장, 1024x500, 색 형식 RGB(2), 8-bit | 단위 |
+| `TC#418` | FR#11 | 언어마다 `graphics/phone-screenshots/` 에 PNG 4~8장, 색 형식 RGB(2), 각 변 320~3840, 긴 변 ≤ 짧은 변 x2 | 단위 |
+| `TC#419` | FR#9~FR#11, NFR#3 | 그래픽을 직접 열어 도형이 foreground 와 같고, 화면에 example 도메인 외 사이트 이름이 없고, 문구가 해당 언어인지 확인 | (수동) 수동. PR 에 확인한 파일 목록을 남긴다 |
+| `TC#420` | NFR#1 | PR 의 `app/build.gradle`·`gradle/` diff 에 의존성 추가가 없다 | (수동) PR diff 확인 |
 
 ## 부록. 변경 이력
 
 - GH-23: 최초 작성
-- GH-43: 스토어 그래픽 (FR#9~FR#11, NFR#3, TC#16~TC#19)
+- GH-43: 스토어 그래픽 (FR#9~FR#11, NFR#3, TC#416~TC#419)

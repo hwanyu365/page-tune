@@ -96,19 +96,19 @@ private fun rule(id: Long, pluginId: Long) =
 class RestoreTest {
 
     @Test
-    fun `TC#33 웹페이지 복원 계획은 스냅샷 행을 같은 id·값으로 넣는다`() {
+    fun `TC#133 웹페이지 복원 계획은 스냅샷 행을 같은 id·값으로 넣는다`() {
         val snapshot = listOf(page(5, 2), page(3))
 
         assertEquals(snapshot, planWebPageRestore(snapshot))
     }
 
     @Test
-    fun `TC#33 빈 스냅샷은 계획이 없다`() {
+    fun `TC#133 빈 스냅샷은 계획이 없다`() {
         assertNull(planWebPageRestore(emptyList()))
     }
 
     @Test
-    fun `TC#34 웹페이지 삭제는 스냅샷 읽기와 삭제를 블록 하나에서 한다`() = runBlocking {
+    fun `TC#134 웹페이지 삭제는 스냅샷 읽기와 삭제를 블록 하나에서 한다`() = runBlocking {
         val store = FakeListStore(pages = listOf(page(1), page(2, 9), page(3)))
 
         val snapshot = deleteWebPagesWithSnapshot(listOf(2, 3), store)
@@ -120,7 +120,7 @@ class RestoreTest {
     }
 
     @Test
-    fun `TC#34 웹페이지 복원은 블록 하나에서 모두 넣는다`() = runBlocking {
+    fun `TC#134 웹페이지 복원은 블록 하나에서 모두 넣는다`() = runBlocking {
         val store = FakeListStore(pages = listOf(page(1)))
 
         restoreWebPages(listOf(page(2, 9), page(3)), store)
@@ -131,7 +131,7 @@ class RestoreTest {
     }
 
     @Test
-    fun `TC#34 같은 id 가 있으면 반영 0, 기존 행 불변`() = runBlocking {
+    fun `TC#134 같은 id 가 있으면 반영 0, 기존 행 불변`() = runBlocking {
         val existing = WebPage(id = 3, title = "new", url = "https://other", pluginId = null)
         val store = FakeListStore(pages = listOf(existing))
 
@@ -145,7 +145,7 @@ class RestoreTest {
     }
 
     @Test
-    fun `TC#34 삽입 중 예외 → 반영 0, 예외 전달`() = runBlocking {
+    fun `TC#134 삽입 중 예외 → 반영 0, 예외 전달`() = runBlocking {
         val store = FakeListStore(pages = listOf(page(1)), failOnPageInsert = true)
 
         try {
@@ -248,7 +248,7 @@ class RestoreTest {
     private val many = (1L..1001L).toList()
 
     @Test
-    fun `TC#34 id 1000개 이상 삭제·복원은 호출마다 900개 이하로 나눠 블록 하나에서 모두 반영한다`() = runBlocking {
+    fun `TC#134 id 1000개 이상 삭제·복원은 호출마다 900개 이하로 나눠 블록 하나에서 모두 반영한다`() = runBlocking {
         val store = FakeListStore(pages = many.map { page(it) })
 
         val snapshot = deleteWebPagesWithSnapshot(many, store)

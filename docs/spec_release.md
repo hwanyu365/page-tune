@@ -38,7 +38,7 @@
 
 ### 사용자 스토리
 
-- `US#1` 개발자로서 버전 태그를 push 하는 것만으로 internal 트랙에 새 빌드가 올라가기를 원한다. 서명 키를 PC 에 두지 않고 릴리스하기 위해서다.
+- `US#1` 개발자로서 버전 태그를 push 하는 것만으로 internal 트랙에 새 빌드가 올라가기를 원한다. 서명 키를 PC 에 두지 않고 릴리스하기 위해서다. → FR#2, FR#4, FR#6
 
 ### 기능 요구사항
 
@@ -55,7 +55,7 @@
 
 ### 비기능 요구사항
 
-- `NFR#1` 기존 사용자 데이터(Room DB v3)는 업그레이드 후에도 보존된다. 스키마는 변경하지 않는다. `[요구사항]`
+- `NFR#1` 기존 사용자 데이터(Room DB)는 업그레이드 후에도 보존된다. 스키마를 바꾸면 마이그레이션과 `app/schemas/` 스냅샷을 함께 둔다 (현재 v5, `spec_tune_edit.md` NFR#1). `[요구사항]`
 - `NFR#2` keystore·비밀번호·서비스 계정 키는 저장소에 커밋하지 않는다. CI 는 GitHub Secrets 에서만 읽는다. `[요구사항]`
 - `NFR#3` `usesCleartextTraffic="true"` 는 유지한다. 사용자가 임의의 http 사이트를 열 수 있어야 하기 때문이다. `[as-built]`
 - `NFR#4` 의존성은 `google()` / `mavenCentral()` 에서만 가져온다. `[요구사항]`
@@ -112,14 +112,15 @@
 
 | TC | 대상 | 시나리오 | 비고 |
 | --- | --- | --- | --- |
-| TC#1 | FR#4 | `v1.2.3` → versionName `1.2.3`, versionCode `10203` | unit |
-| TC#2 | FR#4 | `1.2.3`, `v1.2`, `v1.100.0` → 실패 | unit |
-| TC#3 | FR#5 | 태그 없음 → `0.0.0-dev` / `1` | unit |
-| TC#4 | FR#1, NFR#4 | 빌드 산출물을 지운 상태에서 `./gradlew testDebugUnitTest assembleDebug` 성공 | 로컬. CI 는 태그 push 시 같은 단계를 거친다 |
-| TC#5 | FR#2 | 서명 정보를 주고 `bundleRelease` → `jarsigner -verify` 통과 | 로컬 |
-| TC#6 | FR#3 | 서명 정보 없이 `bundleRelease`/`assembleRelease` → 빠진 키 이름과 함께 실패, `assembleDebug` 는 성공 | 로컬 |
-| TC#7 | FR#7 | API 36 에뮬레이터에서 전 화면 진입 → 상태바·내비게이션바에 툴바·버튼이 가려지지 않음 | (수동) |
-| TC#8 | NFR#1 | 기존 빌드로 Tune·페이지 저장 → 새 빌드로 덮어 설치 → 데이터 유지 | (수동) 에뮬레이터 |
-| TC#9 | 기존 기능 | 에뮬레이터에서 Tune 생성·요소 hide·색상 변경·스크롤 복원·복제 동작 | (수동) |
-| TC#10 | FR#6 | 태그 push → internal 트랙에 해당 versionCode 등록 | Play Console 준비 후. 개발자 확인 |
-| TC#11 | NFR#2 | 저장소에 `*.jks`/`*.keystore`/서비스 계정 JSON 이 추적되지 않음 | `git ls-files` |
+| TC#501 | FR#4 | `v1.2.3` → versionName `1.2.3`, versionCode `10203` | unit |
+| TC#502 | FR#4 | `1.2.3`, `v1.2`, `v1.100.0` → 실패 | unit |
+| TC#503 | FR#5 | 태그 없음 → `0.0.0-dev` / `1` | unit |
+| TC#504 | FR#1, NFR#4 | 빌드 산출물을 지운 상태에서 `./gradlew testDebugUnitTest assembleDebug` 성공 | (수동) 로컬. CI 는 태그 push 시 같은 단계를 거친다 |
+| TC#505 | FR#2 | 서명 정보를 주고 `bundleRelease` → `jarsigner -verify` 통과 | (수동) 로컬 |
+| TC#506 | FR#3 | 서명 정보 없이 `bundleRelease`/`assembleRelease` → 빠진 키 이름과 함께 실패, `assembleDebug` 는 성공 | (수동) 로컬 |
+| TC#507 | FR#7 | API 36 에뮬레이터에서 전 화면 진입 → 상태바·내비게이션바에 툴바·버튼이 가려지지 않음 | (수동) 수동 |
+| TC#508 | NFR#1 | 기존 빌드로 Tune·페이지 저장 → 새 빌드로 덮어 설치 → 데이터 유지 | (수동) 수동, 에뮬레이터 |
+| TC#509 | FR#1 | 에뮬레이터에서 Tune 생성·요소 hide·색상 변경·스크롤 복원·복제 동작 | (수동) 수동 |
+| TC#510 | FR#6 | 태그 push → internal 트랙에 해당 versionCode 등록 | (수동) Play Console 준비 후. 개발자 확인 |
+| TC#511 | NFR#2 | 저장소에 `*.jks`/`*.keystore`/서비스 계정 JSON 이 추적되지 않음 | (수동) `git ls-files` |
+| TC#512 | NFR#3 | 매니페스트 `application` 의 `usesCleartextTraffic` 가 `"true"` 로 남아 있다 | unit (`StoreListingTest`) |

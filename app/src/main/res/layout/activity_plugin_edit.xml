@@ -69,6 +69,23 @@
 
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/tv_edit_step"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:paddingHorizontal="4dp"
+            android:textAppearance="?attr/textAppearanceTitleSmall"
+            android:textColor="@color/onSurface" />
+
+        <TextView
+            android:id="@+id/tv_edit_step_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="4dp"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="@color/onSurfaceVariant" />
+
     </LinearLayout>
 
     <!-- Mid layout: WebView with Element Inspector overlay -->
@@ -95,6 +112,45 @@
             android:textColor="@color/onSurface"
             android:text="@string/edit_pick_banner"
             android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/layout_load_error"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/surface"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_load_error_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="@color/onSurface" />
+
+            <TextView
+                android:id="@+id/tv_load_error_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="@color/onSurfaceVariant" />
+
+            <Button
+                android:id="@+id/btn_load_retry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:minHeight="48dp"
+                android:text="@string/load_error_retry" />
+
+        </LinearLayout>
 
     </FrameLayout>
 
@@ -152,7 +208,7 @@
             android:textStyle="italic"
             android:textColor="@color/onSurface"
             android:text="@string/edit_selected_none"
-            android:maxLines="2"
+            android:maxLines="3"
             android:ellipsize="end" />
 
     </LinearLayout>
@@ -233,6 +289,24 @@
                     android:orientation="vertical"
                     android:visibility="gone"
                     android:layout_marginBottom="0dp">
+
+                    <Button
+                        android:id="@+id/btn_selector_details"
+                        style="?attr/borderlessButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:text="@string/edit_details_show" />
+
+                    <TextView
+                        android:id="@+id/tv_selector_detail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="@color/onSurfaceVariant"
+                        android:textIsSelectable="true"
+                        android:visibility="gone" />
 
                     <TextView
                         android:layout_width="wrap_content"

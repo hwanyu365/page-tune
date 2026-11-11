@@ -15,7 +15,7 @@ import org.junit.Test
 class LoadErrorsTest {
 
     @Test
-    fun `TC#41 주 문서 오류 코드를 종류로 나눈다`() {
+    fun `TC#141 주 문서 오류 코드를 종류로 나눈다`() {
         val expected = mapOf(
             WebViewClient.ERROR_HOST_LOOKUP to CANNOT_CONNECT,
             WebViewClient.ERROR_CONNECT to NO_RESPONSE,
@@ -31,14 +31,14 @@ class LoadErrorsTest {
     }
 
     @Test
-    fun `TC#41 주 문서가 아니면 오류 화면이 없다`() {
+    fun `TC#141 주 문서가 아니면 오류 화면이 없다`() {
         for (code in listOf(WebViewClient.ERROR_HOST_LOOKUP, WebViewClient.ERROR_FAILED_SSL_HANDSHAKE, WebViewClient.ERROR_UNKNOWN)) {
             assertNull(classifyLoadError(code, isMainFrame = false))
         }
     }
 
     @Test
-    fun `TC#41 S1 리다이렉트로 거친 주소의 인증서 오류는 주 문서다`() {
+    fun `TC#141 S1 리다이렉트로 거친 주소의 인증서 오류는 주 문서다`() {
         val t = MainDocumentTracker()
         t.start("https://a.example/")
         t.add("https://b.example/")
@@ -48,7 +48,7 @@ class LoadErrorsTest {
     }
 
     @Test
-    fun `TC#41 S2 커밋 전이면 집합에 없어도 주 문서다`() {
+    fun `TC#141 S2 커밋 전이면 집합에 없어도 주 문서다`() {
         val t = MainDocumentTracker()
         t.start("https://a.example/")
         assertTrue(t.isMainDocument("https://cdn.example/x.js"))
@@ -56,7 +56,7 @@ class LoadErrorsTest {
     }
 
     @Test
-    fun `TC#41 S3 커밋 후 집합 밖 주소는 하위 리소스다`() {
+    fun `TC#141 S3 커밋 후 집합 밖 주소는 하위 리소스다`() {
         val t = MainDocumentTracker()
         t.start("https://a.example/")
         t.commit()
@@ -65,7 +65,7 @@ class LoadErrorsTest {
     }
 
     @Test
-    fun `TC#41 새 로드가 시작되면 이전 로드의 집합을 버린다`() {
+    fun `TC#141 새 로드가 시작되면 이전 로드의 집합을 버린다`() {
         val t = MainDocumentTracker()
         t.start("https://a.example/")
         t.add("https://b.example/")

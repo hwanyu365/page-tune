@@ -38,7 +38,7 @@
 ### 3.1 사용자 스토리
 
 - `US#1` 사용자로서, 화면마다 같은 역할의 버튼·카드·입력칸이 같은 모양이기를 원한다. 어디를 눌러야 할지 바로 알기 위해서다 [요구사항] GH-52
-- `US#2` 사용자로서, 메인 화면에서 옆으로 밀어 웹페이지·Tune 목록을 오가고 싶다 [요구사항] GH-52
+- `US#2` 사용자로서, 메인 화면에서 옆으로 밀어 웹페이지·Tune 목록을 오가고 싶다 [요구사항] GH-52 → FR#7
 
 ### 3.2 기능 요구사항
 
@@ -72,9 +72,9 @@
   - 탭을 전환하면 떠나는 탭의 삭제 선택 모드와 되돌리기 창을 닫는다 (`spec_page_view.md` FR#25).
 
   ```
-  Given 웹페이지 탭에서 삭제 선택 모드로 2개를 선택했다
+  Given Pages 탭에서 삭제 선택 모드로 2개를 선택했다
   When  Tunes 탭으로 민다
-  Then  웹페이지 탭의 선택 모드가 끝나고, 툴바 삭제는 Tune 목록의 선택 모드를 연다
+  Then  Pages 탭의 선택 모드가 끝나고, 툴바 삭제는 Tune 목록의 선택 모드를 연다
   ```
 
 ### 3.3 비기능 요구사항
@@ -84,7 +84,7 @@
 - `NFR#2` 모든 화면이 영어·한국어, 시스템 글꼴 100%·200% 에서 잘리거나 겹치지 않는다 [요구사항] GH-52
 - `NFR#3` 런타임 의존성의 아티팩트 집합을 바꾸지 않는다 [요구사항] GH-52
   - `androidx.viewpager2:viewpager2` 는 Material 1.14.0 이 이미 `compile` 범위로 끌어온다(요청 1.0.0, recyclerview 1.4.0 의 constraint 로 해석 1.1.0-beta02) [as-built] → 직접 쓰므로 Material 이 요청하는 1.0.0 으로 명시 선언만 한다. 해석 버전은 그대로 1.1.0-beta02 다 (D#4).
-- `NFR#4` 기존 단위·수동 TC 가 그대로 통과한다. 단 리소스 이름에 기대는 테스트는 §7 TC#12 를 따른다 [요구사항] GH-52
+- `NFR#4` 기존 단위·수동 TC 가 그대로 통과한다. 단 리소스 이름에 기대는 테스트는 §7 TC#212 를 따른다 [요구사항] GH-52
 
 ## 4. 데이터 및 API 스펙
 
@@ -123,6 +123,7 @@
 | `primary` (아이콘·막대) | `surface` / `surfaceContainerHigh` | 5.13 / 4.11 | 3 (비텍스트) |
 | `onSurface` | `scrim`(`#D9171717`)을 흰 배경에 합성한 `#3a3a3a` | 8.62 | 4.5 |
 | `onPrimary` | `avatar1`~`avatar8` | 최소 6.65 (`avatar1`) | 4.5 |
+| `onPrimary` (스낵바 액션, `colorPrimaryInverse`) / `surface` (스낵바 글자, `colorOnSurfaceInverse`) | `onSurface` (스낵바 배경, `colorSurfaceInverse`) | 13.58 / 13.58 | 4.5 |
 
 - `primary` 를 표면 위 글자색으로 쓰지 않는다 → `primary` / `surfaceContainer` = 4.44:1 로 4.5:1 미달 (D#1).
 - 칩·보조 글자를 투명도로 흐리게 하지 않는다 → 투명도는 배경에 따라 대비가 바뀐다. "흐림" 은 `onSurfaceVariant` 글자로 나타낸다.
@@ -186,25 +187,28 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 
 | TC | 시나리오 | 대상 | 비고 |
 | --- | --- | --- | --- |
-| `TC#1` | 매니페스트의 모든 activity 테마와 application 테마가 앱 테마 계열이고, 앱 테마의 최상위 부모가 `Theme.Material3.Dark` 로 시작한다. `Theme.AppCompat` 부모가 0건 | [FR#1] | 단위 (리소스 XML 파싱) |
-| `TC#2` | `values/colors.xml` 에 §4.1 토큰이 모두 같은 값으로 있고, 그 밖의 색 리소스는 `ic_launcher_background` 뿐이다. `scrim` 은 `#D9171717` 이다. `layout`·`menu`·`drawable`(launcher·벡터 아이콘 제외) 에 `#` 색 리터럴 0건. `app/src/main/java` Kotlin 에 색 직접 지정 0건: `Color.parseColor("#`, `Color.rgb(`, `Color.argb(`, `0xFF`·`0x` 로 시작하는 8자리 색 정수 리터럴, `Color.BLACK`·`Color.WHITE` 등 `Color.` 상수 (FR#2 예외인 주입 스크립트 문자열, 색상 규칙 프리셋 상수(`spec_tune_edit.md` §6.13 의 한 곳), 색 선택 다이얼로그의 사용자 색 계산은 허용 목록으로 둔다. 허용 목록은 파일·심볼 단위이고, 프리셋 상수 밖의 `#RRGGBB` 문자열은 검사에 걸린다) | [FR#2] | 단위 (리소스 XML 파싱 + 소스 읽기). mutation: 구현 PR 에서 Kotlin 파일 하나에 `Color.parseColor("#ffffff")` 를 넣어 실패하는지 확인 |
-| `TC#3` | `colors.xml` 값으로 §4.1 대비 표의 모든 조합을 WCAG 상대 휘도 식으로 계산 → 각 기준 이상. `scrim` 은 `colors.xml` 의 ARGB 값(`#D9171717`)에서 알파를 읽어 흰색 위에 합성한 뒤 계산 | [NFR#1] [FR#6] | 단위. mutation: 구현 PR 에서 `onSurfaceVariant` 를 `#5c5c5c` 로 바꿔 실패하는지 확인 |
-| `TC#4` | `layout` 에 `android:textSize` 0건, Kotlin 에 `textSize =` 0건 | [FR#3] | 단위 (레이아웃) + `grep` (Kotlin) |
-| `TC#5` | `layout` 의 `layout_margin*`·`padding*` 값이 0dp 또는 §4.3 값 | [FR#4] | 단위 |
-| `TC#6` | `layout` 에 `androidx.appcompat.widget.Toolbar`·`androidx.cardview.widget.CardView`·단독 편집칸(부모가 `TextInputLayout` 이 아닌 `EditText`/`NoAutofillEditText`) 0건. Kotlin 에 `android.app.AlertDialog`·`androidx.appcompat.app.AlertDialog` import 0건 | [FR#5] | 단위 (레이아웃) + `grep` (Kotlin) |
-| `TC#7` | 자동완성 서비스를 켠 기기에서 편집 화면·웹페이지 다이얼로그 입력칸에 자동완성 제안이 뜨지 않음. Layout Inspector 에서 버튼이 `MaterialButton`, 체크박스가 `MaterialCheckBox` | [FR#5] | (수동) 에뮬레이터 |
-| `TC#8` | 흰 배경 페이지에서 빠른 메뉴·Tune 상태·이전/다음 버튼을 띄워 글자·아이콘이 읽힘 | [FR#6] | (수동) 비율은 TC#3 |
-| `TC#9` | 탭 누르기·밀기로 전환, 각 탭 툴바 삭제가 그 탭에만 작용, Tunes 탭에서 Tune 을 지운 뒤 웹페이지 탭으로 밀면 연결 표시 갱신, 회전 후 보던 탭 유지, 선택 모드 중 탭 전환 → 선택 모드·되돌리기 창 닫힘 | [FR#7] | (수동) 에뮬레이터 |
-| `TC#10` | 시각 회귀: §5 의 화면 × 영어·한국어 × 글꼴 100%·200% 를 변경 전후로 찍어 잘림·겹침이 없고 역할별 모양이 같음 | [NFR#2] [US#1] | (수동) 에뮬레이터. 확인한 화면 목록을 PR 본문에 남긴다 |
-| `TC#11` | `./gradlew :app:dependencies --configuration releaseRuntimeClasspath` 의 아티팩트 집합이 변경 전과 같음, `app/build.gradle` 에 compose 0건 | [NFR#3] | 로컬. 결과를 PR 본문에 남긴다 |
-| `TC#12` | 검증 명령 통과. `ResourceRulesTest` 의 `spec_tune_edit.md` TC#22 테스트는 리소스 이름만 `onPrimary`·`brandOnSurface` 로 바꾸고 값 단언(`#171717`, `#ff7347`)은 그대로 둔다 | [NFR#4] | 자동 (검증 명령). Red 테스트의 이름 변경은 저장소 소유자 승인을 받았다 (2026-11-08 세션). 값 단언을 바꾸거나 지우는 것은 승인 범위 밖이다 |
-| `TC#13` | 앱 스타일이 `materialThemeOverlay` 로 지정한 overlay 는 그 위젯의 Material3 기본 overlay 를 부모로 둔다: `Widget.Material3.Button.*` 계열 → `ThemeOverlay.Material3.Button.*`, `Widget.Material3.TextInputLayout.*` 계열 → `ThemeOverlay.Material3.TextInputEditText.*`, `Widget.Material3.TabLayout` 계열 → `ThemeOverlay.Material3.TabLayout` | [FR#5] [D#1] | 단위 (리소스 XML 파싱). 부모가 빈 overlay 는 M3 위젯의 컨테이너 속성을 지워 버튼 배경이 마젠타로 그려진다. mutation: 버튼 overlay 부모를 빈 값으로 바꿔 실패하는지 확인 |
+| `TC#201` | 매니페스트의 모든 activity 테마와 application 테마가 앱 테마 계열이고, 앱 테마의 최상위 부모가 `Theme.Material3.Dark` 로 시작한다. `Theme.AppCompat` 부모가 0건 | [FR#1] | 단위 (리소스 XML 파싱) |
+| `TC#202` | `values/colors.xml` 에 §4.1 토큰이 모두 같은 값으로 있고, 그 밖의 색 리소스는 `ic_launcher_background` 뿐이다. `scrim` 은 `#D9171717` 이다. `layout`·`menu`·`drawable`(launcher·벡터 아이콘 제외) 에 `#` 색 리터럴 0건. `app/src/main/java` Kotlin 에 색 직접 지정 0건: `Color.parseColor("#`, `Color.rgb(`, `Color.argb(`, `0xFF`·`0x` 로 시작하는 8자리 색 정수 리터럴, `Color.BLACK`·`Color.WHITE` 등 `Color.` 상수 (FR#2 예외인 주입 스크립트 문자열, 색상 규칙 프리셋 상수(`spec_tune_edit.md` §6.13 의 한 곳), 색 선택 다이얼로그의 사용자 색 계산은 허용 목록으로 둔다. 허용 목록은 파일·심볼 단위이고, 프리셋 상수 밖의 `#RRGGBB` 문자열은 검사에 걸린다) | [FR#2] | 단위 (리소스 XML 파싱 + 소스 읽기). mutation: 구현 PR 에서 Kotlin 파일 하나에 `Color.parseColor("#ffffff")` 를 넣어 실패하는지 확인 |
+| `TC#203` | `colors.xml` 값으로 §4.1 대비 표의 모든 조합을 WCAG 상대 휘도 식으로 계산 → 각 기준 이상. `scrim` 은 `colors.xml` 의 ARGB 값(`#D9171717`)에서 알파를 읽어 흰색 위에 합성한 뒤 계산 | [NFR#1] [FR#6] | 단위. mutation: 구현 PR 에서 `onSurfaceVariant` 를 `#5c5c5c` 로 바꿔 실패하는지 확인 |
+| `TC#204` | `layout` 에 `android:textSize` 0건, Kotlin 에 `textSize =` 0건 | [FR#3] | 단위 (레이아웃) + `grep` (Kotlin) |
+| `TC#205` | `layout` 의 `layout_margin*`·`padding*` 값이 0dp 또는 §4.3 값 | [FR#4] | 단위 |
+| `TC#206` | `layout` 에 `androidx.appcompat.widget.Toolbar`·`androidx.cardview.widget.CardView`·단독 편집칸(부모가 `TextInputLayout` 이 아닌 `EditText`/`NoAutofillEditText`) 0건. Kotlin 에 `android.app.AlertDialog`·`androidx.appcompat.app.AlertDialog` import 0건 | [FR#5] | 단위 (레이아웃) + `grep` (Kotlin) |
+| `TC#207` | 자동완성 서비스를 켠 기기에서 편집 화면·웹페이지 다이얼로그 입력칸에 자동완성 제안이 뜨지 않음. Layout Inspector 에서 버튼이 `MaterialButton`, 체크박스가 `MaterialCheckBox` | [FR#5] | (수동) 수동, 에뮬레이터 |
+| `TC#208` | 흰 배경 페이지에서 빠른 메뉴·Tune 상태·이전/다음 버튼을 띄워 글자·아이콘이 읽힘 | [FR#6] | (수동) 수동. 비율은 TC#203 |
+| `TC#209` | 탭 누르기·밀기로 전환, 각 탭 툴바 삭제가 그 탭에만 작용, Tunes 탭에서 Tune 을 지운 뒤 Pages 탭으로 밀면 연결 표시 갱신, 회전 후 보던 탭 유지, 선택 모드 중 탭 전환 → 선택 모드·되돌리기 창 닫힘 | [FR#7] | (수동) 수동, 에뮬레이터 |
+| `TC#210` | 시각 회귀: §5 의 화면 × 영어·한국어 × 글꼴 100%·200% 를 변경 전후로 찍어 잘림·겹침이 없고 역할별 모양이 같음 | [NFR#2] [US#1] | (수동) 수동, 에뮬레이터. 확인한 화면 목록을 PR 본문에 남긴다 |
+| `TC#211` | `./gradlew :app:dependencies --configuration releaseRuntimeClasspath` 의 아티팩트 집합이 변경 전과 같음, `app/build.gradle` 에 compose 0건 | [NFR#3] | (수동) 로컬. 결과를 PR 본문에 남긴다 |
+| `TC#212` | 검증 명령 통과. `ResourceRulesTest` 의 `spec_tune_edit.md` TC#22 테스트는 리소스 이름만 `onPrimary`·`brandOnSurface` 로 바꾸고 값 단언(`#171717`, `#ff7347`)은 그대로 둔다 | [NFR#4] | (수동) 자동 (검증 명령). Red 테스트의 이름 변경은 저장소 소유자 승인을 받았다 (2026-11-08 세션). 값 단언을 바꾸거나 지우는 것은 승인 범위 밖이다 |
+| `TC#213` | 앱 스타일이 `materialThemeOverlay` 로 지정한 overlay 는 그 위젯의 Material3 기본 overlay 를 부모로 둔다: `Widget.Material3.Button.*` 계열 → `ThemeOverlay.Material3.Button.*`, `Widget.Material3.TextInputLayout.*` 계열 → `ThemeOverlay.Material3.TextInputEditText.*`, `Widget.Material3.TabLayout` 계열 → `ThemeOverlay.Material3.TabLayout` | [FR#5] [D#1] | 단위 (리소스 XML 파싱). 부모가 빈 overlay 는 M3 위젯의 컨테이너 속성을 지워 버튼 배경이 마젠타로 그려진다. mutation: 버튼 overlay 부모를 빈 값으로 바꿔 실패하는지 확인 |
+| `TC#214` | `values-ko` 문자열에서 영문·숫자 바로 뒤에 공백을 두고 조사(을·를·이·가·은·는·으로·로·의·에서·에게·에·와·과·도·만·부터·까지·처럼·보다·이나·나·랑)가 단어로 오는 경우 0건 | [UI#1] (`specification.md` UI 문구) | 단위 (리소스 XML). mutation: 문자열 하나를 "Tune 을"로 되돌려 실패하는지 확인 |
 
 ### 통합·실기기 확인
 
-- TC#10 은 API 24 와 API 36 에뮬레이터에서 한다 → Material 3 위젯의 일부 그림자·리플은 API 별로 다르게 그려진다.
+- TC#210 은 API 24 와 API 36 에뮬레이터에서 한다 → Material 3 위젯의 일부 그림자·리플은 API 별로 다르게 그려진다.
 
 ## 부록. 변경 이력
 
 - GH-51: 최초 작성 (GH-52 범위)
-- GH-52: NFR#3·D#4 viewpager2 해석 버전 정정, TC#13 추가
+- GH-52: NFR#3·D#4 viewpager2 해석 버전 정정, TC#213 추가
+- GH-68: §4.1 대비 표에 스낵바 행 (`colorPrimaryInverse` = `onPrimary`)
+- GH-74: TC#214 한국어 조사 붙여 쓰기

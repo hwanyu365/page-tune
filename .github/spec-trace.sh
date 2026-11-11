@@ -35,7 +35,7 @@ if [ -n "$base" ]; then
   for f in $specs; do
     if git cat-file -e "$base:$f" 2>/dev/null; then
       git diff -U0 --no-color "$base" -- "$f" | sed -n 's/^@@ -[0-9,]* +\([0-9]*\)\(,\([0-9]*\)\)\{0,1\} @@.*/\1 \3/p' |
-        while read -r a c; do i=0; while [ "$i" -lt "${c:-1}" ]; do echo "$f:$((a + i))"; i=$((i + 1)); done; done
+        while IFS=" " read -r a c; do i=0; while [ "$i" -lt "${c:-1}" ]; do echo "$f:$((a + i))"; i=$((i + 1)); done; done
     else
       awk -v f="$f" '{ print f ":" NR }' "$f"
     fi

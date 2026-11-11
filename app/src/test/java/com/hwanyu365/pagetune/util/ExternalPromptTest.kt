@@ -11,7 +11,7 @@ class ExternalPromptTest {
     private fun intent(data: String?, pkg: String?, fallback: String?) = ExternalTarget.IntentTarget(data, pkg, fallback)
 
     @Test
-    fun `TC#59 intent 는 앱 라벨을 우선하고 없으면 package 를 보이며 넘길 주소와 대체 주소 유무를 담는다`() {
+    fun `TC#159 intent 는 앱 라벨을 우선하고 없으면 package 를 보이며 넘길 주소와 대체 주소 유무를 담는다`() {
         assertEquals(
             ExternalPrompt(Kind.APP, "Chrome", "https://f/", intent = true, address = "https://x"),
             ExternalPrompt.describe(intent("https://x", "com.android.chrome", "https://f/")) { "Chrome" },
@@ -27,13 +27,13 @@ class ExternalPromptTest {
     }
 
     @Test
-    fun `TC#59 package 없는 intent 는 data 주소를 보이고 둘 다 없으면 대상 없음이다`() {
+    fun `TC#159 package 없는 intent 는 data 주소를 보이고 둘 다 없으면 대상 없음이다`() {
         assertEquals(ExternalPrompt(Kind.ADDRESS, "geo:1,2", null, intent = true), ExternalPrompt.describe(intent("geo:1,2", null, null)) { null })
         assertEquals(ExternalPrompt(Kind.UNKNOWN, null, "https://f/", intent = true), ExternalPrompt.describe(intent(null, null, "https://f/")) { null })
     }
 
     @Test
-    fun `TC#59 mailto 는 받는 주소, tel 은 번호, 그 밖은 주소 전체를 보인다`() {
+    fun `TC#159 mailto 는 받는 주소, tel 은 번호, 그 밖은 주소 전체를 보인다`() {
         fun view(url: String) = ExternalPrompt.describe(ExternalTarget.View(url)) { null }
         assertEquals(ExternalPrompt(Kind.EMAIL, "a@example.com", null), view("mailto:a@example.com?subject=hi"))
         assertEquals(ExternalPrompt(Kind.EMAIL, "a@example.com", null), view("MAILTO:a@example.com"))
@@ -42,7 +42,7 @@ class ExternalPromptTest {
     }
 
     @Test
-    fun `TC#59 긴 대상은 잘라 말줄임표를 붙인다`() {
+    fun `TC#159 긴 대상은 잘라 말줄임표를 붙인다`() {
         val long = "market://details?id=" + "x".repeat(200)
         val shown = ExternalPrompt.describe(ExternalTarget.View(long)) { null }.subject!!
         assertEquals(ExternalPrompt.MAX_LENGTH, shown.length)
@@ -58,7 +58,7 @@ class ExternalPromptTest {
     }
 
     @Test
-    fun `TC#59 확인 창은 떠 있는 창이 없고 화면이 살아 있을 때만 띄운다`() {
+    fun `TC#159 확인 창은 떠 있는 창이 없고 화면이 살아 있을 때만 띄운다`() {
         assertTrue(ExternalPrompt.canShow(showing = false, finishing = false, destroyed = false))
         assertFalse(ExternalPrompt.canShow(showing = true, finishing = false, destroyed = false))
         assertFalse(ExternalPrompt.canShow(showing = false, finishing = true, destroyed = false))

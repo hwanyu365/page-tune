@@ -123,4 +123,4 @@
 | TC#509 | FR#1 | 에뮬레이터에서 Tune 생성·요소 hide·색상 변경·스크롤 복원·복제 동작 | (수동) 수동 |
 | TC#510 | FR#6 | 태그 push → internal 트랙에 해당 versionCode 등록 | (수동) Play Console 준비 후. 개발자 확인 |
 | TC#511 | NFR#2 | 저장소에 `*.jks`/`*.keystore`/서비스 계정 JSON 이 추적되지 않음 | (수동) `git ls-files` |
-| TC#512 | NFR#3 | 매니페스트 `application` 의 `usesCleartextTraffic` 가 `"true"` 로 남아 있다 | (수동) PR diff 확인 |
+| TC#512 | NFR#3 | 매니페스트 `application` 의 `usesCleartextTraffic` 가 `"true"` 로 남아 있다 | unit (`StoreListingTest`) |

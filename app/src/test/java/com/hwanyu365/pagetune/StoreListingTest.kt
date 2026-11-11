@@ -76,6 +76,14 @@ class StoreListingTest {
     }
 
     @Test
+    fun `TC#512 임의의 http 사이트를 열 수 있게 평문 통신을 허용한다`() {
+        val manifest = File("src/main/AndroidManifest.xml").readText()
+        val application = Regex("""<application\s[^>]*>""").find(manifest)
+        assertTrue("application 선언 없음", application != null)
+        assertTrue(application!!.value, "android:usesCleartextTraffic=\"true\"" in application.value)
+    }
+
+    @Test
     fun `TC#150 처리방침 공유 절은 링크·다운로드 주소를 다른 앱에 넘기는 것을 밝힌다`() {
         val policy = File("../docs/privacy.md").readText().replace("\r\n", "\n")
         fun section(title: String) = policy.substringAfter("## $title\n").substringBefore("\n## ")

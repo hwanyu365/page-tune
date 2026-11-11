@@ -8,7 +8,7 @@ import org.junit.Test
 class TriggerOptionsTest {
 
     @Test
-    fun `TC#12 드롭다운 순서와 트리거 값 라벨 매핑이 고정된다`() {
+    fun `TC#12 TC#60 드롭다운 순서와 트리거 값 라벨 매핑이 고정된다`() {
         assertEquals(
             listOf(
                 "gesture_top" to R.string.edit_trigger_double_top,

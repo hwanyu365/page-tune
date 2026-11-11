@@ -113,7 +113,7 @@ class JsScriptsDomTest {
     }
 
     @Test
-    fun `TC#23 a 셀렉터가 무효면 태그와 속성이 모두 일치하는 요소만 숨기고 클릭한다`() {
+    fun `TC#123 a 셀렉터가 무효면 태그와 속성이 모두 일치하는 요소만 숨기고 클릭한다`() {
         HtmlEngine(bannerPage).use { engine ->
             hide(engine, rule("div[", bannerAttrs))
             assertTrue(engine.isHidden("#both"))
@@ -123,7 +123,7 @@ class JsScriptsDomTest {
     }
 
     @Test
-    fun `TC#23 b 속성값의 따옴표와 at 속성 이름도 예외 없이 찾는다`() {
+    fun `TC#123 b 속성값의 따옴표와 at 속성 이름도 예외 없이 찾는다`() {
         val attrs = mapOf("title" to "it's \"q\"", "@click" to "go()")
         HtmlEngine(bannerPage).use { engine ->
             hide(engine, rule("div[", attrs))
@@ -133,7 +133,7 @@ class JsScriptsDomTest {
     }
 
     @Test
-    fun `TC#23 c 저장 속성이 없으면 태그만으로 찾지 않는다`() {
+    fun `TC#123 c 저장 속성이 없으면 태그만으로 찾지 않는다`() {
         HtmlEngine(bannerPage).use { engine ->
             hide(engine, rule("div[", emptyMap()))
             assertEquals(0, engine.int("Array.from(document.querySelectorAll('div')).filter(e => e.style.display === 'none').length"))
@@ -142,7 +142,7 @@ class JsScriptsDomTest {
     }
 
     @Test
-    fun `TC#23 d 잘못된 규칙이 있어도 같은 Tune 의 정상 규칙은 동작한다`() {
+    fun `TC#123 d 잘못된 규칙이 있어도 같은 Tune 의 정상 규칙은 동작한다`() {
         HtmlEngine(bannerPage).use { engine ->
             hide(engine, rule("div[", emptyMap()), rule("p.plain", emptyMap(), tag = "p"))
             assertTrue(engine.isHidden("p.plain"))
@@ -150,7 +150,7 @@ class JsScriptsDomTest {
     }
 
     @Test
-    fun `TC#23 e 유효하지만 0개인 셀렉터도 3단계는 전부 일치 기준이다`() {
+    fun `TC#123 e 유효하지만 0개인 셀렉터도 3단계는 전부 일치 기준이다`() {
         HtmlEngine(bannerPage).use { engine ->
             hide(engine, rule("div.missing", bannerAttrs))
             assertTrue(engine.isHidden("#both"))
@@ -160,7 +160,7 @@ class JsScriptsDomTest {
     }
 
     @Test
-    fun `TC#23 f 요소 정보가 JSON 이 아니면 그 규칙만 건너뛴다`() {
+    fun `TC#123 f 요소 정보가 JSON 이 아니면 그 규칙만 건너뛴다`() {
         HtmlEngine(bannerPage).use { engine ->
             hide(engine, "not json", rule("p.plain", emptyMap(), tag = "p"))
             assertTrue(engine.isHidden("p.plain"))

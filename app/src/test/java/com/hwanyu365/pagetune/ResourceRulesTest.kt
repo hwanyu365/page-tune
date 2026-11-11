@@ -36,7 +36,7 @@ class ResourceRulesTest {
     }
 
     @Test
-    fun `TC#4 처리방침 주소는 번역하지 않는 문자열 하나다`() {
+    fun `TC#304 처리방침 주소는 번역하지 않는 문자열 하나다`() {
         val strings = File(res, "values/strings.xml").readText()
         val entry = Regex("""<string name="privacy_policy_url"([^>]*)>([^<]*)</string>""").find(strings)
         assertTrue("privacy_policy_url 없음", entry != null)
@@ -46,7 +46,7 @@ class ResourceRulesTest {
     }
 
     @Test
-    fun `TC#52 새 소식 목록은 오름차순·중복 없음이고 항목마다 두 언어 문구가 있다`() {
+    fun `TC#152 새 소식 목록은 오름차순·중복 없음이고 항목마다 두 언어 문구가 있다`() {
         val codes = com.hwanyu365.pagetune.ui.WHATS_NEW_NOTES.map { it.first }
         assertEquals(codes.sorted().distinct(), codes)
 
@@ -60,7 +60,7 @@ class ResourceRulesTest {
     }
 
     @Test
-    fun `TC#14 한국어 문구는 영문 뒤 조사를 띄우지 않는다`() {
+    fun `TC#214 한국어 문구는 영문 뒤 조사를 띄우지 않는다`() {
         val spaced = Regex("""[A-Za-z0-9] (을|를|이|가|은|는|으로|로|의|에서|에게|에|와|과|도|만|부터|까지|처럼|보다|이나|나|랑)(?=[\s.,!?"<]|$)""")
         val bad = File(res, "values-ko/strings.xml").readLines().filter { spaced.containsMatchIn(it) }
         assertEquals(emptyList<String>(), bad)

@@ -8,7 +8,7 @@ import org.junit.Test
 class DomainAvatarTest {
 
     @Test
-    fun `TC#30 www 를 뗀 호스트와 첫 글자 대문자`() {
+    fun `TC#130 www 를 뗀 호스트와 첫 글자 대문자`() {
         val a = DomainAvatar.of("https://www.example.org/a", "t")
 
         assertEquals("example.org", a.host)
@@ -17,7 +17,7 @@ class DomainAvatarTest {
     }
 
     @Test
-    fun `TC#30 m 과 www 는 같은 글자·색`() {
+    fun `TC#130 m 과 www 는 같은 글자·색`() {
         val m = DomainAvatar.of("https://m.example.org/x", "a")
         val www = DomainAvatar.of("http://www.example.org", "b")
 
@@ -27,7 +27,7 @@ class DomainAvatarTest {
     }
 
     @Test
-    fun `TC#30 scheme 이 없으면 https 로 보고 호스트를 구한다`() {
+    fun `TC#130 scheme 이 없으면 https 로 보고 호스트를 구한다`() {
         val a = DomainAvatar.of("example.net/x", "t")
 
         assertEquals("example.net", a.host)
@@ -35,12 +35,12 @@ class DomainAvatarTest {
     }
 
     @Test
-    fun `TC#30 대문자·포트·사용자 정보는 호스트 표기에 없다`() {
+    fun `TC#130 대문자·포트·사용자 정보는 호스트 표기에 없다`() {
         assertEquals("example.org", DomainAvatar.of("https://user@WWW.Example.ORG:8080/p?q#f", "t").host)
     }
 
     @Test
-    fun `TC#30 IDN 은 유니코드 첫 글자`() {
+    fun `TC#130 IDN 은 유니코드 첫 글자`() {
         val a = DomainAvatar.of("https://xn--3e0b707e.kr/", "t")
 
         assertEquals("한국.kr", a.host)
@@ -48,12 +48,12 @@ class DomainAvatarTest {
     }
 
     @Test
-    fun `TC#30 IP 주소는 첫 숫자`() {
+    fun `TC#130 IP 주소는 첫 숫자`() {
         assertEquals("1", DomainAvatar.of("http://192.168.0.1/", "t").letter)
     }
 
     @Test
-    fun `TC#30 호스트가 없으면 대체 이름의 첫 글자와 그 이름의 색`() {
+    fun `TC#130 호스트가 없으면 대체 이름의 첫 글자와 그 이름의 색`() {
         val a = DomainAvatar.of(null, "뉴스")
 
         assertEquals("", a.host)
@@ -63,18 +63,18 @@ class DomainAvatarTest {
     }
 
     @Test
-    fun `TC#30 이모지로 시작하면 첫 문자·숫자`() {
+    fun `TC#130 이모지로 시작하면 첫 문자·숫자`() {
         assertEquals("P", DomainAvatar.of("", "🎉 party").letter)
     }
 
     @Test
-    fun `TC#30 호스트·이름 모두 문자가 없으면 글자 없음`() {
+    fun `TC#130 호스트·이름 모두 문자가 없으면 글자 없음`() {
         assertNull(DomainAvatar.of("", "").letter)
         assertNull(DomainAvatar.of(null, "🎉 !").letter)
     }
 
     @Test
-    fun `TC#30 hashCode 가 음수여도 색 번호는 0~7`() {
+    fun `TC#130 hashCode 가 음수여도 색 번호는 0~7`() {
         assertTrue("polygenelubricants".hashCode() < 0)
         val a = DomainAvatar.of("https://polygenelubricants", "t")
 

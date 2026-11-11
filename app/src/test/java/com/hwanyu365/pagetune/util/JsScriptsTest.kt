@@ -11,7 +11,7 @@ import org.junit.Test
 class JsScriptsTest {
 
     @Test
-    fun `TC#9 색상 선언마다 important 를 붙인다`() {
+    fun `TC#109 색상 선언마다 important 를 붙인다`() {
         val css = JsScripts.buildColorCss(listOf("#content" to "background-color:#000000;color:#ffffff"))
 
         assertTrue(css.contains("background-color:#000000 !important"))
@@ -19,7 +19,7 @@ class JsScriptsTest {
     }
 
     @Test
-    fun `TC#9 하위 노드까지 셀렉터에 포함한다`() {
+    fun `TC#109 하위 노드까지 셀렉터에 포함한다`() {
         // 자식이 자기 색을 갖고 있으면 부모에만 건 규칙은 덮인다.
         val css = JsScripts.buildColorCss(listOf("#content" to "color:#ffffff"))
 
@@ -27,14 +27,14 @@ class JsScriptsTest {
     }
 
     @Test
-    fun `TC#9 셀렉터나 선언이 비면 규칙을 만들지 않는다`() {
+    fun `TC#109 셀렉터나 선언이 비면 규칙을 만들지 않는다`() {
         val css = JsScripts.buildColorCss(listOf("#a" to "", "" to "color:#fff", " " to " "))
 
         assertEquals("", css)
     }
 
     @Test
-    fun `TC#9 규칙이 여러 개면 줄로 나눈다`() {
+    fun `TC#109 규칙이 여러 개면 줄로 나눈다`() {
         val css = JsScripts.buildColorCss(
             listOf("#a" to "color:#fff", ".b" to "background-color:#000")
         )
@@ -43,7 +43,7 @@ class JsScriptsTest {
     }
 
     @Test
-    fun `TC#9 주입 스크립트는 CSS 의 따옴표와 개행을 이스케이프한다`() {
+    fun `TC#109 주입 스크립트는 CSS 의 따옴표와 개행을 이스케이프한다`() {
         // 셀렉터는 사이트에서 온 문자열이라 JS 문자열 리터럴을 깨뜨릴 수 있다.
         val script = JsScripts.getColorStyleScript("a[x='y'] {\n color:#fff; }")
 
@@ -52,14 +52,14 @@ class JsScriptsTest {
     }
 
     @Test
-    fun `TC#9 스크롤 스크립트는 저장된 y 로 이동한다`() {
+    fun `TC#109 스크롤 스크립트는 저장된 y 로 이동한다`() {
         val script = JsScripts.getScrollScript(1234)
 
         assertTrue(script.contains("window.scrollTo(0, 1234)"))
     }
 
     @Test
-    fun `TC#9 스크롤 스크립트는 도달하지 못하면 재시도한다`() {
+    fun `TC#109 스크롤 스크립트는 도달하지 못하면 재시도한다`() {
         // 페이지가 늦게 자라면 첫 scrollTo 는 문서 끝에서 잘려 목표에 못 간다.
         val script = JsScripts.getScrollScript(1234)
 
@@ -67,7 +67,7 @@ class JsScriptsTest {
     }
 
     @Test
-    fun `TC#9 스크롤 스크립트는 사용자가 화면을 만지면 멈춘다`() {
+    fun `TC#109 스크롤 스크립트는 사용자가 화면을 만지면 멈춘다`() {
         // 재시도가 사용자의 스크롤을 계속 되돌리면 페이지를 쓸 수 없다.
         val script = JsScripts.getScrollScript(1234)
 
@@ -200,7 +200,7 @@ class JsScriptsTest {
     }
 
     @Test
-    fun `TC#22 불안정 id 와 구조 경로가 저장된 규칙은 구조 경로로 CSS 를 만든다`() {
+    fun `TC#122 불안정 id 와 구조 경로가 저장된 규칙은 구조 경로로 CSS 를 만든다`() {
         val path = "#main > div:nth-of-type(2)"
         val script = JsScripts.getColorScriptFor(listOf(color(info(path, id = "div-gpt-ad-1712345678-0"))))
 
@@ -208,14 +208,14 @@ class JsScriptsTest {
     }
 
     @Test
-    fun `TC#22 id 가 있어도 저장된 셀렉터를 그대로 쓴다`() {
+    fun `TC#122 id 가 있어도 저장된 셀렉터를 그대로 쓴다`() {
         val script = JsScripts.getColorScriptFor(listOf(color(info("#a", id = "a"))))
 
         assertEquals(JsScripts.getColorStyleScript(JsScripts.buildColorCss(listOf("#a" to "color:#ffffff"))), script)
     }
 
     @Test
-    fun `TC#22 대체 블록은 저장 속성이 있으면 selector 지원과 원래 셀렉터 무효를 함께 요구하는 supports 블록이고 없으면 빈 문자열이다`() {
+    fun `TC#122 대체 블록은 저장 속성이 있으면 selector 지원과 원래 셀렉터 무효를 함께 요구하는 supports 블록이고 없으면 빈 문자열이다`() {
         assertEquals(
             """@supports selector(*) and (not selector(div.x)) { div[role="banner"], div[role="banner"] * { color:#ffffff !important; } }""",
             JsScripts.buildColorFallbackCss("div.x", """div[role="banner"]""", "color:#ffffff"),
@@ -224,7 +224,7 @@ class JsScriptsTest {
     }
 
     @Test
-    fun `TC#22 CSS 계약을 통과한 셀렉터는 원래 규칙 뒤에 대체 블록을 붙인다`() {
+    fun `TC#122 CSS 계약을 통과한 셀렉터는 원래 규칙 뒤에 대체 블록을 붙인다`() {
         val sel = "#main > div.ad"
         val script = JsScripts.getColorScriptFor(listOf(color(info(sel, attrs = mapOf("role" to "banner")))))
         val expectedCss = JsScripts.buildColorCss(listOf(sel to "color:#ffffff")) + "\n" +
@@ -234,7 +234,7 @@ class JsScriptsTest {
     }
 
     @Test
-    fun `TC#22 요소 정보가 JSON 이 아닌 규칙만 제외한다`() {
+    fun `TC#122 요소 정보가 JSON 이 아닌 규칙만 제외한다`() {
         val script = JsScripts.getColorScriptFor(listOf(color("not json"), color(info("#a"))))
 
         assertEquals(JsScripts.getColorStyleScript(JsScripts.buildColorCss(listOf("#a" to "color:#ffffff"))), script)

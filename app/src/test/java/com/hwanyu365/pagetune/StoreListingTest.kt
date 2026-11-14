@@ -101,7 +101,7 @@ class StoreListingTest {
             assertTrue("에뮬레이터 화면이 Pixel 8 Pro 와 다름: $lcd", "echo 'hw.lcd.$lcd' >> ~/.android/avd/test.avd/config.ini" in verify)
         }
         val screenCheck = "adb shell wm size | grep -q 'Physical size: 1344x2992' && adb shell wm density | grep -q 'Physical density: 480' && ./gradlew connectedDebugAndroidTest"
-        assertTrue("테스트 전에 화면 값을 확인하지 않음", "script: $screenCheck" in verify)
+        assertTrue("테스트 전에 화면 값을 확인하지 않음", "script: |\n            $screenCheck\n" in verify)
         val release = File("../.github/workflows/release.yml").readText().replace("\r\n", "\n")
         val caller = Regex("""\n  ([\w-]+):\n    uses: \./\.github/workflows/release-verify\.yml\n""").find(release)
         assertTrue("release.yml 이 release-verify.yml 을 호출하지 않음", caller != null)

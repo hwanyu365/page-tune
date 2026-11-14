@@ -80,6 +80,11 @@ play {
     defaultToAppBundles = true
 }
 
+// 단위 테스트가 빌드 설정·워크플로·문서 같은 저장소 파일을 직접 읽는다. 그 파일은 태스크 입력이 아니라 그것만 바뀌면 테스트가 up-to-date 로 건너뛰어진다.
+tasks.withType(Test).configureEach {
+    outputs.upToDateWhen { false }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.8.0'

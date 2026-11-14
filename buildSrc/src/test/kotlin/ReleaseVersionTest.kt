@@ -1,5 +1,7 @@
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
+import java.io.File
 import org.junit.Test
 
 class ReleaseVersionTest {
@@ -21,5 +23,16 @@ class ReleaseVersionTest {
     fun `TC#503 태그가 없으면 개발 버전으로 빌드한다`() {
         assertEquals(ReleaseVersion("0.0.0-dev", 1), ReleaseVersion.fromTag(null))
         assertEquals(ReleaseVersion("0.0.0-dev", 1), ReleaseVersion.fromTag(""))
+    }
+
+    @Test
+    fun `TC#514 다음 patch 태그는 어느 커밋에 붙여도 versionCode 가 커진다`() {
+        assertTrue(ReleaseVersion.fromTag("v1.3.5").code > ReleaseVersion.fromTag("v1.3.4").code)
+        assertTrue(ReleaseVersion.fromTag("v1.4.0").code > ReleaseVersion.fromTag("v1.3.99").code)
+        assertEquals(ReleaseVersion.fromTag("v1.3.5"), ReleaseVersion.fromTag("v1.3.5"))
+        val gradle = File("../app/build.gradle").readText()
+        assertEquals(listOf("def env = { String key -> findProperty(key) ?: System.getenv(key) }"), gradle.lines().map { it.trim() }.filter { it.startsWith("def env") })
+        assertTrue(Regex("""releaseVersion = ReleaseVersion\.Companion\.fromTag\(env\('VERSION_TAG'\)\)""").containsMatchIn(gradle))
+        assertEquals(listOf("versionCode releaseVersion.code"), gradle.lines().map { it.trim() }.filter { it.startsWith("versionCode") })
     }
 }

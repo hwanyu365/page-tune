@@ -84,6 +84,15 @@ class StoreListingTest {
     }
 
     @Test
+    fun `TC#513 자동 업로드는 internal 트랙에만 하고 공개 비율·승격을 지정하지 않는다`() {
+        val play = File("build.gradle").readText().replace("\r\n", "\n").substringAfter("\nplay {").substringBefore("\n}")
+        assertTrue(play, Regex("""\btrack\s*=\s*'internal'""").containsMatchIn(play))
+        for (key in listOf("userFraction", "releaseStatus", "promoteTrack", "fromTrack", "updatePriority")) assertFalse("play 에 $key", key in play)
+        val release = File("../.github/workflows/release.yml").readText()
+        assertFalse("release.yml 이 promote 를 부름", Regex("""(?i)promote""").containsMatchIn(release))
+    }
+
+    @Test
     fun `TC#150 처리방침 공유 절은 링크·다운로드 주소를 다른 앱에 넘기는 것을 밝힌다`() {
         val policy = File("../docs/privacy.md").readText().replace("\r\n", "\n")
         fun section(title: String) = policy.substringAfter("## $title\n").substringBefore("\n## ")

@@ -4,8 +4,8 @@
 
 - 문서명: spec_release
 - 작성자: dohwan.ahn
-- 작성일 / 최종 수정일: 2026-10-18 / 2026-10-18
-- 기준 커밋 ID: `c37391d`
+- 작성일 / 최종 수정일: 2026-10-18 / 2026-11-14
+- 기준 커밋 ID: `288d83d`
 
 ### 목적
 
@@ -26,11 +26,13 @@
 - release 서명을 환경변수/Gradle property 로 주입한다.
 - 태그에서 `versionName`/`versionCode` 를 만든다.
 - GitHub Actions 로 태그 push → 서명된 AAB → Play internal 트랙 업로드.
+- production 공개와 문제 발생 시 대응 절차를 정한다.
 
 ### Out of Scope
 
 - Play Console 작업: 앱 생성, 첫 AAB 수동 업로드, 서비스 계정 권한, 개인정보처리방침, Data safety, 콘텐츠 등급, 스토어 등록정보 → 개발자가 직접 수행한다.
 - production 트랙 자동 승격 → Console 에서 수동으로 승격한다.
+- 단계적 출시(일부 사용자에게만 먼저 공개) → 초기 사용자가 적어 나눠 공개할 이점이 없다.
 - 스토어 메타데이터(스크린샷·설명)의 저장소 관리.
 - 앱 기능 변경.
 
@@ -39,6 +41,7 @@
 ### 사용자 스토리
 
 - `US#1` 개발자로서 버전 태그를 push 하는 것만으로 internal 트랙에 새 빌드가 올라가기를 원한다. 서명 키를 PC 에 두지 않고 릴리스하기 위해서다. → FR#2, FR#4, FR#6
+- `US#2` 개발자로서 internal 에서 확인한 빌드를 production 에 한 번에 공개하고, 문제가 생기면 고친 빌드를 같은 경로로 바로 내보내기를 원한다. → FR#8, FR#9
 
 ### 기능 요구사항
 
@@ -52,6 +55,8 @@
   - 목록·편집 화면 → 시스템 바·노치·키보드 영역을 피한다.
   - 웹페이지 보기 화면 → 상태바를 숨기고 노치까지 쓰는 전체화면이므로 내비게이션 바만 피한다.
   - 시스템 바 아이콘은 밝은 색으로 고정한다 → 앱 배경이 항상 어두워서, 시스템 라이트 모드 기본값(어두운 아이콘)이면 배경에 묻힌다.
+- `FR#8` 자동 업로드는 internal 트랙에만 하고 공개 비율·출시 상태를 지정하지 않는다. production 공개는 Console 에서 internal 빌드를 100% 로 승격한다. `[요구사항]`
+- `FR#9` production 빌드에 문제가 생기면 이전 빌드를 다시 올리지 않고, 고친 커밋에 다음 태그를 붙여 FR#6 경로로 올린 뒤 FR#8 로 승격한다. 다음 태그는 patch 를 올리고, patch 가 99 면 minor 를 올린다 (§6 버전 산출). versionCode 는 태그만으로 정해지므로 어느 커밋에 붙인 태그든 직전 태그보다 크다. `[요구사항]`
 
 ### 비기능 요구사항
 
@@ -93,6 +98,15 @@
 - 서명이 필요한 태스크(AAB 서명, APK 패키징) 직전에 서명 키 4개를 검사하고, 빠진 키 이름을 담아 실패시킨다.
 - 설정 단계에서 검사하지 않는다 → debug 빌드·테스트까지 서명 정보를 요구하게 된다.
 
+### 출시·문제 대응 [FR#8][FR#9]
+
+- 승격 전 확인 목록 (internal 트랙 빌드를 설치해 확인)
+  - 핵심 흐름: 웹페이지 등록 → 열람 → Tune 적용(숨기기·색상·시작 위치·이전/다음)
+  - 이전 production 빌드에서 덮어 설치 → Tune·웹페이지·설정 유지 (NFR#1)
+  - 릴리스 검증(태그 시 CI) 통과
+- 문제 대응: 출시를 멈출 수단이 없다 → 고친 빌드를 바로 내는 것이 유일한 대응이다.
+  - Play 는 이미 쓴 versionCode 를 다시 받지 않고, 기기는 더 낮은 versionCode 로 덮어 설치하지 않는다 → 이전 빌드로 되돌리려면 그 코드에 다음 태그를 붙여 새 versionCode 로 낸다.
+
 ### 설계 결정
 
 | 항목 | 선택 | 기각 | 근거 |
@@ -102,6 +116,8 @@
 | synthetic 대체 | ViewBinding | `findViewById` | 타입·null 안전성을 synthetic 과 같은 수준으로 유지한다 |
 | Room 코드 생성 | kapt 유지 | KSP 전환 | 이번 범위는 배포 가능화다. 생성 방식 변경은 NFR#1 위험만 늘린다 |
 | 자동 배포 트랙 | internal | production | 사람 확인 없이 사용자에게 나가는 경로를 만들지 않는다 |
+| production 공개 방식 | 100% 한 번에 | 단계적 출시 | 초기 사용자가 적어 나눠 공개할 이점이 없다. 첫 출시는 단계적 출시를 쓸 수도 없다 |
+| 문제 대응 | 고친 빌드를 바로 배포 | 이전 빌드 재배포, 출시 중지 | 100% 공개라 멈출 대상이 없고, 이전 빌드는 versionCode 를 다시 쓸 수 없고 낮은 versionCode 는 이미 업데이트한 기기에 설치되지 않는다 |
 | AGP 라인 | 8.x 최신 (8.13) | 9.x | 9.x 는 built-in Kotlin 전환과 kapt 대체를 함께 요구한다. 8.13 도 compileSdk 36 을 지원하므로 배포 가능화에 필요 없는 마이그레이션을 피한다 |
 | Play 업로드 인증 | `ANDROID_PUBLISHER_CREDENTIALS` 환경변수 | 키 파일 경로 지정 | 서비스 계정 키를 디스크·저장소에 두지 않는다 [NFR#2] |
 
@@ -124,3 +140,9 @@
 | TC#510 | FR#6 | 태그 push → internal 트랙에 해당 versionCode 등록 | (수동) Play Console 준비 후. 개발자 확인 |
 | TC#511 | NFR#2 | 저장소에 `*.jks`/`*.keystore`/서비스 계정 JSON 이 추적되지 않음 | (수동) `git ls-files` |
 | TC#512 | NFR#3 | 매니페스트 `application` 의 `usesCleartextTraffic` 가 `"true"` 로 남아 있다 | unit (`StoreListingTest`) |
+| TC#513 | FR#8 | `play` 설정의 트랙이 `internal` 이고 `userFraction`·`releaseStatus`·`promoteTrack`·`fromTrack` 이 없다, `release.yml` 이 `promote` 태스크를 부르지 않는다 | unit (`StoreListingTest`) |
+| TC#514 | FR#9 | `v1.3.4` → `v1.3.5`, `v1.3.99` → `v1.4.0` 의 versionCode 가 증가하고, versionCode 입력이 태그뿐이다 (같은 태그 → 같은 값, `VERSION_TAG` 는 Gradle property·환경변수에서만 읽음) | unit (`ReleaseVersionTest`) |
+
+## 부록. 변경 이력
+
+- GH-96: production 100% 공개·문제 시 고친 빌드 배포 (US#2, FR#8, FR#9)

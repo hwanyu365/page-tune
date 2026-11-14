@@ -250,6 +250,40 @@ class DesignSystemTest {
     }
 
     @Test
+    fun `TC#208 열람 화면 오버레이는 scrim 배경 위에 onSurface 글자·아이콘을 쓴다`() {
+        val root = parse(File(res, "layout/activity_web_browser.xml"))
+        val byId = root.descendants().associateBy { it.getAttribute("android:id").removePrefix("@+id/") }
+        val overlays = listOf("layout_quick_overlay", "layout_gnb_stack", "tv_pull_top", "tv_pull_bottom").map { byId.getValue(it) }
+        val elements = overlays.flatMap { sequenceOf(it) + it.descendants() }
+
+        val handle = parse(File(res, "drawable/bg_quick_handle.xml")).descendants().single { it.tagName == "solid" }
+        assertEquals("@color/scrim", handle.getAttribute("android:color"))
+        val backgrounds = mapOf(
+            "btn_quick_handle" to ("android:background" to "@drawable/bg_quick_handle"),
+            "layout_quick_toolbar" to ("android:background" to "@color/scrim"),
+            "tv_tune_status" to ("android:background" to "@color/scrim"),
+            "tv_pull_top" to ("android:background" to "@color/scrim"),
+            "tv_pull_bottom" to ("android:background" to "@color/scrim"),
+            "btn_stack_prev" to ("app:backgroundTint" to "@color/scrim"),
+            "btn_stack_next" to ("app:backgroundTint" to "@color/scrim"),
+        )
+        for ((id, attr) in backgrounds) assertEquals(id, attr.second, byId.getValue(id).getAttribute(attr.first))
+
+        val painted = elements.filter { e -> e.tagName == "TextView" || e.tagName == "ImageButton" || e.tagName.endsWith("MaterialButton") }
+        assertTrue("검사 대상 글자·아이콘이 없다", painted.size >= backgrounds.size)
+        val offenders = painted.mapNotNull { e ->
+            val colors = e.attrs().filter { (k, _) -> k == "android:textColor" || k == "app:iconTint" || k == "app:tint" }
+            val id = e.getAttribute("android:id")
+            if (colors.isEmpty() || colors.any { it.second != "@color/onSurface" }) "$id $colors" else null
+        }
+        assertEquals(emptyList<String>(), offenders)
+
+        val browser = File("src/main/java/com/hwanyu365/pagetune/WebBrowserActivity.kt").readText()
+        val recolor = Regex("""setTextColor\(|setBackground\w*\(|backgroundTintList|imageTintList|iconTint|setColorFilter\(|setTint\(""")
+        assertEquals(emptyList<String>(), recolor.findAll(browser).map { it.value }.toList())
+    }
+
+    @Test
     fun `TC#213 위젯 스타일의 materialThemeOverlay 는 그 위젯의 Material3 overlay 를 부모로 둔다`() {
         val expected = mapOf(
             "Widget.Material3.Button" to "ThemeOverlay.Material3.Button",

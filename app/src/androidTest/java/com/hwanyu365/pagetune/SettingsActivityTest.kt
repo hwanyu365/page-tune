@@ -3,7 +3,6 @@ package com.hwanyu365.pagetune
 import android.app.Instrumentation
 import android.content.Intent
 import android.content.res.Resources
-import android.os.SystemClock
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.children
@@ -40,8 +39,7 @@ class SettingsActivityTest {
 
     @Before
     fun setUp() {
-        restoreDeviceSettings()
-        markIntroSeen()
+        resetApp()
     }
 
     @After
@@ -146,14 +144,6 @@ class SettingsActivityTest {
     }
 
     private fun handlers(query: String) = shell(query).lines().mapNotNull { component.find(it)?.groupValues?.get(1) }.distinct()
-
-    private fun waitUntil(condition: () -> Boolean) {
-        val deadline = SystemClock.uptimeMillis() + 5_000
-        while (!condition()) {
-            assertTrue("조건을 5초 안에 만족하지 못함", SystemClock.uptimeMillis() < deadline)
-            SystemClock.sleep(100)
-        }
-    }
 }
 
 // 인자 없는 monitor 만 onStartActivity 로 모든 intent 를 받는다 → 다른 앱을 띄우지 않고 보낸 intent 를 본다.

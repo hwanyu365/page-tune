@@ -97,6 +97,11 @@ class StoreListingTest {
         val verify = File("../.github/workflows/release-verify.yml").readText()
         for (key in listOf("workflow_dispatch:", "workflow_call:", "connectedDebugAndroidTest")) assertTrue("release-verify.yml 에 $key 없음", key in verify)
         assertTrue("API 36 에뮬레이터 아님", Regex("""api-level:\s*36\b""").containsMatchIn(verify))
+        for (lcd in listOf("width=1344", "height=2992", "density=480")) {
+            assertTrue("에뮬레이터 화면이 Pixel 8 Pro 와 다름: $lcd", "echo 'hw.lcd.$lcd' >> ~/.android/avd/test.avd/config.ini" in verify)
+        }
+        val screenCheck = "adb shell wm size | grep -q 'Physical size: 1344x2992' && adb shell wm density | grep -q 'Physical density: 480' && ./gradlew connectedDebugAndroidTest"
+        assertTrue("테스트 전에 화면 값을 확인하지 않음", "script: |\n            $screenCheck\n" in verify)
         val release = File("../.github/workflows/release.yml").readText().replace("\r\n", "\n")
         val caller = Regex("""\n  ([\w-]+):\n    uses: \./\.github/workflows/release-verify\.yml\n""").find(release)
         assertTrue("release.yml 이 release-verify.yml 을 호출하지 않음", caller != null)
@@ -131,27 +136,37 @@ class StoreListingTest {
         val permissions = Regex("""<uses-permission\b[^>]*android:name="([^"]+)"""").findAll(manifest).map { it.groupValues[1] }.toList()
         assertEquals(listOf("android.permission.INTERNET"), permissions)
 
+        assertEquals(DEPENDENCY_RULE, allowedDependencies, declaredDependencies())
+    }
+
+    @Test
+    fun `TC#211 compose 없이 허용 목록의 의존성만 쓴다`() {
+        assertFalse(Regex("compose", RegexOption.IGNORE_CASE).containsMatchIn(File("build.gradle").readText()))
+        assertEquals(DEPENDENCY_RULE, allowedDependencies, declaredDependencies())
+    }
+
+    private val allowedDependencies = setOf(
+        "implementation fileTree(dir: 'libs', include: ['*.jar'])",
+        "implementation androidx.appcompat:appcompat",
+        "implementation androidx.core:core-ktx",
+        "implementation com.google.android.material:material",
+        "implementation androidx.recyclerview:recyclerview",
+        "implementation androidx.cardview:cardview",
+        "implementation androidx.viewpager2:viewpager2",
+        "implementation androidx.room:room-runtime",
+        "implementation androidx.room:room-ktx",
+        "kapt androidx.room:room-compiler",
+        "kapt org.jetbrains.kotlin:kotlin-metadata-jvm",
+    )
+
+    private fun declaredDependencies(): Set<String> {
         val block = File("build.gradle").readText().substringAfter("\ndependencies {\n").substringBefore("\n}")
         val coordinate = Regex("""^(\w+)\s*\(?\s*['"]([^:'"]+:[^:'"]+)(:[^'"]*)?['"]\s*\)?$""")
-        val declared = block.lines().map { it.trim() }
+        return block.lines().map { it.trim() }
             .filter { it.isNotEmpty() && !it.startsWith("//") && !it.startsWith("def ") }
             .filterNot { it.startsWith("testImplementation ") || it.startsWith("androidTestImplementation ") }
             .map { line -> coordinate.find(line)?.let { "${it.groupValues[1]} ${it.groupValues[2]}" } ?: line }
             .toSet()
-        val allowed = setOf(
-            "implementation fileTree(dir: 'libs', include: ['*.jar'])",
-            "implementation androidx.appcompat:appcompat",
-            "implementation androidx.core:core-ktx",
-            "implementation com.google.android.material:material",
-            "implementation androidx.recyclerview:recyclerview",
-            "implementation androidx.cardview:cardview",
-            "implementation androidx.viewpager2:viewpager2",
-            "implementation androidx.room:room-runtime",
-            "implementation androidx.room:room-ktx",
-            "kapt androidx.room:room-compiler",
-            "kapt org.jetbrains.kotlin:kotlin-metadata-jvm",
-        )
-        assertEquals("의존성을 더하거나 빼면 그 이유를 PR 에 적고 이 목록을 고친다", allowed, declared)
     }
 
     @Test
@@ -225,5 +240,9 @@ class StoreListingTest {
                 assertTrue("$f ${p.width}x${p.height}", short >= 320 && long <= 3840 && long <= short * 2)
             }
         }
+    }
+
+    private companion object {
+        const val DEPENDENCY_RULE = "의존성을 더하거나 빼면 그 이유를 PR 에 적고 이 목록을 고친다"
     }
 }

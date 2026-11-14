@@ -126,6 +126,35 @@ class StoreListingTest {
     }
 
     @Test
+    fun `TC#306 권한과 테스트 밖 의존성은 허용 목록 그대로다`() {
+        val manifest = File("src/main/AndroidManifest.xml").readText()
+        val permissions = Regex("""<uses-permission\b[^>]*android:name="([^"]+)"""").findAll(manifest).map { it.groupValues[1] }.toList()
+        assertEquals(listOf("android.permission.INTERNET"), permissions)
+
+        val block = File("build.gradle").readText().substringAfter("\ndependencies {\n").substringBefore("\n}")
+        val coordinate = Regex("""^(\w+)\s*\(?\s*['"]([^:'"]+:[^:'"]+)(:[^'"]*)?['"]\s*\)?$""")
+        val declared = block.lines().map { it.trim() }
+            .filter { it.isNotEmpty() && !it.startsWith("//") && !it.startsWith("def ") }
+            .filterNot { it.startsWith("testImplementation ") || it.startsWith("androidTestImplementation ") }
+            .map { line -> coordinate.find(line)?.let { "${it.groupValues[1]} ${it.groupValues[2]}" } ?: line }
+            .toSet()
+        val allowed = setOf(
+            "implementation fileTree(dir: 'libs', include: ['*.jar'])",
+            "implementation androidx.appcompat:appcompat",
+            "implementation androidx.core:core-ktx",
+            "implementation com.google.android.material:material",
+            "implementation androidx.recyclerview:recyclerview",
+            "implementation androidx.cardview:cardview",
+            "implementation androidx.viewpager2:viewpager2",
+            "implementation androidx.room:room-runtime",
+            "implementation androidx.room:room-ktx",
+            "kapt androidx.room:room-compiler",
+            "kapt org.jetbrains.kotlin:kotlin-metadata-jvm",
+        )
+        assertEquals("의존성을 더하거나 빼면 그 이유를 PR 에 적고 이 목록을 고친다", allowed, declared)
+    }
+
+    @Test
     fun `TC#307 설정 화면은 다른 앱이 열 수 없다`() {
         val manifest = File("src/main/AndroidManifest.xml").readText()
         val activity = Regex("""<activity\b[^>]*android:name="\.SettingsActivity"[^>]*>""").find(manifest)

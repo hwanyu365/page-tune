@@ -6,9 +6,9 @@
 | --- | --- |
 | 문서명 | spec_settings |
 | 작성자 | dohwan.ahn |
-| 작성일 / 최종 수정일 | 2026-11-08 / 2026-11-08 |
-| 버전 | 0.1 |
-| 기준 커밋 ID | `2bdb848` |
+| 작성일 / 최종 수정일 | 2026-11-08 / 2026-11-14 |
+| 버전 | 0.2 |
+| 기준 커밋 ID | `ec1e3af` |
 
 - **기능명:** 설정 화면 — 사용자가 앱 버전, 오픈소스 라이선스, 개인정보 처리방침을 앱 안에서 확인한다.
 - **목적 (Why):**
@@ -90,14 +90,15 @@
 
 | TC | 시나리오 | 대상 | 비고 |
 | --- | --- | --- | --- |
-| `TC#301` | 메인 오버플로 → 설정 → 설정 화면, 오버플로에 오픈소스 라이선스 항목 없음, 위로·시스템 뒤로가기 → 메인 | [FR#1] | (수동) 수동 |
-| `TC#302` | 태그 빌드(e.g. `VERSION_TAG=v1.2.0`)를 설치 → 앱 정보의 버전이 `adb shell dumpsys package com.hwanyu365.pagetune` 의 `versionName` 과 같음. 라이선스 → 원문 표시 | [FR#2] | (수동) 수동, 에뮬레이터. 원문 내용은 `spec_tune_edit.md` TC#25 |
-| `TC#303` | 처리방침 → 브라우저에 게시 페이지, 브라우저를 모두 비활성화한 기기 → 안내와 주소 표시 | [FR#3] | (수동) 수동, 에뮬레이터 |
+| `TC#301` | 메인 오버플로 → 설정 → 설정 화면, 오버플로에 오픈소스 라이선스 항목 없음, 위로·시스템 뒤로가기 → 메인 | [FR#1] | 에뮬레이터 (`SettingsActivityTest`) |
+| `TC#302` | 앱 정보가 앱 이름과 설치된 패키지의 `versionName` 을 보임. 라이선스 → `res/raw` 원문 표시 | [FR#2] | 에뮬레이터 (`SettingsActivityTest`). 원문 내용은 `spec_tune_edit.md` TC#25 |
+| `TC#303` | 처리방침 → `ACTION_VIEW`·`CATEGORY_BROWSABLE`·처리방침 주소의 intent 를 보냄. 그 intent 를 받는 앱을 모두 비활성화한 기기 → 안내와 주소 표시 | [FR#3] | 에뮬레이터 (`SettingsActivityTest`). 비활성화한 앱은 테스트가 끝나면 되살린다 |
 | `TC#304` | 처리방침 주소 문자열 리소스가 `https://hwanyu365.github.io/page-tune/privacy` 이고 `translatable="false"` | [FR#3] | 단위 (`ResourceRulesTest`) |
-| `TC#305` | 영어·한국어, 글꼴 200% 에서 세 항목 잘림 없음, 항목 높이 48dp 이상 | [NFR#1] [NFR#2] | (수동) 수동 |
-| `TC#306` | `app/build.gradle` dependencies 와 매니페스트 권한 변경 없음 | [NFR#3] | (수동) PR diff 확인 |
+| `TC#305` | 영어·한국어 × 글꼴 200% 에서 세 항목의 글자가 말줄임·잘림 없이 항목 안에 들어가고, 항목 높이 48dp 이상 | [NFR#1] [NFR#2] | 에뮬레이터 (`SettingsActivityTest`) |
+| `TC#306` | 매니페스트 권한은 `INTERNET` 하나뿐이고, `app/build.gradle` 의 테스트 밖 의존성(설정·group:name)이 허용 목록과 같음 → `androidx.preference` 는 목록에 없음 | [NFR#3] | 단위 (`StoreListingTest`). 의존성을 더하거나 빼는 PR 은 이유를 적고 목록을 고친다 |
 | `TC#307` | 앱 매니페스트에서 설정 Activity 의 `android:exported` 가 `"false"` 로 명시돼 있다 | [NFR#3] | 단위 (`StoreListingTest` 의 매니페스트 파싱과 같은 방식). mutation: 구현 PR 에서 `true` 로 바꿔 실패하는지 확인 |
 
 ## 부록. 변경 이력
 
 - GH-51: 최초 작성 (GH-55 범위)
+- GH-104: TC#301~303·305·306 을 자동 테스트로 전환

@@ -93,6 +93,29 @@ class StoreListingTest {
     }
 
     @Test
+    fun `TC#515 에뮬레이터 테스트는 릴리스 검증 워크플로에서만 돌고 업로드는 그 뒤에 한다`() {
+        val verify = File("../.github/workflows/release-verify.yml").readText()
+        for (key in listOf("workflow_dispatch:", "workflow_call:", "connectedDebugAndroidTest")) assertTrue("release-verify.yml 에 $key 없음", key in verify)
+        assertTrue("API 36 에뮬레이터 아님", Regex("""api-level:\s*36\b""").containsMatchIn(verify))
+        val release = File("../.github/workflows/release.yml").readText().replace("\r\n", "\n")
+        val caller = Regex("""\n  ([\w-]+):\n    uses: \./\.github/workflows/release-verify\.yml\n""").find(release)
+        assertTrue("release.yml 이 release-verify.yml 을 호출하지 않음", caller != null)
+        val publish = release.substringAfter("\n  release:\n").split(Regex("""\n  \S""")).first()
+        assertTrue("업로드 job 이 ${caller!!.groupValues[1]} 에 의존하지 않음", Regex("""needs:\s*\[?\s*${caller.groupValues[1]}\b""").containsMatchIn(publish))
+        val ci = File("../.github/workflows/ci.yml").readText()
+        assertFalse("ci.yml 이 에뮬레이터 테스트를 돌림", "connectedDebugAndroidTest" in ci || "android-emulator-runner" in ci)
+        assertTrue("ci.yml 이 에뮬레이터 테스트를 컴파일하지 않음", "assembleDebugAndroidTest" in ci)
+    }
+
+    @Test
+    fun `TC#517 에뮬레이터 테스트 라이브러리는 androidTestImplementation 으로만 둔다`() {
+        val dependencies = File("build.gradle").readText().replace("\r\n", "\n").substringAfter("\ndependencies {").substringBefore("\n}")
+        val lines = dependencies.lines().map { it.trim() }.filter { "androidx.test" in it }
+        assertTrue("androidx.test 의존성 없음", lines.isNotEmpty())
+        for (line in lines) assertTrue(line, line.startsWith("androidTestImplementation "))
+    }
+
+    @Test
     fun `TC#150 처리방침 공유 절은 링크·다운로드 주소를 다른 앱에 넘기는 것을 밝힌다`() {
         val policy = File("../docs/privacy.md").readText().replace("\r\n", "\n")
         fun section(title: String) = policy.substringAfter("## $title\n").substringBefore("\n## ")

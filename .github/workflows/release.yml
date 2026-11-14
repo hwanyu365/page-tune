@@ -8,7 +8,10 @@ permissions:
   contents: write
 
 jobs:
+  release-verify:
+    uses: ./.github/workflows/release-verify.yml
   release:
+    needs: release-verify
     runs-on: ubuntu-latest
     steps:
       # 쓰기 토큰이 git 설정에 남으면 빌드 스크립트가 읽을 수 있다. gh 는 GH_TOKEN 으로 동작한다.
@@ -21,7 +24,7 @@ jobs:
           java-version: '21'
       - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
       - run: |
-          ./gradlew -p buildSrc test && ./gradlew lintDebug testDebugUnitTest assembleDebug
+          ./gradlew -p buildSrc test && ./gradlew lintDebug testDebugUnitTest assembleDebug assembleDebugAndroidTest
       # 산출물 빌드·서명·배포는 스택마다 다르다. 비밀값은 Secrets 로만 넣고, 로그에 값이나 다운로드 URL 이 찍히지 않게 한다.
       # public 저장소의 Release 첨부물은 누구나 받을 수 있다 → 배포 대상을 제한해야 하면 첨부하지 말고 별도 배포 채널을 쓴다.
       - name: Decode keystore

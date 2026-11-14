@@ -67,7 +67,7 @@ SDD + TDD: 이슈 → 스펙 갱신 → TC 작성(Red) → 구현(Green) → Ref
 ## 검증 (완료 선언 전 반드시 실행)
 
 ```sh
-./gradlew -p buildSrc test && ./gradlew lintDebug testDebugUnitTest assembleDebug
+./gradlew -p buildSrc test && ./gradlew lintDebug testDebugUnitTest assembleDebug assembleDebugAndroidTest
 ```
 
 - agent 는 `sh .claude/hooks/verify.sh` 로 실행한다 → 같은 명령에 추적성 검사를 더해 돌리고, 통과한 작업 트리를 기록한다.
@@ -76,6 +76,9 @@ SDD + TDD: 이슈 → 스펙 갱신 → TC 작성(Red) → 구현(Green) → Ref
     - pre-commit 을 건너뛰는 명령은 `.claude/settings.json` deny 가 막는다: `--no-verify`(약어 포함), `git commit -n`·`git … commit … -n`, `hooksPath`(소문자·대문자 표기), `GIT_CONFIG*`, `commit-tree`, `hash-object`.
     - 막지 못하는 범위: deny 는 명령 문자열 규칙이라 그 밖의 형태(짧은 옵션 묶음 `-anm`, 섞인 대소문자 `HooksPath` 등)로 쓴 건너뛰기는 통과한다. 커밋 명령 직전 hook(`hooks-path.sh --check`)은 명령을 실행하기 전에 세션 작업 트리만 본다 → 한 명령 안에서 권한을 지우고 커밋하는 경우(`chmod -x … && git commit`), `.githooks/pre-commit` 이 없거나 실행할 수 없는 다른 워크트리의 `git -C … commit`, hook 경로가 틀린 클론에서 `env git commit`·`sh -c "git commit"` 처럼 `if` 패턴에 맞지 않는 커밋은 통과한다. rebase·cherry-pick·revert·merge 가 만드는 커밋은 pre-commit 을 거치지 않는다.
 - CI(`.github/workflows/ci.yml`)도 같은 명령과 추적성 검사(`.github/spec-trace.sh`)를 실행한다.
+- 릴리스 검증은 위 명령 뒤에 API 36 에뮬레이터를 연결하고 `./gradlew connectedDebugAndroidTest` 를 실행한다 (`docs/spec_release.md` FR#10).
+  - CI 는 `.github/workflows/release-verify.yml` 이 태그 push 와 수동 실행에서 같은 순서로 돌린다. PR CI 는 에뮬레이터 테스트를 돌리지 않는다.
+  - 에뮬레이터 테스트(`app/src/androidTest/`)를 추가·수정한 PR 은 로컬 에뮬레이터에서 그 테스트를 돌린 결과를 PR 본문에 남긴다 → PR CI 가 돌리지 않는다.
 - 완료 판정은 스펙 §3·§4·§6 항목별로 구현 위치와 TC 를 대조하고, 반대로 diff 의 새 분기·문구마다 근거 스펙 ID 를 찾는다 (`docs/rules_spec.md` §2.2, `/adk:verify`).
 - 막는 장치를 바꿨으면 이전 버전들과 같은 입력으로 판정을 비교해, 다시 풀린 입력이 의도한 것인지 확인한다 (`/adk:verify` 2-3).
 - 변경이 닿는 경로(같은 입력을 읽는 곳, 같은 산출물을 만드는 곳)를 모두 세고, 고치지 않은 경로는 왜 영향이 없는지 말할 수 있어야 한다.

@@ -36,6 +36,14 @@ class ResourceRulesTest {
     }
 
     @Test
+    fun `TC#212 TC#22 테스트는 브랜드 색 값 단언을 그대로 둔다`() {
+        val source = File("src/test/java/com/hwanyu365/pagetune/ResourceRulesTest.kt").readText()
+        val body = source.substringAfter("fun `TC#22 ").substringBefore("@Test")
+        assertTrue(body, "name=\"onPrimary\">#171717<" in body)
+        assertTrue(body, "name=\"brandOnSurface\">#ff7347<" in body)
+    }
+
+    @Test
     fun `TC#304 처리방침 주소는 번역하지 않는 문자열 하나다`() {
         val strings = File(res, "values/strings.xml").readText()
         val entry = Regex("""<string name="privacy_policy_url"([^>]*)>([^<]*)</string>""").find(strings)

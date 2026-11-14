@@ -29,7 +29,7 @@ if git rev-parse -q --verify origin/main >/dev/null; then sh .github/spec-trace.
 # 서브셸을 || 뒤에 두면 -e 가 꺼지므로 종료 코드는 따로 본다.
 (
 set -e
-./gradlew -p buildSrc test && ./gradlew lintDebug testDebugUnitTest assembleDebug
+./gradlew -p buildSrc test && ./gradlew lintDebug testDebugUnitTest assembleDebug assembleDebugAndroidTest
 )
 r=$?
 [ "$r" -eq 0 ] || exit "$r"

@@ -5,7 +5,7 @@
 - 문서명: spec_release
 - 작성자: dohwan.ahn
 - 작성일 / 최종 수정일: 2026-10-18 / 2026-11-14
-- 기준 커밋 ID: `288d83d`
+- 기준 커밋 ID: `fcbdfff`
 
 ### 목적
 
@@ -27,6 +27,7 @@
 - 태그에서 `versionName`/`versionCode` 를 만든다.
 - GitHub Actions 로 태그 push → 서명된 AAB → Play internal 트랙 업로드.
 - production 공개와 문제 발생 시 대응 절차를 정한다.
+- 릴리스 때 에뮬레이터에서 앱을 띄우는 테스트(릴리스 검증)를 돌린다.
 
 ### Out of Scope
 
@@ -41,6 +42,7 @@
 ### 사용자 스토리
 
 - `US#1` 개발자로서 버전 태그를 push 하는 것만으로 internal 트랙에 새 빌드가 올라가기를 원한다. 서명 키를 PC 에 두지 않고 릴리스하기 위해서다. → FR#2, FR#4, FR#6
+- `US#3` 개발자로서 PR 검증은 빠르게 유지하면서, 릴리스 전에는 실제 화면을 띄운 테스트로 확인받기를 원한다. → FR#10, NFR#5
 - `US#2` 개발자로서 internal 에서 확인한 빌드를 production 에 한 번에 공개하고, 문제가 생기면 고친 빌드를 같은 경로로 바로 내보내기를 원한다. → FR#8, FR#9
 
 ### 기능 요구사항
@@ -50,13 +52,14 @@
 - `FR#3` 서명 정보가 없으면 release 빌드는 빠진 키 이름을 알려주며 실패한다. debug 빌드와 unit test 는 서명 정보 없이 동작한다. `[요구사항]`
 - `FR#4` `versionName`/`versionCode` 는 태그 `vMAJOR.MINOR.PATCH` 에서 만든다. `versionCode = MAJOR*10000 + MINOR*100 + PATCH` 이다. `[요구사항]`
 - `FR#5` 태그가 없는 로컬 빌드는 `versionName "0.0.0-dev"`, `versionCode 1` 로 빌드된다. `[요구사항]`
-- `FR#6` `v*` 태그 push 시 workflow 가 unit test → `bundleRelease` → internal 트랙 업로드 순으로 실행한다. 앞 단계가 실패하면 업로드하지 않는다. `[요구사항]`
+- `FR#6` `v*` 태그 push 시 workflow 가 릴리스 검증(FR#10) → `bundleRelease` → internal 트랙 업로드 순으로 실행한다. 앞 단계가 실패하면 업로드하지 않는다. `[요구사항]`
 - `FR#7` 기존 화면은 API 36 기기에서 시스템 바에 가려지지 않는다. `[요구사항]`
   - 목록·편집 화면 → 시스템 바·노치·키보드 영역을 피한다.
   - 웹페이지 보기 화면 → 상태바를 숨기고 노치까지 쓰는 전체화면이므로 내비게이션 바만 피한다.
   - 시스템 바 아이콘은 밝은 색으로 고정한다 → 앱 배경이 항상 어두워서, 시스템 라이트 모드 기본값(어두운 아이콘)이면 배경에 묻힌다.
 - `FR#8` 자동 업로드는 internal 트랙에만 하고 공개 비율·출시 상태를 지정하지 않는다. production 공개는 Console 에서 internal 빌드를 100% 로 승격한다. `[요구사항]`
 - `FR#9` production 빌드에 문제가 생기면 이전 빌드를 다시 올리지 않고, 고친 커밋에 다음 태그를 붙여 FR#6 경로로 올린 뒤 FR#8 로 승격한다. 다음 태그는 patch 를 올리고, patch 가 99 면 minor 를 올린다 (§6 버전 산출). versionCode 는 태그만으로 정해지므로 어느 커밋에 붙인 태그든 직전 태그보다 크다. `[요구사항]`
+- `FR#10` 릴리스 검증은 검증 명령(CLAUDE.md "검증") 뒤에 API 36 에뮬레이터에서 `connectedDebugAndroidTest` 를 실행한다. 태그 push(FR#6)와 수동 실행이 같은 워크플로를 쓰고, PR CI 는 에뮬레이터 테스트를 실행하지 않고 컴파일(`assembleDebugAndroidTest`)만 한다. `[요구사항]`
 
 ### 비기능 요구사항
 
@@ -64,6 +67,7 @@
 - `NFR#2` keystore·비밀번호·서비스 계정 키는 저장소에 커밋하지 않는다. CI 는 GitHub Secrets 에서만 읽는다. `[요구사항]`
 - `NFR#3` `usesCleartextTraffic="true"` 는 유지한다. 사용자가 임의의 http 사이트를 열 수 있어야 하기 때문이다. `[as-built]`
 - `NFR#4` 의존성은 `google()` / `mavenCentral()` 에서만 가져온다. `[요구사항]`
+- `NFR#5` 에뮬레이터 테스트 라이브러리는 `androidTestImplementation` 으로만 둔다 → release 앱에 들어가지 않는다. `[요구사항]`
 
 ## 4. 데이터 및 API 스펙
 
@@ -116,6 +120,9 @@
 | synthetic 대체 | ViewBinding | `findViewById` | 타입·null 안전성을 synthetic 과 같은 수준으로 유지한다 |
 | Room 코드 생성 | kapt 유지 | KSP 전환 | 이번 범위는 배포 가능화다. 생성 방식 변경은 NFR#1 위험만 늘린다 |
 | 자동 배포 트랙 | internal | production | 사람 확인 없이 사용자에게 나가는 경로를 만들지 않는다 |
+| 에뮬레이터 테스트 시점 | 릴리스 검증 (태그·수동 실행) | PR 마다 | PR 검증을 약 2분으로 유지한다. 에뮬레이터 테스트는 10~20분이 걸린다 |
+| 에뮬레이터 API | 36 하나 | 36 + 24(minSdk) | 기기 대부분이 최신 버전이고, 두 대면 릴리스 검증 시간이 두 배다 |
+| 릴리스 검증 정의 위치 | 재사용 워크플로 하나(`release-verify.yml`)를 태그·수동 실행이 함께 호출 | 두 워크플로에 같은 step 복사 | 한 곳만 고치면 두 경로가 같이 바뀐다 |
 | production 공개 방식 | 100% 한 번에 | 단계적 출시 | 초기 사용자가 적어 나눠 공개할 이점이 없다. 첫 출시는 단계적 출시를 쓸 수도 없다 |
 | 문제 대응 | 고친 빌드를 바로 배포 | 이전 빌드 재배포, 출시 중지 | 100% 공개라 멈출 대상이 없고, 이전 빌드는 versionCode 를 다시 쓸 수 없고 낮은 versionCode 는 이미 업데이트한 기기에 설치되지 않는다 |
 | AGP 라인 | 8.x 최신 (8.13) | 9.x | 9.x 는 built-in Kotlin 전환과 kapt 대체를 함께 요구한다. 8.13 도 compileSdk 36 을 지원하므로 배포 가능화에 필요 없는 마이그레이션을 피한다 |
@@ -142,7 +149,11 @@
 | TC#512 | NFR#3 | 매니페스트 `application` 의 `usesCleartextTraffic` 가 `"true"` 로 남아 있다 | unit (`StoreListingTest`) |
 | TC#513 | FR#8 | `play` 설정의 트랙이 `internal` 이고 `userFraction`·`releaseStatus`·`promoteTrack`·`fromTrack` 이 없다, `release.yml` 이 `promote` 태스크를 부르지 않는다 | unit (`StoreListingTest`) |
 | TC#514 | FR#9 | `v1.3.4` → `v1.3.5`, `v1.3.99` → `v1.4.0` 의 versionCode 가 증가하고, versionCode 입력이 태그뿐이다 (같은 태그 → 같은 값, `VERSION_TAG` 는 Gradle property·환경변수에서만 읽음) | unit (`ReleaseVersionTest`) |
+| TC#515 | FR#6, FR#10 | `release-verify.yml` 이 `workflow_dispatch`·`workflow_call` 로 열리고 API 36 에뮬레이터에서 `connectedDebugAndroidTest` 를 실행, `release.yml` 의 업로드 job 이 그 job 에 `needs` 로 의존, `ci.yml` 은 에뮬레이터 테스트를 실행하지 않고 `assembleDebugAndroidTest` 로 컴파일만 한다 | unit (`StoreListingTest`) |
+| TC#516 | FR#10 | 앱 실행 → 메인 화면에 Pages·Tunes 탭이 보이고 Tunes 탭을 누르면 전환된다 | 에뮬레이터 (`MainActivityTest`) |
+| TC#517 | NFR#5 | `app/build.gradle` 에서 `androidx.test` 의존성 줄이 모두 `androidTestImplementation` 이다 | unit (`StoreListingTest`) |
 
 ## 부록. 변경 이력
 
 - GH-96: production 100% 공개·문제 시 고친 빌드 배포 (US#2, FR#8, FR#9)
+- GH-97: 릴리스 검증에 API 36 에뮬레이터 테스트 (US#3, FR#6, FR#10, NFR#5)

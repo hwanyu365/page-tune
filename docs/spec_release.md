@@ -4,7 +4,7 @@
 
 - 문서명: spec_release
 - 작성자: dohwan.ahn
-- 작성일 / 최종 수정일: 2026-10-18 / 2026-11-14
+- 작성일 / 최종 수정일: 2026-10-18 / 2026-11-15
 - 기준 커밋 ID: `fcbdfff`
 
 ### 목적
@@ -59,7 +59,7 @@
   - 시스템 바 아이콘은 밝은 색으로 고정한다 → 앱 배경이 항상 어두워서, 시스템 라이트 모드 기본값(어두운 아이콘)이면 배경에 묻힌다.
 - `FR#8` 자동 업로드는 internal 트랙에만 하고 공개 비율·출시 상태를 지정하지 않는다. production 공개는 Console 에서 internal 빌드를 100% 로 승격한다. `[요구사항]`
 - `FR#9` production 빌드에 문제가 생기면 이전 빌드를 다시 올리지 않고, 고친 커밋에 다음 태그를 붙여 FR#6 경로로 올린 뒤 FR#8 로 승격한다. 다음 태그는 patch 를 올리고, patch 가 99 면 minor 를 올린다 (§6 버전 산출). versionCode 는 태그만으로 정해지므로 어느 커밋에 붙인 태그든 직전 태그보다 크다. `[요구사항]`
-- `FR#10` 릴리스 검증은 검증 명령(CLAUDE.md "검증") 뒤에 API 36 에뮬레이터에서 `connectedDebugAndroidTest` 를 실행한다. 태그 push(FR#6)와 수동 실행이 같은 워크플로를 쓰고, PR CI 는 에뮬레이터 테스트를 실행하지 않고 컴파일(`assembleDebugAndroidTest`)만 한다. `[요구사항]`
+- `FR#10` 릴리스 검증은 검증 명령(CLAUDE.md "검증") 뒤에 API 36 에뮬레이터(Pixel 8 Pro 기기 프로필)에서 `connectedDebugAndroidTest` 를 실행한다. 태그 push(FR#6)와 수동 실행이 같은 워크플로를 쓰고, PR CI 는 에뮬레이터 테스트를 실행하지 않고 컴파일(`assembleDebugAndroidTest`)만 한다. `[요구사항]`
 
 ### 비기능 요구사항
 
@@ -122,6 +122,7 @@
 | 자동 배포 트랙 | internal | production | 사람 확인 없이 사용자에게 나가는 경로를 만들지 않는다 |
 | 에뮬레이터 테스트 시점 | 릴리스 검증 (태그·수동 실행) | PR 마다 | PR 검증을 약 2분으로 유지한다. 에뮬레이터 테스트는 10~20분이 걸린다 |
 | 에뮬레이터 API | 36 하나 | 36 + 24(minSdk) | 기기 대부분이 최신 버전이고, 두 대면 릴리스 검증 시간이 두 배다 |
+| 에뮬레이터 화면 | Pixel 8 Pro 프로필 (소유자 결정, 2026-11-15) | 기기 프로필 미지정(기본 AVD 320x640 mdpi) | 로컬 AVD 와 같은 화면이라 로컬 결과가 CI 결과를 뜻한다. 320dp 급 작은 화면은 지원 범위 밖이다 (`spec_design.md` NFR#2) |
 | 릴리스 검증 정의 위치 | 재사용 워크플로 하나(`release-verify.yml`)를 태그·수동 실행이 함께 호출 | 두 워크플로에 같은 step 복사 | 한 곳만 고치면 두 경로가 같이 바뀐다 |
 | production 공개 방식 | 100% 한 번에 | 단계적 출시 | 초기 사용자가 적어 나눠 공개할 이점이 없다. 첫 출시는 단계적 출시를 쓸 수도 없다 |
 | 문제 대응 | 고친 빌드를 바로 배포 | 이전 빌드 재배포, 출시 중지 | 100% 공개라 멈출 대상이 없고, 이전 빌드는 versionCode 를 다시 쓸 수 없고 낮은 versionCode 는 이미 업데이트한 기기에 설치되지 않는다 |
@@ -149,7 +150,7 @@
 | TC#512 | NFR#3 | 매니페스트 `application` 의 `usesCleartextTraffic` 가 `"true"` 로 남아 있다 | unit (`StoreListingTest`) |
 | TC#513 | FR#8 | `play` 설정의 트랙이 `internal` 이고 `userFraction`·`releaseStatus`·`promoteTrack`·`fromTrack` 이 없다, `release.yml` 이 `promote` 태스크를 부르지 않는다 | unit (`StoreListingTest`) |
 | TC#514 | FR#9 | `v1.3.4` → `v1.3.5`, `v1.3.99` → `v1.4.0` 의 versionCode 가 증가하고, versionCode 입력이 태그뿐이다 (같은 태그 → 같은 값, `VERSION_TAG` 는 Gradle property·환경변수에서만 읽음) | unit (`ReleaseVersionTest`) |
-| TC#515 | FR#6, FR#10 | `release-verify.yml` 이 `workflow_dispatch`·`workflow_call` 로 열리고 API 36 에뮬레이터에서 `connectedDebugAndroidTest` 를 실행, `release.yml` 의 업로드 job 이 그 job 에 `needs` 로 의존, `ci.yml` 은 에뮬레이터 테스트를 실행하지 않고 `assembleDebugAndroidTest` 로 컴파일만 한다 | unit (`StoreListingTest`) |
+| TC#515 | FR#6, FR#10 | `release-verify.yml` 이 `workflow_dispatch`·`workflow_call` 로 열리고 API 36·`pixel_8_pro` 프로필 에뮬레이터에서 `connectedDebugAndroidTest` 를 실행, `release.yml` 의 업로드 job 이 그 job 에 `needs` 로 의존, `ci.yml` 은 에뮬레이터 테스트를 실행하지 않고 `assembleDebugAndroidTest` 로 컴파일만 한다 | unit (`StoreListingTest`) |
 | TC#516 | FR#10 | 앱 실행 → 메인 화면에 Pages·Tunes 탭이 보이고 Tunes 탭을 누르면 전환된다 | 에뮬레이터 (`MainActivityTest`) |
 | TC#517 | NFR#5 | `app/build.gradle` 에서 `androidx.test` 의존성 줄이 모두 `androidTestImplementation` 이다 | unit (`StoreListingTest`) |
 
@@ -157,3 +158,4 @@
 
 - GH-96: production 100% 공개·문제 시 고친 빌드 배포 (US#2, FR#8, FR#9)
 - GH-97: 릴리스 검증에 API 36 에뮬레이터 테스트 (US#3, FR#6, FR#10, NFR#5)
+- GH-106: 릴리스 검증 에뮬레이터를 Pixel 8 Pro 프로필로 고정 (FR#10, TC#515)

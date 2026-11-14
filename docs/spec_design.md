@@ -6,7 +6,7 @@
 | --- | --- |
 | 문서명 | spec_design |
 | 작성자 | dohwan.ahn |
-| 작성일 / 최종 수정일 | 2026-11-08 / 2026-11-14 |
+| 작성일 / 최종 수정일 | 2026-11-08 / 2026-11-15 |
 | 버전 | 0.2 |
 | 기준 커밋 ID | `0284e51` |
 
@@ -82,6 +82,7 @@
 - `NFR#1` §4.1 의 글자·배경 조합은 4.5:1, 비텍스트 조합은 3:1 이상이다 (WCAG 2.1 1.4.3, 1.4.11, 상대 휘도 식) [요구사항] GH-52
   - 새 조합을 쓰면 §4.1 대비 표에 비율과 함께 추가한다.
 - `NFR#2` 모든 화면이 영어·한국어, 시스템 글꼴 100%·200% 에서 잘리거나 겹치지 않는다 [요구사항] GH-52
+  - 화면 크기는 릴리스 검증 에뮬레이터(Pixel 8 Pro 프로필, `spec_release.md` FR#10) 기준이다. 320dp 급 작은 화면은 범위 밖이다 (소유자 결정, 2026-11-15).
 - `NFR#3` 런타임 의존성의 아티팩트 집합을 바꾸지 않는다 [요구사항] GH-52
   - `androidx.viewpager2:viewpager2` 는 Material 1.14.0 이 이미 `compile` 범위로 끌어온다(요청 1.0.0, recyclerview 1.4.0 의 constraint 로 해석 1.1.0-beta02) [as-built] → 직접 쓰므로 Material 이 요청하는 1.0.0 으로 명시 선언만 한다. 해석 버전은 그대로 1.1.0-beta02 다 (D#4).
 - `NFR#4` 기존 단위·수동 TC 가 그대로 통과한다. 단 리소스 이름에 기대는 테스트는 §7 TC#212 를 따른다 [요구사항] GH-52
@@ -196,7 +197,7 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 | `TC#207` | 편집 화면(새 Tune)·웹페이지 추가 다이얼로그의 모든 입력칸이 `NoAutofillEditText` 이고 `autofillType` 이 `NONE` → 자동완성 서비스가 칸을 인식하지 않음. 두 화면과 삭제 선택 모드 목록의 버튼은 `MaterialButton`, 체크박스는 `MaterialCheckBox` | [FR#5] | 에뮬레이터 (`DesignSystemDeviceTest`) |
 | `TC#208` | 열람 화면 레이아웃에서 빠른 메뉴 툴바·Tune 상태·이전/다음 버튼·당기기 안내의 배경(`background`·`backgroundTint`)이 `@color/scrim`, 글자·아이콘(`textColor`·`iconTint`·`tint`)이 `@color/onSurface`. `WebBrowserActivity` 는 이 색을 코드에서 바꾸지 않음 | [FR#6] | 단위 (`DesignSystemTest`). 비율은 TC#203 |
 | `TC#209` | 탭 누르기·밀기로 전환, 각 탭 툴바 삭제가 그 탭에만 작용, Tunes 탭에서 Tune 을 지운 뒤 Pages 탭으로 밀면 연결 표시 갱신, 화면 재생성(`recreate`) 뒤 보던 탭 유지, 선택 모드 중 탭 전환 → 선택 모드·되돌리기 창 닫힘 | [FR#7] | 에뮬레이터 (`MainTabsTest`) |
-| `TC#210` | §5 의 화면 × 영어·한국어 × 글꼴 100%·200% 에서 보이는 글자가 말줄임·세로 잘림 없이 그려지고, `LinearLayout` 안의 보이는 형제끼리 겹치지 않음 | [NFR#2] [US#1] | 에뮬레이터 (`LayoutFitTest`). 역할별 모양은 TC#201~206·213 이 리소스로 고정한다 |
+| `TC#210` | §5 의 화면 × 영어·한국어 × 글꼴 100%·200% 에서 보이는 글자가 말줄임·세로 잘림 없이, 그려진 글자 모양이 칸 폭 안에 그려지고, `LinearLayout` 안의 보이는 형제끼리 겹치지 않음 | [NFR#2] [US#1] | 에뮬레이터 (`LayoutFitTest`). 역할별 모양은 TC#201~206·213 이 리소스로 고정한다 |
 | `TC#211` | `app/build.gradle` 에 compose 0건, 테스트 밖 의존성(설정·group:name)이 허용 목록과 같음 | [NFR#3] | 단위 (`StoreListingTest`). 허용 목록은 `spec_settings.md` TC#306 과 같다. 전이 의존성은 고정하지 않는다 → 라이브러리 버전 갱신마다 바뀐다 |
 | `TC#212` | 검증 명령 통과. `ResourceRulesTest` 의 `spec_tune_edit.md` TC#22 테스트는 리소스 이름만 `onPrimary`·`brandOnSurface` 로 바꾸고 값 단언(`#171717`, `#ff7347`)은 그대로 둔다 | [NFR#4] | 단위 (`ResourceRulesTest` 가 TC#22 테스트 본문의 값 단언을 확인). Red 테스트의 이름 변경은 저장소 소유자 승인을 받았다 (2026-11-08 세션). 값 단언을 바꾸거나 지우는 것은 승인 범위 밖이다 |
 | `TC#213` | 앱 스타일이 `materialThemeOverlay` 로 지정한 overlay 는 그 위젯의 Material3 기본 overlay 를 부모로 둔다: `Widget.Material3.Button.*` 계열 → `ThemeOverlay.Material3.Button.*`, `Widget.Material3.TextInputLayout.*` 계열 → `ThemeOverlay.Material3.TextInputEditText.*`, `Widget.Material3.TabLayout` 계열 → `ThemeOverlay.Material3.TabLayout` | [FR#5] [D#1] | 단위 (리소스 XML 파싱). 부모가 빈 overlay 는 M3 위젯의 컨테이너 속성을 지워 버튼 배경이 마젠타로 그려진다. mutation: 버튼 overlay 부모를 빈 값으로 바꿔 실패하는지 확인 |

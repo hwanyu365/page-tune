@@ -37,11 +37,16 @@ fun layoutProblems(root: View, screen: String): List<String> {
             }
             val innerWidth = v.width - v.totalPaddingLeft - v.totalPaddingRight
             val innerHeight = v.height - v.totalPaddingTop - v.totalPaddingBottom
-            // 줄 폭은 글자 진행 폭의 합이라 그려진 모양보다 넓을 수 있다 → 글자 크기의 10% 안쪽 초과는 잘림으로 보지 않는다.
-            val slack = maxOf(1f, v.textSize * 0.1f)
+            val ink = Rect()
             for (line in 0 until layout.lineCount) {
                 if (layout.getEllipsisCount(line) > 0) problems += "${name(v)} 말줄임 '${v.text}'"
-                if (layout.getLineWidth(line) > innerWidth + slack) problems += "${name(v)} 가로 넘침 '${v.text}' ${layout.getLineWidth(line)}>$innerWidth"
+                val start = layout.getLineStart(line)
+                val end = layout.getLineVisibleEnd(line)
+                if (end <= start) continue
+                // 줄 폭은 글자 진행 폭의 합이라 그려진 모양보다 넓을 수 있다 → 그려진 글자 모양의 폭으로 판정한다.
+                // 버튼처럼 배치 폭을 넓게 잡고 가운데 맞추는 칸은 줄 시작 위치가 칸 좌표가 아니다 → 위치는 보지 않는다.
+                v.paint.getTextBounds(v.text, start, end, ink)
+                if (ink.width() > innerWidth + 1) problems += "${name(v)} 가로 넘침 '${v.text}' ${ink.width()}>$innerWidth"
             }
             if (layout.height > innerHeight + 1) problems += "${name(v)} 세로 잘림 '${v.text}' ${layout.height}>$innerHeight"
         }

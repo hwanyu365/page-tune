@@ -97,6 +97,7 @@ class StoreListingTest {
         val verify = File("../.github/workflows/release-verify.yml").readText()
         for (key in listOf("workflow_dispatch:", "workflow_call:", "connectedDebugAndroidTest")) assertTrue("release-verify.yml 에 $key 없음", key in verify)
         assertTrue("API 36 에뮬레이터 아님", Regex("""api-level:\s*36\b""").containsMatchIn(verify))
+        assertTrue("Pixel 8 Pro 프로필 아님", Regex("""profile:\s*pixel_8_pro\s""").containsMatchIn(verify))
         val release = File("../.github/workflows/release.yml").readText().replace("\r\n", "\n")
         val caller = Regex("""\n  ([\w-]+):\n    uses: \./\.github/workflows/release-verify\.yml\n""").find(release)
         assertTrue("release.yml 이 release-verify.yml 을 호출하지 않음", caller != null)

@@ -6,8 +6,10 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.longClick
-import androidx.test.espresso.action.ViewActions.swipeLeft
-import androidx.test.espresso.action.ViewActions.swipeRight
+import androidx.test.espresso.action.CoordinatesProvider
+import androidx.test.espresso.action.GeneralSwipeAction
+import androidx.test.espresso.action.Press
+import androidx.test.espresso.action.Swipe
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.isDialog
@@ -48,9 +50,9 @@ class MainTabsTest {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             onView(pagesTab).check(matches(isSelected()))
             onView(tunesTab).perform(click()).check(matches(isSelected()))
-            onView(withId(R.id.view_pager)).perform(swipeRight())
+            swipePages(toNext = false)
             onView(pagesTab).check(matches(isSelected()))
-            onView(withId(R.id.view_pager)).perform(swipeLeft())
+            swipePages(toNext = true)
             onView(tunesTab).check(matches(isSelected()))
             eventually { onView(tuneRow).check(matches(isDisplayed())) }
 
@@ -70,7 +72,7 @@ class MainTabsTest {
             eventually { assertEquals(2, shownCheckboxes(scenario, R.id.rv_webpages)) }
             eventually { assertEquals(0, shownCheckboxes(scenario, R.id.rv_plugins)) }
 
-            onView(withId(R.id.view_pager)).perform(swipeLeft())
+            swipePages(toNext = true)
             onView(tunesTab).check(matches(isSelected()))
             eventually { onView(withId(R.id.action_delete_selected)).check(doesNotExist()) }
             eventually { assertEquals(0, shownCheckboxes(scenario, R.id.rv_webpages)) }
@@ -79,13 +81,13 @@ class MainTabsTest {
             eventually { assertEquals(1, shownCheckboxes(scenario, R.id.rv_plugins)) }
             eventually { assertEquals(0, shownCheckboxes(scenario, R.id.rv_webpages)) }
 
-            onView(withId(R.id.view_pager)).perform(swipeRight())
+            swipePages(toNext = false)
             eventually { onView(withId(R.id.action_delete_selected)).check(doesNotExist()) }
             eventually { assertEquals(0, shownCheckboxes(scenario, R.id.rv_plugins)) }
 
             onView(withText("Page B")).perform(longClick())
             onView(withId(R.id.action_delete_selected)).check(matches(isDisplayed()))
-            onView(withId(R.id.view_pager)).perform(swipeLeft())
+            swipePages(toNext = true)
             eventually { onView(withId(R.id.action_delete_selected)).check(doesNotExist()) }
         }
     }
@@ -98,18 +100,28 @@ class MainTabsTest {
             eventually { onView(withText("Page B")).check(matches(isDisplayed())) }
             deleteFromItemMenu(withText("Page B"))
             onView(withId(com.google.android.material.R.id.snackbar_text)).check(matches(isDisplayed()))
-            onView(withId(R.id.view_pager)).perform(swipeLeft())
+            swipePages(toNext = true)
             // 되돌리기 창은 5초 뒤 저절로 닫힌다 → 그보다 짧게 기다려야 탭 전환이 닫았는지 가려진다.
             waitUntil(timeoutMs = 1_500) { snackbarGone() }
 
             eventually { onView(tuneRow).check(matches(isDisplayed())) }
             deleteFromItemMenu(tuneRow)
-            onView(withId(R.id.view_pager)).perform(swipeRight())
+            swipePages(toNext = false)
             onView(pagesTab).check(matches(isSelected()))
             eventually {
                 onView(allOf(withId(R.id.tv_plugin), inRowWith("Page A"))).check(matches(withText(R.string.webpage_item_tune_none)))
             }
         }
+    }
+
+    // 화면 가장자리에서 시작하는 밀기는 시스템 뒤로가기 제스처가 가져간다 → 안쪽에서 민다.
+    private fun swipePages(toNext: Boolean) {
+        fun at(fraction: Float) = CoordinatesProvider { v ->
+            val xy = IntArray(2).also { v.getLocationOnScreen(it) }
+            floatArrayOf(xy[0] + v.width * fraction, xy[1] + v.height / 2f)
+        }
+        val (from, to) = if (toNext) 0.8f to 0.2f else 0.2f to 0.8f
+        onView(withId(R.id.view_pager)).perform(GeneralSwipeAction(Swipe.FAST, at(from), at(to), Press.FINGER))
     }
 
     private fun inRowWith(text: String): Matcher<View> = inRowWith(withText(text))

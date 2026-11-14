@@ -38,9 +38,11 @@ class ResourceRulesTest {
     @Test
     fun `TC#212 TC#22 테스트는 브랜드 색 값 단언을 그대로 둔다`() {
         val source = File("src/test/java/com/hwanyu365/pagetune/ResourceRulesTest.kt").readText()
-        val body = source.substringAfter("fun `TC#22 ").substringBefore("@Test")
-        assertTrue(body, "name=\"onPrimary\">#171717<" in body)
-        assertTrue(body, "name=\"brandOnSurface\">#ff7347<" in body)
+        val body = source.substringAfter("fun `TC#22 ").substringBefore("@Test").lines().map { it.trim() }
+        for (value in listOf("onPrimary\">#171717<", "brandOnSurface\">#ff7347<")) {
+            val assertion = "assertTrue(Regex(\"\"\"name=\"$value\"\"\").containsMatchIn(colors))"
+            assertTrue("TC#22 에 값 단언이 없다: $assertion", assertion in body)
+        }
     }
 
     @Test

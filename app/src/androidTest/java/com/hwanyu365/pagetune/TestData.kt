@@ -8,6 +8,7 @@ import kotlinx.coroutines.runBlocking
 import java.io.Closeable
 import java.net.InetAddress
 import java.net.ServerSocket
+import java.net.Socket
 import kotlin.concurrent.thread
 
 val database: AppDatabase get() = AppDatabase.getDatabase(targetContext)
@@ -34,16 +35,21 @@ class LocalPage(private val html: String) : Closeable {
     init {
         thread(isDaemon = true) {
             while (!server.isClosed) {
-                runCatching {
-                    server.accept().use { socket ->
-                        val reader = socket.getInputStream().bufferedReader()
-                        while (!reader.readLine().isNullOrEmpty()) Unit
-                        val body = html.toByteArray()
-                        val head = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: ${body.size}\r\nConnection: close\r\n\r\n"
-                        socket.getOutputStream().apply { write(head.toByteArray()); write(body); flush() }
-                    }
-                }
+                val socket = runCatching { server.accept() }.getOrNull() ?: continue
+                // WebView 는 요청을 보내지 않는 연결을 미리 열기도 한다 → 연결마다 따로 처리하고 오래 기다리지 않는다.
+                thread(isDaemon = true) { respond(socket) }
             }
+        }
+    }
+
+    private fun respond(socket: Socket) = runCatching {
+        socket.use {
+            it.soTimeout = 5_000
+            val reader = it.getInputStream().bufferedReader()
+            while (!reader.readLine().isNullOrEmpty()) Unit
+            val body = html.toByteArray()
+            val head = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: ${body.size}\r\nConnection: close\r\n\r\n"
+            it.getOutputStream().apply { write(head.toByteArray()); write(body); flush() }
         }
     }
 

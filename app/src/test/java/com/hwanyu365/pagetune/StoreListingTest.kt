@@ -126,6 +126,14 @@ class StoreListingTest {
     }
 
     @Test
+    fun `TC#306 설정 화면은 권한·preference 의존성을 더하지 않는다`() {
+        val manifest = File("src/main/AndroidManifest.xml").readText()
+        val permissions = Regex("""<uses-permission\b[^>]*android:name="([^"]+)"""").findAll(manifest).map { it.groupValues[1] }.toList()
+        assertEquals(listOf("android.permission.INTERNET"), permissions)
+        assertFalse("androidx.preference" in File("build.gradle").readText())
+    }
+
+    @Test
     fun `TC#307 설정 화면은 다른 앱이 열 수 없다`() {
         val manifest = File("src/main/AndroidManifest.xml").readText()
         val activity = Regex("""<activity\b[^>]*android:name="\.SettingsActivity"[^>]*>""").find(manifest)

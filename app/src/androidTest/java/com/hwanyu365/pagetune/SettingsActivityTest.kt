@@ -25,6 +25,7 @@ import org.hamcrest.Matchers.containsString
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,7 +39,13 @@ class SettingsActivityTest {
     private val component = Regex("""^\s*([\w.]+)/[\w.$]+$""")
 
     @Before
-    fun setUp() = markIntroSeen()
+    fun setUp() {
+        restoreDeviceSettings()
+        markIntroSeen()
+    }
+
+    @After
+    fun tearDown() = restoreDeviceSettings()
 
     @Test
     @JvmName("tc301")
@@ -93,15 +100,11 @@ class SettingsActivityTest {
         val handlers = handlers(query)
         assertTrue("처리방침 주소를 받는 앱이 없는 기기는 비활성화 전후를 비교할 수 없다", handlers.isNotEmpty())
         assertFalse(targetContext.packageName in handlers)
-        try {
-            handlers.forEach { shell("pm disable-user --user 0 $it") }
-            assertEquals(emptyList<String>(), handlers(query))
-            ActivityScenario.launch(SettingsActivity::class.java).use {
-                onView(withId(R.id.item_privacy)).perform(click())
-                onView(withText(targetContext.getString(R.string.settings_no_browser, privacyUrl))).check(matches(isDisplayed()))
-            }
-        } finally {
-            handlers.forEach { shell("pm enable --user 0 $it") }
+        handlers.forEach { changeDeviceSetting("pm disable-user --user 0 $it", restore = "pm enable --user 0 $it") }
+        assertEquals(emptyList<String>(), handlers(query))
+        ActivityScenario.launch(SettingsActivity::class.java).use {
+            onView(withId(R.id.item_privacy)).perform(click())
+            onView(withText(targetContext.getString(R.string.settings_no_browser, privacyUrl))).check(matches(isDisplayed()))
         }
     }
 
@@ -109,37 +112,36 @@ class SettingsActivityTest {
     @JvmName("tc305")
     fun `TC#305 영어·한국어 글꼴 200% 에서 세 항목이 잘리지 않고 48dp 이상이다`() {
         val oldScale = shell("settings get system font_scale").trim()
-        try {
-            shell("settings put system font_scale 2.0")
-            waitUntil { Resources.getSystem().configuration.fontScale == 2.0f }
-            for (tag in listOf("en", "ko")) {
-                shell("cmd locale set-app-locales ${targetContext.packageName} --user 0 --locales $tag")
-                waitUntil { targetContext.applicationContext.resources.configuration.locales[0].language == tag }
-                ActivityScenario.launch(SettingsActivity::class.java).use { scenario ->
-                    onView(withId(R.id.item_privacy)).check(matches(isDisplayed()))
-                    scenario.onActivity { activity ->
-                        val config = activity.resources.configuration
-                        assertEquals(2.0f, config.fontScale)
-                        assertEquals(tag, config.locales[0].language)
-                        val minHeight = 48 * activity.resources.displayMetrics.density
-                        for (id in listOf(R.id.item_app_info, R.id.item_licenses, R.id.item_privacy)) {
-                            val item = activity.findViewById<ViewGroup>(id)
-                            val name = "$tag ${activity.resources.getResourceEntryName(id)}"
-                            assertTrue("$name 높이 ${item.height}", item.height >= minHeight)
-                            for (text in item.children.filterIsInstance<TextView>()) {
-                                val layout = text.layout
-                                assertTrue("$name 글자 없음", text.text.isNotEmpty() && layout != null)
-                                for (line in 0 until layout.lineCount) assertEquals("$name 말줄임", 0, layout.getEllipsisCount(line))
-                                assertTrue("$name 세로 잘림", layout.height <= text.height - text.totalPaddingTop - text.totalPaddingBottom)
-                                assertTrue("$name 항목 밖", text.top >= 0 && text.bottom <= item.height && text.right <= item.width)
-                            }
+        changeDeviceSetting(
+            "settings put system font_scale 2.0",
+            restore = if (oldScale == "null") "settings delete system font_scale" else "settings put system font_scale $oldScale",
+        )
+        waitUntil { Resources.getSystem().configuration.fontScale == 2.0f }
+        for (tag in listOf("en", "ko")) {
+            val locales = "cmd locale set-app-locales ${targetContext.packageName} --user 0"
+            changeDeviceSetting("$locales --locales $tag", restore = locales)
+            waitUntil { targetContext.applicationContext.resources.configuration.locales[0].language == tag }
+            ActivityScenario.launch(SettingsActivity::class.java).use { scenario ->
+                onView(withId(R.id.item_privacy)).check(matches(isDisplayed()))
+                scenario.onActivity { activity ->
+                    val config = activity.resources.configuration
+                    assertEquals(2.0f, config.fontScale)
+                    assertEquals(tag, config.locales[0].language)
+                    val minHeight = 48 * activity.resources.displayMetrics.density
+                    for (id in listOf(R.id.item_app_info, R.id.item_licenses, R.id.item_privacy)) {
+                        val item = activity.findViewById<ViewGroup>(id)
+                        val name = "$tag ${activity.resources.getResourceEntryName(id)}"
+                        assertTrue("$name 높이 ${item.height}", item.height >= minHeight)
+                        for (text in item.children.filterIsInstance<TextView>()) {
+                            val layout = text.layout
+                            assertTrue("$name 글자 없음", text.text.isNotEmpty() && layout != null)
+                            for (line in 0 until layout.lineCount) assertEquals("$name 말줄임", 0, layout.getEllipsisCount(line))
+                            assertTrue("$name 세로 잘림", layout.height <= text.height - text.totalPaddingTop - text.totalPaddingBottom)
+                            assertTrue("$name 항목 밖", text.top >= 0 && text.bottom <= item.height && text.right <= item.width)
                         }
                     }
                 }
             }
-        } finally {
-            shell("cmd locale set-app-locales ${targetContext.packageName} --user 0")
-            shell(if (oldScale == "null") "settings delete system font_scale" else "settings put system font_scale $oldScale")
         }
     }
 

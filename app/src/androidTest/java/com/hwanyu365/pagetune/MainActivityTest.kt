@@ -19,7 +19,10 @@ import org.junit.runner.RunWith
 class MainActivityTest {
 
     @Before
-    fun setUp() = markIntroSeen()
+    fun setUp() {
+        restoreDeviceSettings()
+        markIntroSeen()
+    }
 
     // DEX 는 메서드 이름에 '#'·공백을 받지 않는다 → 소스 이름은 TC 규칙대로 두고 바이트코드 이름만 바꾼다.
     @Test

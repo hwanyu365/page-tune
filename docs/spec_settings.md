@@ -95,7 +95,7 @@
 | `TC#303` | 처리방침 → `ACTION_VIEW`·`CATEGORY_BROWSABLE`·처리방침 주소의 intent 를 보냄. 그 intent 를 받는 앱을 모두 비활성화한 기기 → 안내와 주소 표시 | [FR#3] | 에뮬레이터 (`SettingsActivityTest`). 비활성화한 앱은 테스트가 끝나면 되살린다 |
 | `TC#304` | 처리방침 주소 문자열 리소스가 `https://hwanyu365.github.io/page-tune/privacy` 이고 `translatable="false"` | [FR#3] | 단위 (`ResourceRulesTest`) |
 | `TC#305` | 영어·한국어 × 글꼴 200% 에서 세 항목의 글자가 말줄임·잘림 없이 항목 안에 들어가고, 항목 높이 48dp 이상 | [NFR#1] [NFR#2] | 에뮬레이터 (`SettingsActivityTest`) |
-| `TC#306` | 매니페스트 권한은 `INTERNET` 하나뿐이고 `app/build.gradle` 에 `androidx.preference` 가 없음 | [NFR#3] | 단위 (`StoreListingTest`) |
+| `TC#306` | 매니페스트 권한은 `INTERNET` 하나뿐이고, `app/build.gradle` 의 테스트 밖 의존성(설정·group:name)이 허용 목록과 같음 → `androidx.preference` 는 목록에 없음 | [NFR#3] | 단위 (`StoreListingTest`). 의존성을 더하거나 빼는 PR 은 이유를 적고 목록을 고친다 |
 | `TC#307` | 앱 매니페스트에서 설정 Activity 의 `android:exported` 가 `"false"` 로 명시돼 있다 | [NFR#3] | 단위 (`StoreListingTest` 의 매니페스트 파싱과 같은 방식). mutation: 구현 PR 에서 `true` 로 바꿔 실패하는지 확인 |
 
 ## 부록. 변경 이력

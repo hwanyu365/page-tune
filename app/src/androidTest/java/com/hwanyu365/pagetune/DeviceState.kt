@@ -19,3 +19,19 @@ fun shell(command: String): String {
     val pfd = InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command)
     return ParcelFileDescriptor.AutoCloseInputStream(pfd).bufferedReader().use { it.readText() }
 }
+
+// 앱을 지워도 남는 자리여야 한다 → 테스트가 되돌리기 전에 죽어도 다음 실행의 restoreDeviceSettings 가 찾는다.
+private const val RESTORE_SCRIPT = "/data/local/tmp/pagetune-test-restore.sh"
+
+fun changeDeviceSetting(change: String, restore: String) {
+    // executeShellCommand 는 셸을 거치지 않아 리디렉션을 쓸 수 없다 → tee 의 표준 입력으로 쓴다.
+    val (output, input) = InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommandRw("tee -a $RESTORE_SCRIPT")
+    ParcelFileDescriptor.AutoCloseOutputStream(input).use { it.write("$restore\n".toByteArray()) }
+    ParcelFileDescriptor.AutoCloseInputStream(output).use { it.readBytes() }
+    shell(change)
+}
+
+fun restoreDeviceSettings() {
+    shell("sh $RESTORE_SCRIPT")
+    shell("rm -f $RESTORE_SCRIPT")
+}

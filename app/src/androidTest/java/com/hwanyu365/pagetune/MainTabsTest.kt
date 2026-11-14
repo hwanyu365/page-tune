@@ -1,7 +1,9 @@
 package com.hwanyu365.pagetune
 
 import android.view.View
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -24,7 +26,11 @@ import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
 import org.hamcrest.Matchers.allOf
+import com.hwanyu365.pagetune.ui.fragment.PluginsFragment
+import com.hwanyu365.pagetune.ui.fragment.TabPage
+import com.hwanyu365.pagetune.ui.fragment.WebPagesFragment
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -122,6 +128,16 @@ class MainTabsTest {
         }
         val (from, to) = if (toNext) 0.8f to 0.2f else 0.2f to 0.8f
         onView(withId(R.id.view_pager)).perform(GeneralSwipeAction(Swipe.FAST, at(from), at(to), Press.FINGER))
+        // 정착하기 전에는 떠나는 탭이 아직 툴바 메뉴를 받는다 → 사람이 다음 동작을 하는 시점처럼 정착을 기다린다.
+        eventually { onView(withId(R.id.view_pager)).check { view, _ -> assertTrue(settled(view as ViewPager2)) } }
+    }
+
+    private fun settled(pager: ViewPager2): Boolean {
+        if (pager.scrollState != ViewPager2.SCROLL_STATE_IDLE) return false
+        val current = if (pager.currentItem == 0) WebPagesFragment::class.java else PluginsFragment::class.java
+        return (pager.context as FragmentActivity).supportFragmentManager.fragments
+            .filter { it is TabPage }
+            .all { it.isMenuVisible == (it.javaClass == current) }
     }
 
     private fun inRowWith(text: String): Matcher<View> = inRowWith(withText(text))

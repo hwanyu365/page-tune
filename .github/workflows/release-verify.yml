@@ -41,4 +41,5 @@ jobs:
             echo 'hw.lcd.density=480' >> ~/.android/avd/test.avd/config.ini
             grep '^hw\.lcd\.' ~/.android/avd/test.avd/config.ini
           disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest
+          # config.ini 값이 화면에 반영되지 않으면 다른 화면에서 판정하게 된다 → 테스트 전에 확인한다.
+          script: adb shell wm size | grep -q 'Physical size: 1344x2992' && adb shell wm density | grep -q 'Physical density: 480' && ./gradlew connectedDebugAndroidTest

@@ -8,8 +8,10 @@ import android.view.View
 import androidx.core.content.edit
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
@@ -69,7 +71,7 @@ class LayoutFitTest {
         targetContext.getSharedPreferences("intro", Context.MODE_PRIVATE).edit(commit = true) { clear() }
         ActivityScenario.launch(MainActivity::class.java).use {
             check(eventually { dialogRoot() }, "intro")
-            androidx.test.espresso.Espresso.pressBack()
+            pressBack()
             eventually { onView(withId(R.id.layout_empty)).check(matches(isDisplayed())) }
             checkActivity(it, "pages_empty")
             onView(tab(R.string.tab_tunes)).perform(click())
@@ -86,7 +88,7 @@ class LayoutFitTest {
             checkActivity(it, "pages")
             onView(withId(R.id.fab_add_webpage)).perform(click())
             check(dialogRoot(), "webpage_dialog")
-            androidx.test.espresso.Espresso.pressBack()
+            onView(withId(R.id.btn_dialog_cancel)).inRoot(isDialog()).perform(click())
             onView(tab(R.string.tab_tunes)).perform(click())
             eventually { onView(allOf(withId(R.id.tv_plugin_name), withText("Tune A"))).check(matches(isDisplayed())) }
             checkActivity(it, "tunes")

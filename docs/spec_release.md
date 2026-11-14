@@ -56,7 +56,7 @@
   - 웹페이지 보기 화면 → 상태바를 숨기고 노치까지 쓰는 전체화면이므로 내비게이션 바만 피한다.
   - 시스템 바 아이콘은 밝은 색으로 고정한다 → 앱 배경이 항상 어두워서, 시스템 라이트 모드 기본값(어두운 아이콘)이면 배경에 묻힌다.
 - `FR#8` 자동 업로드는 internal 트랙에만 하고 공개 비율·출시 상태를 지정하지 않는다. production 공개는 Console 에서 internal 빌드를 100% 로 승격한다. `[요구사항]`
-- `FR#9` production 빌드에 문제가 생기면 이전 빌드를 다시 올리지 않고, 고친 커밋에 다음 patch 태그를 붙여 FR#6 경로로 올린 뒤 FR#8 로 승격한다. versionCode 는 태그만으로 정해지므로 어느 커밋에 붙인 태그든 직전 태그보다 크다. `[요구사항]`
+- `FR#9` production 빌드에 문제가 생기면 이전 빌드를 다시 올리지 않고, 고친 커밋에 다음 태그를 붙여 FR#6 경로로 올린 뒤 FR#8 로 승격한다. 다음 태그는 patch 를 올리고, patch 가 99 면 minor 를 올린다 (§6 버전 산출). versionCode 는 태그만으로 정해지므로 어느 커밋에 붙인 태그든 직전 태그보다 크다. `[요구사항]`
 
 ### 비기능 요구사항
 
@@ -141,7 +141,7 @@
 | TC#511 | NFR#2 | 저장소에 `*.jks`/`*.keystore`/서비스 계정 JSON 이 추적되지 않음 | (수동) `git ls-files` |
 | TC#512 | NFR#3 | 매니페스트 `application` 의 `usesCleartextTraffic` 가 `"true"` 로 남아 있다 | unit (`StoreListingTest`) |
 | TC#513 | FR#8 | `play` 설정의 트랙이 `internal` 이고 `userFraction`·`releaseStatus`·`promoteTrack`·`fromTrack` 이 없다, `release.yml` 이 `promote` 태스크를 부르지 않는다 | unit (`StoreListingTest`) |
-| TC#514 | FR#9 | `v1.3.4` → `v1.3.5` 의 versionCode 가 증가하고, versionCode 입력이 태그뿐이다 (같은 태그 → 같은 값) | unit (`ReleaseVersionTest`) |
+| TC#514 | FR#9 | `v1.3.4` → `v1.3.5`, `v1.3.99` → `v1.4.0` 의 versionCode 가 증가하고, versionCode 입력이 태그뿐이다 (같은 태그 → 같은 값, `VERSION_TAG` 는 Gradle property·환경변수에서만 읽음) | unit (`ReleaseVersionTest`) |
 
 ## 부록. 변경 이력
 

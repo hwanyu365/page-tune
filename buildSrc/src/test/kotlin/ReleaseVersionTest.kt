@@ -28,8 +28,10 @@ class ReleaseVersionTest {
     @Test
     fun `TC#514 다음 patch 태그는 어느 커밋에 붙여도 versionCode 가 커진다`() {
         assertTrue(ReleaseVersion.fromTag("v1.3.5").code > ReleaseVersion.fromTag("v1.3.4").code)
+        assertTrue(ReleaseVersion.fromTag("v1.4.0").code > ReleaseVersion.fromTag("v1.3.99").code)
         assertEquals(ReleaseVersion.fromTag("v1.3.5"), ReleaseVersion.fromTag("v1.3.5"))
         val gradle = File("../app/build.gradle").readText()
+        assertEquals(listOf("def env = { String key -> findProperty(key) ?: System.getenv(key) }"), gradle.lines().map { it.trim() }.filter { it.startsWith("def env") })
         assertTrue(Regex("""releaseVersion = ReleaseVersion\.Companion\.fromTag\(env\('VERSION_TAG'\)\)""").containsMatchIn(gradle))
         assertEquals(listOf("versionCode releaseVersion.code"), gradle.lines().map { it.trim() }.filter { it.startsWith("versionCode") })
     }

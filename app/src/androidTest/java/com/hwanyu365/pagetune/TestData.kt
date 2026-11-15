@@ -35,8 +35,8 @@ fun rulesOf(tuneId: Long) = runBlocking { database.pluginDao().getPluginWithActi
 fun clickRule(trigger: String, selector: String) = PluginAction(pluginId = 0, actionType = "click", targetSelector = selector, triggerType = trigger)
 
 /** 앱이 여는 웹페이지를 기기 안에서 내준다 → 네트워크 없이도 열람 화면이 같은 페이지를 읽는다. */
-class LocalPage(private val html: String) : Closeable {
-    private val server = ServerSocket(0, 16, InetAddress.getByName("127.0.0.1"))
+class LocalPage(private val html: String, port: Int = 0) : Closeable {
+    private val server = ServerSocket().apply { reuseAddress = true; bind(java.net.InetSocketAddress(InetAddress.getByName("127.0.0.1"), port), 16) }
     val url = "http://127.0.0.1:${server.localPort}/"
 
     init {

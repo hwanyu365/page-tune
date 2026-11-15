@@ -24,6 +24,7 @@ android {
         versionCode releaseVersion.code
         versionName releaseVersion.name
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments listener: 'com.hwanyu365.pagetune.RestoreDeviceSettingsListener'
     }
 
     signingConfigs {

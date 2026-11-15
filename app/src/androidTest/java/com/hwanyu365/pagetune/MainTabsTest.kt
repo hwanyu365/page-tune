@@ -14,17 +14,13 @@ import androidx.test.espresso.action.Press
 import androidx.test.espresso.action.Swipe
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.RootMatchers.isDialog
-import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isSelected
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.hamcrest.Description
 import org.hamcrest.Matcher
-import org.hamcrest.TypeSafeMatcher
 import org.hamcrest.Matchers.allOf
 import com.hwanyu365.pagetune.ui.fragment.PluginsFragment
 import com.hwanyu365.pagetune.ui.fragment.TabPage
@@ -38,8 +34,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class MainTabsTest {
 
-    private val pagesTab = allOf(withText(R.string.tab_webpages), isDescendantOfA(withId(R.id.tab_layout)))
-    private val tunesTab = allOf(withText(R.string.tab_tunes), isDescendantOfA(withId(R.id.tab_layout)))
     private val tuneRow = allOf(withId(R.id.tv_plugin_name), withText("Tune A"))
 
     @Before
@@ -140,33 +134,6 @@ class MainTabsTest {
             .filter { it is TabPage }
             .all { it.isMenuVisible == (it.javaClass == current) }
     }
-
-    private fun inRowWith(text: String): Matcher<View> = inRowWith(withText(text))
-
-    private fun inRowWith(content: Matcher<View>): Matcher<View> = object : TypeSafeMatcher<View>() {
-        override fun describeTo(description: Description) {
-            description.appendText("목록 줄 안: ").appendDescriptionOf(content)
-        }
-
-        override fun matchesSafely(view: View): Boolean {
-            var row: View = view
-            while (true) {
-                val parent = row.parent as? View ?: return false
-                if (parent is RecyclerView) return row.shownViews().any { content.matches(it) }
-                row = parent
-            }
-        }
-    }
-
-    private fun deleteFromItemMenu(item: Matcher<View>) {
-        onView(allOf(withId(R.id.btn_more), inRowWith(item), isDisplayed())).perform(click())
-        onView(withText(R.string.delete)).inRoot(isPlatformPopup()).perform(click())
-        onView(withId(android.R.id.button1)).inRoot(isDialog()).perform(click())
-    }
-
-    private fun snackbarGone(): Boolean = runCatching {
-        onView(withId(com.google.android.material.R.id.snackbar_text)).check(doesNotExist())
-    }.isSuccess
 
     private fun shownCheckboxes(scenario: ActivityScenario<MainActivity>, list: Int): Int {
         var count = 0

@@ -266,10 +266,12 @@ class StoreListingTest {
     }
 
     @Test
-    fun `TC#408 배포 workflow 는 번들 업로드 태스크만 부른다`() {
-        val release = File("../.github/workflows/release.yml").readText()
-        val tasks = Regex("""\./gradlew\s+([^\n]+)""").findAll(release).flatMap { it.groupValues[1].split(Regex("""\s+""")) }.filter { it.startsWith("publish") || it.startsWith(":app:publish") }.toList()
-        assertEquals(listOf("publishReleaseBundle"), tasks)
+    fun `TC#408 배포 workflow 의 Gradle 호출은 검증 명령과 번들 업로드뿐이다`() {
+        val release = File("../.github/workflows/release.yml").readText().replace("\r\n", "\n")
+        val calls = Regex("""\./gradlew\b([^\n&]*)""").findAll(release).map { it.groupValues[1].trim() }.toList()
+        assertEquals(listOf("-p buildSrc test", "lintDebug testDebugUnitTest assembleDebug assembleDebugAndroidTest", "publishReleaseBundle"), calls)
+        val commands = release.lines().filterNot { Regex("""^\s*-?\s*uses:""").containsMatchIn(it) }.joinToString("\n")
+        assertEquals("./gradlew 밖의 Gradle 호출", calls.size, Regex("""(?i)gradle""").findAll(commands).count())
     }
 
     @Test

@@ -142,7 +142,7 @@
 | `TC#414` | FR#5 | 두 로케일 전체 설명에 백업 예외 서술("Google 계정"/"Google account")이 있다 | 단위 |
 | `TC#415` | FR#7 | listing 에 알려진 국내 커뮤니티 이름 목록과 URL 패턴(`www.`·`.com`·`.kr`·`http`, 이슈 URL 제외)이 없다 | 단위. 목록 밖 사이트 이름은 걸러내지 못한다 → 리뷰에서 본다 |
 | `TC#407` | FR#5 | 설치된 앱(병합 매니페스트)의 요청 권한이 `INTERNET`·`{패키지}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` 뿐이고, 앱이 선언한 권한은 뒤의 것 하나(signature)다. 목록이 바뀌면 방침·스토어 문구를 확인하고 목록을 고친다 | 에뮬레이터 (`InstalledAppTest`) |
-| `TC#408` | FR#8 | `release.yml` 이 부르는 publish 태스크가 `publishReleaseBundle` 뿐이고, `./gradlew publishReleaseBundle --dry-run` 에 `publish…Listing` 태스크가 없다 | 단위 (`StoreListingTest`) + 릴리스 검증 (`release-verify.yml`) |
+| `TC#408` | FR#8 | `release.yml` 의 Gradle 호출이 허용 목록(검증 명령, `publishReleaseBundle`) 그대로이고 `./gradlew` 밖의 Gradle 호출이 없으며, `./gradlew publishReleaseBundle --dry-run` 에 `publish…Listing` 태스크가 없다 | 단위 (`StoreListingTest`) + 릴리스 검증 (`release-verify.yml`). workflow 가 부르는 스크립트 파일 안의 호출은 보지 못한다 |
 | `TC#416` | FR#9 | 언어마다 `graphics/icon/` 에 PNG 한 장, 512x512, 색 형식 RGBA(6), 8-bit | 단위 (`StoreListingTest`), PNG IHDR |
 | `TC#417` | FR#10 | 언어마다 `graphics/feature-graphic/` 에 PNG 한 장, 1024x500, 색 형식 RGB(2), 8-bit | 단위 |
 | `TC#418` | FR#11 | 언어마다 `graphics/phone-screenshots/` 에 PNG 4~8장, 색 형식 RGB(2), 각 변 320~3840, 긴 변 ≤ 짧은 변 x2 | 단위 |

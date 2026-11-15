@@ -66,3 +66,21 @@ jobs:
         run: |
           ./gradlew publishReleaseBundle --dry-run > "$RUNNER_TEMP/publish.log"
           grep -q '^:app:publishReleaseBundle ' "$RUNNER_TEMP/publish.log" && ! grep -E '^:app:publish[A-Za-z]*Listing ' "$RUNNER_TEMP/publish.log" || { cat "$RUNNER_TEMP/publish.log"; exit 1; }
+      - name: TC#24 release 번들에 테스트 전용 라이브러리 클래스가 없다
+        run: |
+          unzip -o -q app/build/outputs/bundle/release/app-release.aab 'base/dex/*' -d "$RUNNER_TEMP/aab"
+          dexdump="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)dexdump"
+          for dex in "$RUNNER_TEMP"/aab/base/dex/*.dex; do "$dexdump" "$dex" | grep 'Class descriptor'; done > "$RUNNER_TEMP/classes.txt"
+          grep -q 'Lcom/hwanyu365/pagetune/MainActivity;' "$RUNNER_TEMP/classes.txt" || { echo "::error::번들 클래스 목록을 읽지 못함"; exit 1; }
+          if grep -E "'Lorg/(htmlunit|json)/" "$RUNNER_TEMP/classes.txt"; then echo "::error::테스트 전용 라이브러리 클래스가 번들에 있음"; exit 1; fi
+      # 검사가 실제로 막는지 보려고 위반을 하나씩 넣는다 → 작업 트리를 바꾸므로 마지막에 두고 되돌린다.
+      - name: TC#20 lint 는 하드코딩 문자열과 번역 누락을 오류로 막는다
+        run: |
+          printf '%s\n' '<?xml version="1.0" encoding="utf-8"?>' '<TextView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Probe" />' > app/src/main/res/layout/tc20_probe.xml
+          sed -i 's#^</resources>#    <string name="tc20_probe">Probe</string>\n</resources>#' app/src/main/res/values/strings.xml
+          if ./gradlew lintDebug > "$RUNNER_TEMP/lint.log" 2>&1; then echo "::error::위반을 넣었는데 lint 가 통과함"; exit 1; fi
+          tr '\n' ' ' < app/build/reports/lint-results-debug.xml | grep -o '<issue [^>]*>' > "$RUNNER_TEMP/issues.txt"
+          for id in HardcodedText MissingTranslation; do
+            grep "id=\"$id\"" "$RUNNER_TEMP/issues.txt" | grep -q 'severity="Error"' || { echo "::error::lint 가 $id 를 오류로 내지 않음"; cat "$RUNNER_TEMP/lint.log"; exit 1; }
+          done
+          git checkout -- app/src/main/res/values/strings.xml && rm app/src/main/res/layout/tc20_probe.xml

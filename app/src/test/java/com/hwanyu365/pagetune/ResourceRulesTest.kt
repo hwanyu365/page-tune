@@ -45,6 +45,34 @@ class ResourceRulesTest {
         }
     }
 
+    private fun userStrings(dir: String): Map<String, String> {
+        val text = File(res, "$dir/strings.xml").readText()
+        val strings = Regex("""<string name="([^"]+)"([^>]*)>(.*?)</string>""", RegexOption.DOT_MATCHES_ALL).findAll(text)
+            .filter { "translatable=\"false\"" !in it.groupValues[2] }.associate { it.groupValues[1] to it.groupValues[3] }
+        val plurals = Regex("""<plurals name="([^"]+)"[^>]*>(.*?)</plurals>""", RegexOption.DOT_MATCHES_ALL).findAll(text)
+            .associate { "plurals/" + it.groupValues[1] to Regex("""<item[^>]*>(.*?)</item>""").findAll(it.groupValues[2]).joinToString(" ") { m -> m.groupValues[1] } }
+        return strings + plurals
+    }
+
+    @Test
+    fun `TC#21 영어·한국어 문구는 같은 이름을 갖고 각 언어로 쓰이며 쓰지 않는 말이 없다`() {
+        val en = userStrings("values")
+        val ko = userStrings("values-ko")
+        assertEquals(en.keys, ko.keys)
+        val hangul = Regex("[가-힣]")
+        // 두 언어에서 같은 원어를 쓰기로 한 문구(Pages·Tunes 탭, Tune)와 글자 없는 형식 문자열이다.
+        val sameInBoth = setOf("tab_webpages", "tab_tunes", "webpage_dialog_tune_label", "edit_label_with_text")
+        assertEquals(emptyList<String>(), ko.filter { (k, v) -> k !in sameInBoth && !hangul.containsMatchIn(v) }.keys.toList())
+        assertEquals(emptyList<String>(), en.filter { hangul.containsMatchIn(it.value) }.keys.toList())
+        val avoidEn = listOf("Plugin", "Webpage", "Web Page", "Setup", "Action", "Hidden", "Click Event", "Floating GNB", "Gesture", "Pick Mode", "Inspector", "Broken Selector", "Revert", "Onboarding", "Tutorial", "Release notes", "Retry")
+        val developer = listOf("selector", "inspector", "GNB", "gesture", "setup", "plugin")
+        val bad = en.flatMap { (k, v) ->
+            avoidEn.filter { Regex("""\b${Regex.escape(it)}\b""").containsMatchIn(v) }.map { "$k: $it" } +
+                developer.filter { Regex("""\b$it\b""", RegexOption.IGNORE_CASE).containsMatchIn(v) }.map { "$k: $it" }
+        } + ko.flatMap { (k, v) -> (listOf("튜토리얼", "업데이트 내역", "재시도") + developer).filter { v.contains(it, ignoreCase = true) }.map { "$k: $it" } }
+        assertEquals(emptyList<String>(), bad)
+    }
+
     @Test
     fun `TC#304 처리방침 주소는 번역하지 않는 문자열 하나다`() {
         val strings = File(res, "values/strings.xml").readText()

@@ -146,6 +146,20 @@ class StoreListingTest {
     }
 
     @Test
+    fun `TC#20 lint 는 하드코딩 문자열과 번역 누락을 오류로 막는다`() {
+        val lint = File("build.gradle").readText().replace("\r\n", "\n").substringAfter("\n    lint {").substringBefore("\n    }")
+        assertTrue(lint, Regex("""(?m)^\s*abortOnError true\s*$""").containsMatchIn(lint))
+        assertTrue(lint, Regex("""(?m)^\s*error 'HardcodedText', 'MissingTranslation'\s*$""").containsMatchIn(lint))
+    }
+
+    @Test
+    fun `TC#24 JS 테스트 엔진과 org_json 은 testImplementation 으로만 둔다`() {
+        val dependencies = File("build.gradle").readText().replace("\r\n", "\n").substringAfter("\ndependencies {").substringBefore("\n}")
+        val lines = dependencies.lines().map { it.trim() }.filter { "org.htmlunit:" in it || "org.json:json" in it }
+        assertEquals(listOf("testImplementation 'org.htmlunit:htmlunit:", "testImplementation 'org.json:json:"), lines.map { it.substringBeforeLast(":") + ":" })
+    }
+
+    @Test
     fun `TC#517 에뮬레이터 테스트 라이브러리는 androidTestImplementation 으로만 둔다`() {
         val dependencies = File("build.gradle").readText().replace("\r\n", "\n").substringAfter("\ndependencies {").substringBefore("\n}")
         val lines = dependencies.lines().map { it.trim() }.filter { "androidx.test" in it || "room-testing" in it }

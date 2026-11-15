@@ -15,8 +15,8 @@ val database: AppDatabase get() = AppDatabase.getDatabase(targetContext)
 
 fun clearData() = database.clearAllTables()
 
-fun addTune(name: String, actions: List<PluginAction> = emptyList()): Long = runBlocking {
-    val id = database.pluginDao().insertPlugin(Plugin(name = name))
+fun addTune(name: String, actions: List<PluginAction> = emptyList(), testUrl: String? = null): Long = runBlocking {
+    val id = database.pluginDao().insertPlugin(Plugin(name = name, testUrl = testUrl))
     database.pluginDao().insertActions(actions.map { it.copy(pluginId = id) })
     id
 }
@@ -24,6 +24,13 @@ fun addTune(name: String, actions: List<PluginAction> = emptyList()): Long = run
 fun addWebPage(title: String, url: String, tuneId: Long? = null): Long = runBlocking {
     database.webPageDao().insertWebPage(WebPage(title = title, url = url, pluginId = tuneId))
 }
+
+fun hideRule(id: String) = PluginAction(pluginId = 0, actionType = "hidden", targetSelector = """{"selector":"#$id","tagName":"div","id":"$id","attributes":{}}""")
+
+fun colorRule(id: String, css: String) = PluginAction(pluginId = 0, actionType = "color", targetSelector = """{"selector":"#$id","tagName":"div","id":"$id","attributes":{}}""", styleCss = css)
+
+fun rulesOf(tuneId: Long) = runBlocking { database.pluginDao().getPluginWithActions(tuneId)?.actions.orEmpty() }
+    .sortedBy { it.id }.map { Triple(it.actionType, it.targetSelector, it.styleCss) }
 
 fun clickRule(trigger: String, selector: String) = PluginAction(pluginId = 0, actionType = "click", targetSelector = selector, triggerType = trigger)
 

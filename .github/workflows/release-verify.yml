@@ -62,3 +62,7 @@ jobs:
           ./gradlew bundleRelease
           jarsigner -verify -verbose -certs app/build/outputs/bundle/release/app-release.aab > "$RUNNER_TEMP/verify.log"
           grep -qx 'jar verified.' "$RUNNER_TEMP/verify.log" && grep -q 'Signed by "CN=release-verify"' "$RUNNER_TEMP/verify.log" || { cat "$RUNNER_TEMP/verify.log"; exit 1; }
+      - name: TC#408 배포 태스크는 listing 을 게시하지 않는다
+        run: |
+          ./gradlew publishReleaseBundle --dry-run > "$RUNNER_TEMP/publish.log"
+          grep -q '^:app:publishReleaseBundle ' "$RUNNER_TEMP/publish.log" && ! grep -E '^:app:publish[A-Za-z]*Listing ' "$RUNNER_TEMP/publish.log" || { cat "$RUNNER_TEMP/publish.log"; exit 1; }

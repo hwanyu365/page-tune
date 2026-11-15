@@ -6,7 +6,7 @@
 | --- | --- |
 | 문서명 | spec_store |
 | 작성자 | dohwan.ahn |
-| 작성일 / 최종 수정일 | 2026-11-07 / 2026-11-07 |
+| 작성일 / 최종 수정일 | 2026-11-07 / 2026-11-15 |
 | 기준 커밋 ID | `4383c5f` |
 
 ### 목적
@@ -78,7 +78,6 @@
 
 - `NFR#1` 의존성을 추가하지 않는다. `[요구사항]`
 - `NFR#2` 아이콘 정의에 비밀값·외부 에셋이 없다. 도형은 벡터 path 하나다. `[요구사항]`
-- `NFR#3` 그래픽의 글꼴은 재배포·상업 이용이 허용된 것만 쓴다: Roboto(Apache 2.0), Noto Sans CJK KR(SIL OFL 1.1). `[요구사항]`
 
 ## 4. 데이터 및 API 스펙
 
@@ -86,7 +85,7 @@
 
 | 항목 | 값 | 근거 |
 | --- | --- | --- |
-| 권한 | `INTERNET` 하나 | 매니페스트 |
+| 권한 | `INTERNET` 하나. 라이브러리(androidx.core)가 더하는 `{패키지}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` 은 앱 안 브로드캐스트를 다른 앱이 보내지 못하게 하는 signature 권한이라 사용자 데이터와 무관하다 | 매니페스트, 설치된 앱 (TC#407) |
 | 저장 | Room DB `web_plugin_database` — 웹페이지(제목·주소·연결된 Tune), Tune(이름·테스트 주소), 규칙. SharedPreferences — 마지막으로 본 versionCode 정수 하나 (`spec_page_view.md` FR#27, FR#34) | `db/`, 시작 안내·새 소식 판정 |
 | 웹 데이터 | WebView 의 쿠키·캐시·DOM 저장소는 Android WebView 가 기기에 보관한다 | `util/WebViewConfig.kt` |
 | 외부 전송 | 사용자가 연 페이지의 요청 외 없음. 분석·광고·크래시 SDK 가 의존성에 없다 | `app/build.gradle` dependencies |
@@ -124,6 +123,7 @@
 | listing 업로드 | 파일만 두고 수동 게시 | workflow 에 `publishListing` 추가 | 사람이 확인하지 않은 문구가 스토어에 나가는 경로를 만들지 않는다 (`spec_release.md` 의 internal 트랙 결정과 같은 이유) |
 | 연락처 | GitHub 이슈 | 개인 이메일 | 저장소 정책상 이메일을 노출하지 않는다 |
 | 그래픽 생성 도구 | 저장소 밖에서 렌더한 PNG 만 커밋 | 생성 스크립트 커밋 | 스크립트는 Pillow·글꼴 파일을 요구한다 → 의존성 없이(NFR#1) 둘 수 없다. 스크린샷은 어차피 수동 촬영이다 |
+| 그래픽 글꼴 | Roboto(Apache 2.0), Noto Sans CJK KR(SIL OFL 1.1) (소유자 결정, 2026-11-15) | 그 밖의 글꼴 | 재배포·상업 이용이 허용된 글꼴만 쓴다. PNG 에는 글꼴 정보가 남지 않아 기계로 확인할 수 없다 → 요구사항이 아닌 결정으로 둔다 |
 | 스크린샷 비율 | 촬영 시 화면 크기를 2:1 로 바꿈 | 찍은 뒤 잘라냄 | 잘라내면 상태바·하단 FAB 가 잘린다 |
 
 ## 7. 테스트 및 검증 기준
@@ -133,25 +133,23 @@
 | `TC#401` | FR#6 | 모든 listing 파일이 존재하고 글자 수 제한 이하 | 단위 (`StoreListingTest`) |
 | `TC#402` | FR#7 | listing 에 "ad block"·"광고 차단" 이 없다 | 단위 |
 | `TC#403` | FR#4 | `docs/privacy.md` 에 한국어·영어 제목, GitHub 이슈 URL 이 있고 이메일 주소가 없다. 한국어·영어 시행일이 같다 | 단위 |
-| `TC#404` | FR#1~FR#3 | `assembleDebug` 성공, 병합 매니페스트의 `icon`·`roundIcon` 이 mipmap | (수동) 로컬 |
+| `TC#404` | FR#1~FR#3 | 앱 매니페스트의 `icon`·`roundIcon` 이 `@mipmap/ic_launcher`·`@mipmap/ic_launcher_round`, 적응형 아이콘 두 파일이 background·foreground·monochrome 를 갖고 `drawable*/ic_launcher.*` 가 없다. 설치된 앱(병합 매니페스트)의 아이콘이 `mipmap/ic_launcher` 다. `assembleDebug` 성공은 CI `verify` | 단위 (`StoreListingTest`) + 에뮬레이터 (`InstalledAppTest`) |
 | `TC#410` | FR#1 | 획 끝 포함 최대 반지름 ≤ 33dp (foreground·monochrome) | 단위 (`IconSafeZoneTest`) |
 | `TC#411` | FR#1, NFR#2 | foreground 와 monochrome path 가 같다 | 단위 |
 | `TC#412` | FR#1 | 적응형 background 가 `@color/ic_launcher_background`(`#171717`) | 단위 |
-| `TC#405` | FR#1 | API 36 에뮬레이터 런처에서 원형·사각 마스크와 테마 아이콘(monochrome)에서 잘림 없음 | (수동) 수동. 소유자 시안 확인 후 merge |
-| `TC#406` | FR#2 | API 24 에뮬레이터 런처에서 PNG 아이콘 표시 | (수동) 수동 |
+| `TC#406` | FR#2 | `mipmap-{mdpi,hdpi,xhdpi,xxhdpi,xxxhdpi}` 에 `ic_launcher.png`·`ic_launcher_round.png` 가 있고 각각 48·72·96·144·192px RGBA 8-bit PNG 다. API 24 런처가 그리는 모양은 확인하지 않는다 (API 24 에뮬레이터 없음, 소유자 결정 2026-11-15) | 단위 (`StoreListingTest`) |
 | `TC#413` | FR#5 | 매니페스트 `uses-permission` 이 `INTERNET` 뿐, `allowBackup="true"`, 백업 제외 규칙 없음, 방침에 Google 계정 백업 서술이 있고 "기기 밖으로 전송되지 않아요"류 단정이 없다 | 단위 (`StoreListingTest`). 단정 문구 검사는 알려진 두 문구만 막는다 → 다른 표현은 리뷰로 확인 |
 | `TC#414` | FR#5 | 두 로케일 전체 설명에 백업 예외 서술("Google 계정"/"Google account")이 있다 | 단위 |
 | `TC#415` | FR#7 | listing 에 알려진 국내 커뮤니티 이름 목록과 URL 패턴(`www.`·`.com`·`.kr`·`http`, 이슈 URL 제외)이 없다 | 단위. 목록 밖 사이트 이름은 걸러내지 못한다 → 리뷰에서 본다 |
-| `TC#407` | FR#5 | 병합 매니페스트에 라이브러리가 더하는 권한이 있으면 방침에 필요한지 판단 | (수동) 로컬. TC#413 은 앱 매니페스트만 본다 |
-| `TC#408` | FR#8 | `./gradlew publishReleaseBundle --dry-run` 에 `publishReleaseListing` 이 없다 | (수동) 로컬 |
-| `TC#409` | FR#4 | Pages 활성화 후 게시 URL 이 열린다 | (수동) 소유자 설정 후 확인 |
+| `TC#407` | FR#5 | 설치된 앱(병합 매니페스트)의 요청 권한이 `INTERNET`·`{패키지}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` 뿐이고, 앱이 선언한 권한은 뒤의 것 하나(signature)다. 목록이 바뀌면 방침·스토어 문구를 확인하고 목록을 고친다 | 에뮬레이터 (`InstalledAppTest`) |
+| `TC#408` | FR#8 | `release.yml` 이 부르는 publish 태스크가 `publishReleaseBundle` 뿐이고, `./gradlew publishReleaseBundle --dry-run` 에 `publish…Listing` 태스크가 없다 | 단위 (`StoreListingTest`) + 릴리스 검증 (`release-verify.yml`) |
 | `TC#416` | FR#9 | 언어마다 `graphics/icon/` 에 PNG 한 장, 512x512, 색 형식 RGBA(6), 8-bit | 단위 (`StoreListingTest`), PNG IHDR |
 | `TC#417` | FR#10 | 언어마다 `graphics/feature-graphic/` 에 PNG 한 장, 1024x500, 색 형식 RGB(2), 8-bit | 단위 |
 | `TC#418` | FR#11 | 언어마다 `graphics/phone-screenshots/` 에 PNG 4~8장, 색 형식 RGB(2), 각 변 320~3840, 긴 변 ≤ 짧은 변 x2 | 단위 |
-| `TC#419` | FR#9~FR#11, NFR#3 | 그래픽을 직접 열어 도형이 foreground 와 같고, 화면에 example 도메인 외 사이트 이름이 없고, 문구가 해당 언어인지 확인 | (수동) 수동. PR 에 확인한 파일 목록을 남긴다 |
-| `TC#420` | NFR#1 | PR 의 `app/build.gradle`·`gradle/` diff 에 의존성 추가가 없다 | (수동) PR diff 확인 |
+| `TC#420` | NFR#1 | `app/build.gradle` 의 모든 의존성(테스트 포함), buildscript classpath, `buildSrc` 의존성이 허용 목록 그대로이고 `gradle/` 에는 wrapper 파일만 있다 → 의존성을 더하면 목록을 고쳐야 해 PR diff 에 드러난다 | 단위 (`StoreListingTest`) |
 
 ## 부록. 변경 이력
 
 - GH-23: 최초 작성
 - GH-43: 스토어 그래픽 (FR#9~FR#11, NFR#3, TC#416~TC#419)
+- GH-112: 수동 TC 자동화 (TC#404, TC#406~408, TC#420), TC#405·TC#409·TC#419 삭제, NFR#3 을 설계 결정 "그래픽 글꼴" 로 옮김

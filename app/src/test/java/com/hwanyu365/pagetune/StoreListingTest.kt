@@ -113,10 +113,44 @@ class StoreListingTest {
     }
 
     @Test
+    fun `TC#504 SDK 는 36·최소 24 이고 빌드 스크립트의 저장소는 google·mavenCentral 뿐이다`() {
+        val app = File("build.gradle").readText()
+        for (line in listOf("compileSdk 36", "targetSdk 36", "minSdk 24")) {
+            assertTrue("app/build.gradle 에 '$line' 없음", Regex("""(?m)^\s*${Regex.escape(line)}\s*$""").containsMatchIn(app))
+        }
+        val skip = setOf("build", ".gradle", ".git", ".idea")
+        val scripts = File("..").walkTopDown().onEnter { it.name !in skip }
+            .filter { it.isFile && (it.name.endsWith(".gradle") || it.name.endsWith(".gradle.kts")) }.toList()
+        val blocks = scripts.flatMap { script ->
+            script.readText().split(Regex("""\brepositories\s*\{""")).drop(1).map { script to it.substringBefore("}") }
+        }
+        assertTrue("repositories 블록 없음", blocks.isNotEmpty())
+        for ((script, block) in blocks) {
+            val repos = block.lines().map { it.trim() }.filter { it.isNotEmpty() && !it.startsWith("//") }
+            assertTrue("${script.path} 저장소 '$repos'", repos.isNotEmpty() && repos.all { it in setOf("google()", "mavenCentral()") })
+        }
+    }
+
+    @Test
+    fun `TC#511 서명 키와 서비스 계정 키 파일은 저장소에 추적되지 않는다`() {
+        val patterns = File("../.github/secret-files.regex").readLines().filter { it.isNotBlank() }.map(::Regex)
+        for (name in listOf("upload.jks", "app/release.keystore", "service-account.json", "keys/service-account-play.json")) {
+            assertTrue("비밀 파일 목록이 $name 을 잡지 못함", patterns.any { it.containsMatchIn(name) })
+        }
+        val git = ProcessBuilder("git", "-c", "core.quotePath=false", "ls-files").directory(File("..")).start()
+        val tracked = git.inputStream.bufferedReader().readLines()
+        assertEquals("git ls-files 실패", 0, git.waitFor())
+        assertTrue("추적 파일 없음", tracked.isNotEmpty())
+        val leaked = tracked.filter { path -> !path.endsWith(".example") && patterns.any { it.containsMatchIn(path) } }
+        assertEquals(emptyList<String>(), leaked)
+    }
+
+    @Test
     fun `TC#517 에뮬레이터 테스트 라이브러리는 androidTestImplementation 으로만 둔다`() {
         val dependencies = File("build.gradle").readText().replace("\r\n", "\n").substringAfter("\ndependencies {").substringBefore("\n}")
-        val lines = dependencies.lines().map { it.trim() }.filter { "androidx.test" in it }
-        assertTrue("androidx.test 의존성 없음", lines.isNotEmpty())
+        val lines = dependencies.lines().map { it.trim() }.filter { "androidx.test" in it || "room-testing" in it }
+        assertTrue("androidx.test 의존성 없음", lines.any { "androidx.test" in it })
+        assertTrue("room-testing 의존성 없음", lines.any { "room-testing" in it })
         for (line in lines) assertTrue(line, line.startsWith("androidTestImplementation "))
     }
 

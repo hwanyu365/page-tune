@@ -53,6 +53,11 @@ android {
         viewBinding true
     }
 
+    // 마이그레이션 테스트가 옛 버전 DB 를 스냅샷으로 만든다.
+    sourceSets {
+        androidTest.assets.srcDirs += files("$projectDir/schemas")
+    }
+
     lint {
         abortOnError true
         error 'HardcodedText', 'MissingTranslation'
@@ -109,4 +114,5 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.7.0'
     androidTestImplementation 'androidx.test.ext:junit:1.3.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
+    androidTestImplementation "androidx.room:room-testing:$room_version"
 }

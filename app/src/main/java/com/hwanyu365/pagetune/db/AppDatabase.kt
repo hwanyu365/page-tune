@@ -56,6 +56,8 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        internal val MIGRATIONS = arrayOf(MIGRATION_2_3, MIGRATION_4_5)
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -65,7 +67,7 @@ abstract class AppDatabase : RoomDatabase() {
                 )
                 // 저장된 Tune 과 웹페이지는 날려선 안 된다. 버전을 올릴 땐 마이그레이션을 반드시 함께 추가한다.
                 // fallbackToDestructiveMigration() 을 쓰면 마이그레이션 누락이 조용한 데이터 삭제로 이어진다.
-                .addMigrations(MIGRATION_2_3, MIGRATION_4_5)
+                .addMigrations(*MIGRATIONS)
                 .build()
                 INSTANCE = instance
                 instance

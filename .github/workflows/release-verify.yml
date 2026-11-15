@@ -44,3 +44,21 @@ jobs:
           # config.ini 값이 화면에 반영되지 않으면 다른 화면에서 판정하게 된다 → 테스트 전에 확인한다.
           script: |
             adb shell wm size | grep -q 'Physical size: 1344x2992' && adb shell wm density | grep -q 'Physical density: 480' && ./gradlew connectedDebugAndroidTest
+      - name: TC#506 서명 정보 없는 release 빌드는 빠진 키 이름과 함께 실패한다
+        run: |
+          if ./gradlew bundleRelease assembleRelease --continue > "$RUNNER_TEMP/unsigned.log" 2>&1; then echo "::error::서명 정보 없이 release 빌드가 성공함"; exit 1; fi
+          for task in signReleaseBundle packageRelease; do
+            grep -A1 "Execution failed for task ':app:$task'" "$RUNNER_TEMP/unsigned.log" | grep -q 'Release signing is not configured: RELEASE_STORE_FILE, RELEASE_STORE_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_KEY_PASSWORD' || { echo "::error::$task 가 빠진 키 이름으로 실패하지 않음"; cat "$RUNNER_TEMP/unsigned.log"; exit 1; }
+          done
+      # jarsigner -verify 는 서명 없는 파일에도 0 을 반환한다 → 출력으로 판정한다.
+      - name: TC#505 일회용 키로 서명한 release 번들은 그 키의 서명으로 검증된다
+        env:
+          RELEASE_STORE_FILE: ${{ runner.temp }}/throwaway.jks
+          RELEASE_STORE_PASSWORD: throwaway
+          RELEASE_KEY_ALIAS: throwaway
+          RELEASE_KEY_PASSWORD: throwaway
+        run: |
+          keytool -genkeypair -keystore "$RELEASE_STORE_FILE" -storepass "$RELEASE_STORE_PASSWORD" -keypass "$RELEASE_KEY_PASSWORD" -alias "$RELEASE_KEY_ALIAS" -keyalg RSA -keysize 2048 -validity 2 -dname CN=release-verify
+          ./gradlew bundleRelease
+          jarsigner -verify -verbose -certs app/build/outputs/bundle/release/app-release.aab > "$RUNNER_TEMP/verify.log"
+          grep -qx 'jar verified.' "$RUNNER_TEMP/verify.log" && grep -q 'Signed by "CN=release-verify"' "$RUNNER_TEMP/verify.log" || { cat "$RUNNER_TEMP/verify.log"; exit 1; }

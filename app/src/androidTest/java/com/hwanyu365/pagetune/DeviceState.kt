@@ -2,9 +2,11 @@ package com.hwanyu365.pagetune
 
 import android.content.Context
 import android.os.ParcelFileDescriptor
+import android.os.SystemClock
 import androidx.core.content.edit
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.Assert.assertTrue
 
 val targetContext: Context get() = InstrumentationRegistry.getInstrumentation().targetContext
 
@@ -34,4 +36,30 @@ fun changeDeviceSetting(change: String, restore: String) {
 fun restoreDeviceSettings() {
     shell("sh $RESTORE_SCRIPT")
     shell("rm -f $RESTORE_SCRIPT")
+}
+
+fun waitUntil(timeoutMs: Long = 5_000, condition: () -> Boolean) {
+    val deadline = SystemClock.uptimeMillis() + timeoutMs
+    while (!condition()) {
+        assertTrue("조건을 ${timeoutMs}ms 안에 만족하지 못함", SystemClock.uptimeMillis() < deadline)
+        SystemClock.sleep(100)
+    }
+}
+
+fun <T> eventually(timeoutMs: Long = 10_000, block: () -> T): T {
+    val deadline = SystemClock.uptimeMillis() + timeoutMs
+    while (true) {
+        try {
+            return block()
+        } catch (e: Throwable) {
+            if (SystemClock.uptimeMillis() > deadline) throw e
+            SystemClock.sleep(200)
+        }
+    }
+}
+
+fun resetApp() {
+    restoreDeviceSettings()
+    clearData()
+    markIntroSeen()
 }

@@ -33,5 +33,14 @@ jobs:
           api-level: 36
           target: google_apis
           arch: x86_64
+          # 러너의 avdmanager 에 최신 기기 정의가 없다 → 로컬 AVD(Pixel 8 Pro)와 같은 화면 값을 직접 넣는다.
+          pre-emulator-launch-script: |
+            sed -i '/^hw\.lcd\./d' ~/.android/avd/test.avd/config.ini
+            echo 'hw.lcd.width=1344' >> ~/.android/avd/test.avd/config.ini
+            echo 'hw.lcd.height=2992' >> ~/.android/avd/test.avd/config.ini
+            echo 'hw.lcd.density=480' >> ~/.android/avd/test.avd/config.ini
+            grep '^hw\.lcd\.' ~/.android/avd/test.avd/config.ini
           disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest
+          # config.ini 값이 화면에 반영되지 않으면 다른 화면에서 판정하게 된다 → 테스트 전에 확인한다.
+          script: |
+            adb shell wm size | grep -q 'Physical size: 1344x2992' && adb shell wm density | grep -q 'Physical density: 480' && ./gradlew connectedDebugAndroidTest

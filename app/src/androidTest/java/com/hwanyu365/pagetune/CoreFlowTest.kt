@@ -114,55 +114,9 @@ class CoreFlowTest {
         tap(R.id.btn_plugin_save)
     }
 
-    // 사용자의 탭과 같은 click 이벤트를 요소에 보낸다 → 선택 스크립트와 앱 연결 경로를 그대로 탄다.
-    private fun pick(web: WebView, id: String) {
-        web.js("document.getElementById('$id').click()")
-        eventually { onView(withId(R.id.layout_action_config)).check(matches(isDisplayed())) }
-        eventually {
-            var selector = ""
-            InstrumentationRegistry.getInstrumentation().runOnMainSync { selector = resumedActivity().findViewById<android.widget.TextView>(R.id.tv_selector_detail).text.toString() }
-            assertEquals("#$id", selector)
-        }
-    }
-
-    // 시트 안 칸은 스크롤해야 보이고, 시트 밖 칸은 스크롤 대상이 아니다.
-    private fun tap(id: Int) {
-        val view = onView(withId(id))
-        runCatching { view.perform(scrollTo()) }
-        view.perform(click())
-    }
-
-    private fun pickColor(button: Int, hex: String) {
-        tap(button)
-        onView(withContentDescription(hex)).inRoot(isDialog()).perform(click())
-        onView(withText(R.string.ok)).inRoot(isDialog()).perform(click())
-    }
-
-    private fun rulesOf(id: Long) = runBlocking { database.pluginDao().getPluginWithActions(id)!!.actions }
-        .sortedBy { it.id }.map { Triple(it.actionType, it.targetSelector, it.styleCss) }
-
-    private fun rulesText(): String = resumedText(R.id.layout_actions_list)
-
-    private fun resumedText(id: Int): String {
-        var text = ""
-        InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            val root = resumedActivity().findViewById<android.view.View>(id)
-            text = root.shownViews().filterIsInstance<android.widget.TextView>().joinToString("\n") { it.text.toString() }
-        }
-        return text
-    }
-
-    private fun webView(id: Int): WebView = eventually {
-        var web: WebView? = null
-        InstrumentationRegistry.getInstrumentation().runOnMainSync { web = resumedActivity().findViewById(id) }
-        web!!
-    }
-
-    private fun resumedActivity(): Activity = ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(Stage.RESUMED).single()
+    private fun rulesText(): String = allText(R.id.layout_actions_list)
 
     private fun withChild(text: String) = androidx.test.espresso.matcher.ViewMatchers.hasDescendant(withText(text))
-
-    private val tunesTab = allOf(withText(R.string.tab_tunes), isDescendantOfA(withId(R.id.tab_layout)))
 
     private companion object {
         const val NAME = "Core Tune"
@@ -170,14 +124,4 @@ class CoreFlowTest {
         const val TEXT = "#FFFFFF"
         const val SCROLL_Y = 600
     }
-}
-
-fun WebView.js(script: String): String {
-    val latch = CountDownLatch(1)
-    var result = ""
-    InstrumentationRegistry.getInstrumentation().runOnMainSync {
-        evaluateJavascript(script) { result = it ?: ""; latch.countDown() }
-    }
-    assertTrue("스크립트 결과가 오지 않음: $script", latch.await(5, TimeUnit.SECONDS))
-    return result
 }

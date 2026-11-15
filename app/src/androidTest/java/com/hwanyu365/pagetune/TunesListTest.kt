@@ -122,7 +122,9 @@ class TunesListTest {
             onView(withId(R.id.action_delete_mode)).perform(click())
             onView(withId(R.id.action_delete_selected)).perform(click())
             // 선택 없음 안내는 토스트다 → 확인 창 없이 아무것도 지우지 않는 결과로 판정한다.
-            onView(withText(R.string.tune_delete_title)).check(doesNotExist())
+            // 대화상자 창을 직접 찾는다 → Espresso 가 창이 뜨기를 기다렸다가 없을 때만 통과한다.
+            val dialog = runCatching { onView(withText(R.string.tune_delete_title)).inRoot(isDialog()).check(matches(isDisplayed())) }
+            assertTrue("선택 없이 확인 창이 뜸", dialog.exceptionOrNull() is androidx.test.espresso.NoMatchingRootException)
             assertEquals(2, runBlocking { database.pluginDao().getAllPlugins() }.size)
 
             androidx.test.espresso.Espresso.pressBack()
@@ -215,6 +217,7 @@ class TunesListTest {
             ActivityScenario.launch<WebBrowserActivity>(viewer).use {
                 val web = eventually { onMain { resumedActivity().findViewById<android.webkit.WebView>(R.id.wv_browser) } }
                 eventually { assertEquals("\"none\"", web.js("getComputedStyle(document.getElementById('ad')).display")) }
+                eventually { assertEquals("\"rgb(211, 47, 47)\"", web.js("getComputedStyle(document.getElementById('box')).backgroundColor")) }
             }
             val editor = Intent(targetContext, PluginEditActivity::class.java).putExtra("plugin_id", tune)
             ActivityScenario.launch<PluginEditActivity>(editor).use {

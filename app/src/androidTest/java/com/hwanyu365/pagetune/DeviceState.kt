@@ -60,6 +60,19 @@ fun <T> eventually(timeoutMs: Long = 10_000, block: () -> T): T {
 
 fun resetApp() {
     restoreDeviceSettings()
+    allowSlowTaps()
     clearData()
     markIntroSeen()
 }
+
+// 느린 기기에서는 Espresso 의 탭이 누르고 떼는 사이에 길게 누르기 기준을 넘겨 길게 누르기가 된다 → 기준을 늘려 탭이 탭으로 남게 한다.
+private fun allowSlowTaps() {
+    val old = shell("settings get secure long_press_timeout").trim()
+    changeDeviceSetting(
+        "settings put secure long_press_timeout $SLOW_TAP_MS",
+        restore = if (old == "null") "settings delete secure long_press_timeout" else "settings put secure long_press_timeout $old",
+    )
+    waitUntil { android.view.ViewConfiguration.getLongPressTimeout() == SLOW_TAP_MS }
+}
+
+private const val SLOW_TAP_MS = 1500

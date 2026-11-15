@@ -178,19 +178,6 @@ class TunesListTest {
         }
     }
 
-    // 줄을 바꾸는 동안에는 변경 애니메이션 때문에 같은 줄이 둘 있다 → 하나로 정해질 때 누른다.
-    private fun tapOnce(view: org.hamcrest.Matcher<android.view.View>) = eventually { onView(view).perform(click()) }
-
-    private fun assertSelectedCount(count: Int) {
-        assertEquals(count.toString(), onMain { selectionTitle() })
-    }
-
-    private fun selectionTitle(): String {
-        // 선택 수는 ActionMode 상단 바의 제목이다.
-        val bar = resumedActivity().window.decorView.shownViews().first { it.javaClass.simpleName == "ActionBarContextView" }
-        return bar.shownViews().filterIsInstance<android.widget.TextView>().first { it.id == androidx.appcompat.R.id.action_bar_title }.text.toString()
-    }
-
     private fun undoRestoresLinks() {
         val rules = listOf(hideRule("ad"), colorRule("box", "background-color:#D32F2F"), clickRule("gnb_next", "#next"))
         LocalPage("""<html><body><div id="ad">AD</div><div id="box">BOX</div><a id="next" href="#">next</a></body></html>""").use { page ->

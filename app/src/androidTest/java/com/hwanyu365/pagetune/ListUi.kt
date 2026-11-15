@@ -61,6 +61,19 @@ fun shownNames(list: Int, name: Int): List<String> = onMain {
         .mapNotNull { row -> row.findViewById<android.widget.TextView>(name)?.text?.toString() }
 }
 
+// 줄을 바꾸는 동안에는 변경 애니메이션 때문에 같은 줄이 둘 있다 → 하나로 정해질 때 누른다.
+fun tapOnce(view: Matcher<View>) = eventually { onView(view).perform(click()) }
+
+fun assertSelectedCount(count: Int) {
+    org.junit.Assert.assertEquals(count.toString(), onMain { selectionTitle() })
+}
+
+private fun selectionTitle(): String {
+    // 선택 수는 ActionMode 상단 바의 제목이다.
+    val bar = resumedActivity().window.decorView.shownViews().first { it.javaClass.simpleName == "ActionBarContextView" }
+    return bar.shownViews().filterIsInstance<android.widget.TextView>().first { it.id == androidx.appcompat.R.id.action_bar_title }.text.toString()
+}
+
 fun resumedActivity(): Activity {
     val find = { ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(Stage.RESUMED).single() }
     return if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) find() else onMain(find)

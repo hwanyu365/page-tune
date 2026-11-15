@@ -104,11 +104,16 @@ class EditScreenTest {
 
     private fun loadAddress() = LocalPage(html).use { page ->
         editor().use {
-            onView(withId(R.id.et_inp_taddr)).perform(replaceText("example.com"))
-            onView(withId(R.id.btn_load_url)).perform(click())
-            assertEquals("https://example.com", textOf(R.id.et_inp_taddr))
+            // https 로 정규화한 주소를 기기 안 소켓으로 받는다 → 외부 네트워크 없이 그 주소로 열었는지 본다.
+            java.net.ServerSocket(0).use { server ->
+                val connected = java.util.concurrent.CountDownLatch(1)
+                kotlin.concurrent.thread(isDaemon = true) { runCatching { server.accept().use { connected.countDown() } } }
+                onView(withId(R.id.et_inp_taddr)).perform(replaceText("localhost:${server.localPort}/"))
+                onView(withId(R.id.btn_load_url)).perform(click())
+                assertEquals("https://localhost:${server.localPort}/", textOf(R.id.et_inp_taddr))
+                assertTrue("정규화한 주소로 연결하지 않음", connected.await(10, java.util.concurrent.TimeUnit.SECONDS))
+            }
             val web = webView(R.id.wv_inspector)
-            eventually(timeoutMs = 20_000) { assertTrue(onMain { web.url.orEmpty() }.startsWith("https://example.com")) }
 
             loadInEditor(page.url, "document.getElementById('box')")
             web.js("window.loadMark = 1")

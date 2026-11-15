@@ -105,7 +105,8 @@ class MainTabsTest {
             onView(pagesTab).perform(click())
             eventually { onView(withText("Page B")).check(matches(isDisplayed())) }
             deleteFromItemMenu(withText("Page B"))
-            onView(withId(com.google.android.material.R.id.snackbar_text)).check(matches(isDisplayed()))
+            // 되돌리기 창은 DB 삭제가 끝난 뒤에 뜬다 → Espresso 가 기다리지 않는 작업이다.
+            eventually { onView(withId(com.google.android.material.R.id.snackbar_text)).check(matches(isDisplayed())) }
             swipePages(toNext = true)
             // 되돌리기 창은 5초 뒤 저절로 닫힌다 → 그보다 짧게 기다려야 탭 전환이 닫았는지 가려진다.
             waitUntil(timeoutMs = 1_500) { snackbarGone() }

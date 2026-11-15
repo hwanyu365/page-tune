@@ -193,12 +193,22 @@ class StoreListingTest {
         "kapt org.jetbrains.kotlin:kotlin-metadata-jvm",
     )
 
-    private fun declaredDependencies(): Set<String> {
+    private val testDependencies = setOf(
+        "testImplementation junit:junit",
+        "testImplementation org.htmlunit:htmlunit",
+        "testImplementation org.json:json",
+        "androidTestImplementation androidx.test:runner",
+        "androidTestImplementation androidx.test.ext:junit",
+        "androidTestImplementation androidx.test.espresso:espresso-core",
+        "androidTestImplementation androidx.room:room-testing",
+    )
+
+    private fun declaredDependencies(includeTests: Boolean = false): Set<String> {
         val block = File("build.gradle").readText().substringAfter("\ndependencies {\n").substringBefore("\n}")
         val coordinate = Regex("""^(\w+)\s*\(?\s*['"]([^:'"]+:[^:'"]+)(:[^'"]*)?['"]\s*\)?$""")
         return block.lines().map { it.trim() }
             .filter { it.isNotEmpty() && !it.startsWith("//") && !it.startsWith("def ") }
-            .filterNot { it.startsWith("testImplementation ") || it.startsWith("androidTestImplementation ") }
+            .filterNot { !includeTests && (it.startsWith("testImplementation ") || it.startsWith("androidTestImplementation ")) }
             .map { line -> coordinate.find(line)?.let { "${it.groupValues[1]} ${it.groupValues[2]}" } ?: line }
             .toSet()
     }
@@ -228,6 +238,52 @@ class StoreListingTest {
             val text = File(listings, "$locale/$name").readText().replace(issues, "").lowercase()
             for (w in names + urlPatterns) assertFalse("$locale/$name 에 '$w'", w in text)
         }
+    }
+
+    @Test
+    fun `TC#404 매니페스트 아이콘은 mipmap 이고 적응형 아이콘은 세 레이어를 갖는다`() {
+        val manifest = File("src/main/AndroidManifest.xml").readText()
+        assertTrue(Regex("""android:icon="@mipmap/ic_launcher"""").containsMatchIn(manifest))
+        assertTrue(Regex("""android:roundIcon="@mipmap/ic_launcher_round"""").containsMatchIn(manifest))
+        for (name in listOf("ic_launcher", "ic_launcher_round")) {
+            val adaptive = File("src/main/res/mipmap-anydpi-v26/$name.xml").readText()
+            for (layer in listOf("""<background android:drawable="@color/ic_launcher_background"""", """<foreground android:drawable="@drawable/ic_launcher_foreground"""", """<monochrome android:drawable="@drawable/ic_launcher_monochrome"""")) {
+                assertTrue("$name 에 $layer 없음", layer in adaptive)
+            }
+        }
+        val leftovers = File("src/main/res").listFiles().orEmpty().filter { it.name.startsWith("drawable") }.flatMap { it.listFiles().orEmpty().toList() }.filter { it.name.startsWith("ic_launcher.") }
+        assertEquals(emptyList<File>(), leftovers)
+    }
+
+    @Test
+    fun `TC#406 적응형 아이콘을 못 쓰는 API 24·25 용 PNG 가 모든 밀도에 있다`() {
+        val sizes = mapOf("mdpi" to 48, "hdpi" to 72, "xhdpi" to 96, "xxhdpi" to 144, "xxxhdpi" to 192)
+        for ((density, size) in sizes) for (name in listOf("ic_launcher", "ic_launcher_round")) {
+            val f = File("src/main/res/mipmap-$density/$name.png")
+            assertTrue("$f 없음", f.isFile)
+            assertEquals("$f", Png(size, size, 8, 6), png(f))
+        }
+    }
+
+    @Test
+    fun `TC#408 배포 workflow 의 Gradle 호출은 검증 명령과 번들 업로드뿐이다`() {
+        val release = File("../.github/workflows/release.yml").readText().replace("\r\n", "\n")
+        val calls = Regex("""\./gradlew\b([^\n&]*)""").findAll(release).map { it.groupValues[1].trim() }.toList()
+        assertEquals(listOf("-p buildSrc test", "lintDebug testDebugUnitTest assembleDebug assembleDebugAndroidTest", "publishReleaseBundle"), calls)
+        val commands = release.lines().filterNot { Regex("""^\s*-?\s*uses:""").containsMatchIn(it) }.joinToString("\n")
+        assertEquals("./gradlew 밖의 Gradle 호출", calls.size, Regex("""(?i)gradle""").findAll(commands).count())
+    }
+
+    @Test
+    fun `TC#420 모든 의존성과 빌드 플러그인은 허용 목록 그대로이고 gradle 폴더에는 wrapper 만 있다`() {
+        assertEquals(DEPENDENCY_RULE, allowedDependencies + testDependencies, declaredDependencies(includeTests = true))
+        val classpath = File("../build.gradle").readText().substringAfter("buildscript {").substringAfter("dependencies {").substringBefore("}")
+            .lines().map { it.trim() }.filter { it.isNotEmpty() }.map { it.replace(Regex(""":[^:'"]+['"]$"""), "").replace(Regex("""['"]"""), "") }.toSet()
+        assertEquals(DEPENDENCY_RULE, setOf("classpath com.android.tools.build:gradle", "classpath org.jetbrains.kotlin:kotlin-gradle-plugin", "classpath com.github.triplet.gradle:play-publisher"), classpath)
+        val buildSrc = File("../buildSrc/build.gradle.kts").readText().replace("\r\n", "\n").substringAfter("\ndependencies {").substringBefore("\n}").lines().map { it.trim() }.filter { it.isNotEmpty() }
+        assertEquals(DEPENDENCY_RULE, listOf("""testImplementation("junit:junit:4.13.2")"""), buildSrc)
+        val gradleDir = File("../gradle")
+        assertEquals(setOf("wrapper/gradle-wrapper.jar", "wrapper/gradle-wrapper.properties"), gradleDir.walkTopDown().filter { it.isFile }.map { it.relativeTo(gradleDir).invariantSeparatorsPath }.toSet())
     }
 
     private data class Png(val width: Int, val height: Int, val bitDepth: Int, val colorType: Int)

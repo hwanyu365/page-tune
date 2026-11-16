@@ -214,6 +214,7 @@ class StoreListingTest {
         "androidTestImplementation androidx.test:runner",
         "androidTestImplementation androidx.test.ext:junit",
         "androidTestImplementation androidx.test.espresso:espresso-core",
+        "androidTestImplementation androidx.test.espresso:espresso-intents",
         "androidTestImplementation androidx.room:room-testing",
     )
 

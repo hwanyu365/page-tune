@@ -25,6 +25,7 @@ class BuildDependenciesTest {
             "androidx.test:runner",
             "androidx.test.ext:junit",
             "androidx.test.espresso:espresso-core",
+            "androidx.test.espresso:espresso-intents",
             "androidx.room:room-testing",
         ),
     )

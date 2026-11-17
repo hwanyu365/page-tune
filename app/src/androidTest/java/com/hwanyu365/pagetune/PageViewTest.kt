@@ -42,6 +42,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -131,10 +132,11 @@ class PageViewTest {
     }
 
     private fun forEachNavMode(block: (String) -> Unit) {
-        val modes = listOf(NAV_THREE_BUTTON, NAV_GESTURAL)
-        val current = modes.firstOrNull { shell("cmd overlay list").contains("[x] $it") } ?: NAV_GESTURAL
+        val current = shell("cmd overlay list").lines().map { it.trim() }
+            .firstOrNull { it.startsWith("[x] $NAV_PREFIX") }?.removePrefix("[x] ")
+        assertNotNull("켜진 내비게이션 overlay 를 찾지 못해 되돌릴 수 없음", current)
         changeDeviceSetting("true", restore = "cmd overlay enable-exclusive --category $current")
-        for (mode in modes) {
+        for (mode in listOf(NAV_THREE_BUTTON, NAV_GESTURAL)) {
             shell("cmd overlay enable-exclusive --category $mode")
             waitUntil(10_000) { shell("cmd overlay list").contains("[x] $mode") }
             block(mode)
@@ -236,10 +238,10 @@ class PageViewTest {
             openViewer(addWebPage("Page", server.url, tune)).use {
                 val web = loaded()
                 web.js("window.scrollTo(0, 1000)")
-                onView(withId(R.id.wv_browser)).perform(doubleTapAt(0.5f))
+                onView(withId(R.id.wv_browser)).perform(doubleTapAt(0.45f))
                 SystemClock.sleep(1_000)
                 assertEquals("\"/\"", web.js("location.pathname"))
-                onView(withId(R.id.wv_browser)).perform(doubleTapAt(0.1f))
+                onView(withId(R.id.wv_browser)).perform(doubleTapAt(0.35f))
                 eventually { assertEquals("\"/up\"", web.js("location.pathname")) }
             }
         }
@@ -369,18 +371,27 @@ class PageViewTest {
                     val stack = rectOf(activity.findViewById(R.id.layout_gnb_stack))
                     assertFalse("툴바 $toolbar 와 이전·다음 버튼 $stack 이 겹침", Rect.intersects(toolbar, stack))
                 }
-                SystemClock.sleep(2_000)
+                val hide = toolbarTimeoutMs()
+                SystemClock.sleep(hide / 2)
                 onView(withId(R.id.layout_quick_toolbar)).check(matches(isDisplayed()))
-                eventually(timeoutMs = 4_000) { onView(withId(R.id.layout_quick_toolbar)).check(matches(not(isDisplayed()))) }
+                eventually(timeoutMs = hide) { onView(withId(R.id.layout_quick_toolbar)).check(matches(not(isDisplayed()))) }
 
                 onView(withId(R.id.btn_quick_handle)).perform(click())
-                SystemClock.sleep(2_500)
+                SystemClock.sleep(hide * 5 / 8)
                 onView(withId(R.id.btn_quick_refresh)).perform(click())
-                SystemClock.sleep(2_500)
+                SystemClock.sleep(hide * 5 / 8)
                 onView(withId(R.id.layout_quick_toolbar)).check(matches(isDisplayed()))
-                eventually(timeoutMs = 3_000) { onView(withId(R.id.layout_quick_toolbar)).check(matches(not(isDisplayed()))) }
+                eventually(timeoutMs = hide) { onView(withId(R.id.layout_quick_toolbar)).check(matches(not(isDisplayed()))) }
             }
         }
+    }
+
+    // API 29 이상은 4초를 접근성 "조치를 취할 시간" 권장값으로 늘린다 (FR#14).
+    private fun toolbarTimeoutMs(): Long {
+        val base = 4_000
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) return base.toLong()
+        val manager = targetContext.getSystemService(android.view.accessibility.AccessibilityManager::class.java)
+        return manager.getRecommendedTimeoutMillis(base, android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTROLS).toLong()
     }
 
     private fun quickMenu() {
@@ -506,12 +517,14 @@ class PageViewTest {
             openViewer(addWebPage("Nav", server.url, nav)).use {
                 val web = loaded()
                 eventually { onView(withId(R.id.layout_gnb_stack)).check(matches(isDisplayed())) }
+                // 상태 표시는 진입 3초 뒤 숨는다 → 페이지 로드가 늦어도 "표시 중" 배치를 보도록 다시 보이게 한다.
+                onMain { resumedActivity().findViewById<View>(R.id.tv_tune_status).visibility = View.VISIBLE }
+                onView(withId(R.id.tv_tune_status)).check(matches(isDisplayed()))
                 onMain {
                     val activity = resumedActivity()
-                    val status = activity.findViewById<View>(R.id.tv_tune_status)
-                    assertTrue("버튼이 나왔을 때 상태 표시가 이미 사라짐", status.isShown)
+                    val status = rectOf(activity.findViewById(R.id.tv_tune_status))
                     val stack = rectOf(activity.findViewById(R.id.layout_gnb_stack))
-                    assertFalse("상태 ${rectOf(status)} 가 이전·다음 버튼 $stack 을 가림", Rect.intersects(rectOf(status), stack))
+                    assertFalse("상태 $status 가 이전·다음 버튼 $stack 을 가림", Rect.intersects(status, stack))
                 }
                 onView(withId(R.id.btn_stack_next)).perform(click())
                 eventually { assertEquals("\"/next\"", web.js("location.pathname")) }
@@ -739,8 +752,9 @@ class PageViewTest {
         const val SCROLL_Y = 600
         const val NAV_LINKS = "<a id=\"prev\" href=\"/prev\">prev</a> <a id=\"next\" href=\"/next\">next</a>"
         const val SHORT_BODY = "<p>short</p>$NAV_LINKS"
-        const val NAV_THREE_BUTTON = "com.android.internal.systemui.navbar.threebutton"
-        const val NAV_GESTURAL = "com.android.internal.systemui.navbar.gestural"
+        const val NAV_PREFIX = "com.android.internal.systemui.navbar."
+        const val NAV_THREE_BUTTON = "${NAV_PREFIX}threebutton"
+        const val NAV_GESTURAL = "${NAV_PREFIX}gestural"
         const val CUTOUT_CORNER = "com.android.internal.display.cutout.emulation.corner"
     }
 }

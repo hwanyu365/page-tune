@@ -102,6 +102,8 @@ class StoreListingTest {
         }
         val screenCheck = "adb shell wm size | grep -q 'Physical size: 1344x2992' && adb shell wm density | grep -q 'Physical density: 480' && ./gradlew connectedDebugAndroidTest"
         assertTrue("테스트 전에 화면 값을 확인하지 않음", "script: |\n            $screenCheck\n" in verify)
+        val emulatorStep = verify.replace("\r\n", "\n").substringAfter("- uses: reactivecircus/android-emulator-runner@").split(Regex("""\n      - """)).first()
+        assertTrue("태그 실행의 에뮬레이터 테스트가 그 태그로 빌드되지 않음", "\n        env:\n          VERSION_TAG: \${{ github.ref_type == 'tag' && github.ref_name || '' }}\n" in emulatorStep)
         val release = File("../.github/workflows/release.yml").readText().replace("\r\n", "\n")
         val caller = Regex("""\n  ([\w-]+):\n    uses: \./\.github/workflows/release-verify\.yml\n""").find(release)
         assertTrue("release.yml 이 release-verify.yml 을 호출하지 않음", caller != null)

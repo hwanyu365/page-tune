@@ -1,5 +1,6 @@
 <resources>
     <style name="AppTheme" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="actionOverflowButtonStyle">@style/Widget.App.ActionButton.Overflow</item>
         <item name="colorPrimary">@color/primary</item>
         <item name="colorOnPrimary">@color/onPrimary</item>
         <item name="colorPrimaryContainer">@color/primary</item>
@@ -65,6 +66,11 @@
     <style name="Widget.App.Toolbar" parent="Widget.Material3.Toolbar.Surface">
         <item name="android:background">@color/surfaceContainerLow</item>
         <item name="titleTextAppearance">@style/TextAppearance.Material3.TitleLarge</item>
+    </style>
+
+    <!-- 기본 더보기 버튼은 폭이 40dp 라 터치 영역 48dp 에 못 미친다. -->
+    <style name="Widget.App.ActionButton.Overflow" parent="Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:minWidth">48dp</item>
     </style>
 
     <style name="Widget.App.TabLayout" parent="Widget.Material3.TabLayout">

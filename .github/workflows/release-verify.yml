@@ -29,6 +29,9 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        # 태그 없는 빌드는 versionCode 1 이라 새 소식 경로를 판정할 수 없다 → 태그 실행에서는 그 태그로 빌드한다.
+        env:
+          VERSION_TAG: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
         with:
           api-level: 36
           target: google_apis

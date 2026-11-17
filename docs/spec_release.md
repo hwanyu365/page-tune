@@ -5,7 +5,7 @@
 - 문서명: spec_release
 - 작성자: dohwan.ahn
 - 작성일 / 최종 수정일: 2026-10-18 / 2026-11-15
-- 기준 커밋 ID: `fcbdfff`
+- 기준 커밋 ID: `c0ecfa3`
 
 ### 목적
 
@@ -59,7 +59,7 @@
   - 시스템 바 아이콘은 밝은 색으로 고정한다 → 앱 배경이 항상 어두워서, 시스템 라이트 모드 기본값(어두운 아이콘)이면 배경에 묻힌다.
 - `FR#8` 자동 업로드는 internal 트랙에만 하고 공개 비율·출시 상태를 지정하지 않는다. production 공개는 Console 에서 internal 빌드를 100% 로 승격한다. `[요구사항]`
 - `FR#9` production 빌드에 문제가 생기면 이전 빌드를 다시 올리지 않고, 고친 커밋에 다음 태그를 붙여 FR#6 경로로 올린 뒤 FR#8 로 승격한다. 다음 태그는 patch 를 올리고, patch 가 99 면 minor 를 올린다 (§6 버전 산출). versionCode 는 태그만으로 정해지므로 어느 커밋에 붙인 태그든 직전 태그보다 크다. `[요구사항]`
-- `FR#10` 릴리스 검증은 검증 명령(CLAUDE.md "검증") 뒤에 API 36 에뮬레이터(Pixel 8 Pro 와 같은 화면 1344x2992·480dpi)에서 `connectedDebugAndroidTest` 를 실행한다. 그 뒤 서명 정보 없는 release 빌드가 실패하는지(FR#3)와 일회용 키로 서명한 번들이 검증되는지(FR#2)를 확인한다. 태그 push(FR#6)와 수동 실행이 같은 워크플로를 쓰고, PR CI 는 에뮬레이터 테스트를 실행하지 않고 컴파일(`assembleDebugAndroidTest`)만 한다. `[요구사항]`
+- `FR#10` 릴리스 검증은 검증 명령(CLAUDE.md "검증") 뒤에 API 36 에뮬레이터(Pixel 8 Pro 와 같은 화면 1344x2992·480dpi)에서 `connectedDebugAndroidTest` 를 실행한다. 그 뒤 서명 정보 없는 release 빌드가 실패하는지(FR#3)와 일회용 키로 서명한 번들이 검증되는지(FR#2)를 확인한다. 태그 push(FR#6)와 수동 실행이 같은 워크플로를 쓰고, 태그로 실행될 때는 에뮬레이터 테스트도 그 태그(`VERSION_TAG`)로 빌드한다 → 태그 없는 개발 빌드(versionCode 1)에서는 판정할 수 없는 새 소식 경로(`spec_page_view.md` TC#151)를 배포 전에 판정한다. PR CI 는 에뮬레이터 테스트를 실행하지 않고 컴파일(`assembleDebugAndroidTest`)만 한다. `[요구사항]`
 
 ### 비기능 요구사항
 
@@ -150,7 +150,7 @@
 | TC#512 | NFR#3 | 매니페스트 `application` 의 `usesCleartextTraffic` 가 `"true"` 로 남아 있다 | unit (`StoreListingTest`) |
 | TC#513 | FR#8 | `play` 설정의 트랙이 `internal` 이고 `userFraction`·`releaseStatus`·`promoteTrack`·`fromTrack` 이 없다, `release.yml` 이 `promote` 태스크를 부르지 않는다 | unit (`StoreListingTest`) |
 | TC#514 | FR#9 | `v1.3.4` → `v1.3.5`, `v1.3.99` → `v1.4.0` 의 versionCode 가 증가하고, versionCode 입력이 태그뿐이다 (같은 태그 → 같은 값, `VERSION_TAG` 는 Gradle property·환경변수에서만 읽음) | unit (`ReleaseVersionTest`) |
-| TC#515 | FR#6, FR#10 | `release-verify.yml` 이 `workflow_dispatch`·`workflow_call` 로 열리고 API 36·1344x2992·480dpi 에뮬레이터에서 `connectedDebugAndroidTest` 를 실행, `release.yml` 의 업로드 job 이 그 job 에 `needs` 로 의존, `ci.yml` 은 에뮬레이터 테스트를 실행하지 않고 `assembleDebugAndroidTest` 로 컴파일만 한다 | unit (`StoreListingTest`) |
+| TC#515 | FR#6, FR#10 | `release-verify.yml` 이 `workflow_dispatch`·`workflow_call` 로 열리고 API 36·1344x2992·480dpi 에뮬레이터에서 `connectedDebugAndroidTest` 를 실행하고 그 단계의 `VERSION_TAG` 가 태그 실행일 때만 그 태그, `release.yml` 의 업로드 job 이 그 job 에 `needs` 로 의존, `ci.yml` 은 에뮬레이터 테스트를 실행하지 않고 `assembleDebugAndroidTest` 로 컴파일만 한다 | unit (`StoreListingTest`) |
 | TC#516 | FR#10 | 앱 실행 → 메인 화면에 Pages·Tunes 탭이 보이고 Tunes 탭을 누르면 전환된다 | 에뮬레이터 (`MainActivityTest`) |
 | TC#517 | NFR#5 | `app/build.gradle` 에서 `androidx.test`·`room-testing` 의존성 줄이 모두 `androidTestImplementation` 이다 | unit (`StoreListingTest`) |
 
@@ -160,3 +160,4 @@
 - GH-97: 릴리스 검증에 API 36 에뮬레이터 테스트 (US#3, FR#6, FR#10, NFR#5)
 - GH-106: 릴리스 검증 에뮬레이터 화면을 Pixel 8 Pro 와 같게 고정 (FR#10, TC#515)
 - GH-110: 수동 TC 자동화 (TC#504~509, TC#511), TC#510 삭제
+- GH-119: 태그 실행의 릴리스 검증 에뮬레이터 테스트를 그 태그로 빌드 (FR#10, TC#515)

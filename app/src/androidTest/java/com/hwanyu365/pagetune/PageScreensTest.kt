@@ -144,11 +144,18 @@ class PageScreensTest {
     private fun resourceTexts(tag: String): List<Regex> {
         val config = Configuration(targetContext.resources.configuration).apply { setLocale(Locale.forLanguageTag(tag)) }
         val res = targetContext.createConfigurationContext(config).resources
-        return R.string::class.java.fields.mapNotNull { field ->
-            runCatching { res.getString(field.getInt(null)) }.getOrNull()
-        }.map { value ->
+        // 앱 R 에는 라이브러리 문자열이 없다 → 화면에 쓰이는 라이브러리(AppCompat·Material)의 R 도 읽는다.
+        val strings = listOf(R.string::class.java, androidx.appcompat.R.string::class.java, com.google.android.material.R.string::class.java)
+            .flatMap { it.fields.toList() }
+            .mapNotNull { field -> runCatching { res.getString(field.getInt(null)) }.getOrNull() }
+        val plurals = R.plurals::class.java.fields.flatMap { field ->
+            listOf(1, 2, 5).mapNotNull { n -> runCatching { res.getQuantityString(field.getInt(null), n) }.getOrNull() }
+        }
+        return (strings + plurals).distinct().mapNotNull { value ->
             // 서식 자리(%s, %1$d 등)는 무엇이 들어와도 된다.
             val parts = value.split(Regex("""%(\d+\$)?[sd]"""))
+            // 서식 자리만 있는 리소스(e.g. "%1$s %2$s")는 어떤 문구와도 맞아 언어를 가리지 못한다.
+            if (parts.size > 1 && parts.none { part -> part.any(Char::isLetter) }) return@mapNotNull null
             Regex(parts.joinToString(".+") { Regex.escape(it) })
         }
     }

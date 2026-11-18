@@ -75,8 +75,9 @@
     <string name="edit_match_none">Matches %d · May not be found after reload</string>
     <string name="edit_match_many">Matches %d · May apply to more elements than intended</string>
     <string name="edit_start_position_set">Use current scroll as start position</string>
-    <string name="edit_select_parent">Parent ⇧</string>
-    <string name="edit_select_child">Child ⇩</string>
+    <string name="edit_select_parent">Select parent element</string>
+    <string name="edit_select_child">Select child element</string>
+    <string name="edit_make_rule">Make rule</string>
     <string name="edit_action_type">What to do</string>
     <string name="edit_action_hide">Hide</string>
     <string name="edit_action_click">Prev/Next navigation</string>
@@ -122,7 +123,7 @@
     <string name="edit_step_save">Save</string>
     <string name="edit_step_address_hint">Enter the page address and tap Load</string>
     <string name="edit_step_pick_hint">Turn on Pick element and tap what you want to change</string>
-    <string name="edit_step_rule_hint">Choose what to do and tap Add rule</string>
+    <string name="edit_step_rule_hint">Tap Make rule to choose what to do</string>
     <string name="edit_step_save_hint">Enter a name and tap Save, or pick another element</string>
     <string name="edit_label_with_text">%1$s · %2$s</string>
     <string name="element_kind_link">Link</string>

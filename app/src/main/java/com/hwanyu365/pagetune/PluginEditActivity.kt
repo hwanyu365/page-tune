@@ -19,6 +19,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.doOnPreDraw
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -241,6 +242,11 @@ class PluginEditActivity : AppCompatActivity() {
             binding.wvInspector.evaluateJavascript("window.webPluginSelectChild();", null)
         }
 
+        binding.btnMakeRule.setOnClickListener {
+            binding.scrollBottomConfig.scrollTo(0, 0)
+            sheet.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+
         binding.rgActionType.setOnCheckedChangeListener { _, checkedId ->
             binding.layoutClickTriggerSetup.visibility =
                 if (checkedId == R.id.rb_action_click) View.VISIBLE else View.GONE
@@ -348,7 +354,11 @@ class PluginEditActivity : AppCompatActivity() {
         val peek = binding.layoutSheetPeekEnd.bottom + binding.layoutBottomConfigContainer.paddingBottom
         if (sheet.peekHeight != peek) sheet.peekHeight = peek
         val webPadding = peek - imeExtra
-        if (binding.layoutEditMain.paddingBottom != webPadding) binding.layoutEditMain.updatePadding(bottom = webPadding)
+        if (binding.layoutEditMain.paddingBottom != webPadding) {
+            binding.layoutEditMain.updatePadding(bottom = webPadding)
+            // 배치 도중 바꾼 padding 은 다시 배치되지 않을 수 있어 다음 배치를 따로 요청한다.
+            if (binding.root.isInLayout) binding.layoutEditMain.post { binding.layoutEditMain.requestLayout() }
+        }
         updateSheetMaxHeight()
     }
 
@@ -451,6 +461,7 @@ class PluginEditActivity : AppCompatActivity() {
         val label = ElementLabel.of(detailsJson)
         if (label == null) {
             binding.tvSelectedSelector.setText(R.string.edit_selected_error)
+            sheet.state = BottomSheetBehavior.STATE_COLLAPSED
             updateStep()
             return
         }
@@ -467,8 +478,21 @@ class PluginEditActivity : AppCompatActivity() {
         applyDetailsState()
         binding.layoutTraversalActions.visibility = View.VISIBLE
         binding.layoutActionConfig.visibility = View.VISIBLE
-        sheet.state = BottomSheetBehavior.STATE_EXPANDED
+        sheet.state = BottomSheetBehavior.STATE_COLLAPSED
+        revealSelection()
         updateStep()
+    }
+
+    // 선택 줄이 막 나타났으면 WebView 는 다음 배치에서야 줄어들고 페이지는 그보다 늦게 새 높이를 안다.
+    // 그래서 배치가 끝난 뒤 접힌 시트 위로 남는 높이를 직접 넘긴다.
+    private fun revealSelection() {
+        binding.root.doOnPreDraw {
+            val web = binding.wvInspector
+            val webTop = IntArray(2).also { web.getLocationInWindow(it) }[1] - IntArray(2).also { binding.root.getLocationInWindow(it) }[1]
+            val visible = binding.root.height - sheet.peekHeight - webTop
+            if (visible > 0 && web.width > 0) web.evaluateJavascript(JsScripts.getRevealSelectionScript(visible, web.width), null)
+        }
+        binding.root.invalidate()
     }
 
     private fun applyDetailsState() {

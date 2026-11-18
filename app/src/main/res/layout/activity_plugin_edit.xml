@@ -215,6 +215,46 @@
 
 
         <LinearLayout
+            android:id="@+id/layout_traversal_actions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="4dp"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/btn_select_parent"
+                style="?attr/materialIconButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:layout_marginEnd="4dp"
+                android:contentDescription="@string/edit_select_parent"
+                app:icon="@drawable/ic_arrow_upward" />
+
+            <Button
+                android:id="@+id/btn_select_child"
+                style="?attr/materialIconButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:layout_marginStart="4dp"
+                android:contentDescription="@string/edit_select_child"
+                app:icon="@drawable/ic_arrow_downward" />
+
+            <Button
+                android:id="@+id/btn_make_rule"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/edit_make_rule" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/layout_sheet_peek_end"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -251,35 +291,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
-                <!-- Parent / Child Traversal Buttons -->
-                <LinearLayout
-                    android:id="@+id/layout_traversal_actions"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="4dp"
-                    android:visibility="gone">
-
-                    <Button
-                        android:id="@+id/btn_select_parent"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="4dp"
-                        android:text="@string/edit_select_parent" />
-
-                    <Button
-                        android:id="@+id/btn_select_child"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="4dp"
-                        android:text="@string/edit_select_child" />
-
-                </LinearLayout>
 
                 <!-- Action Config Panel -->
                 <LinearLayout

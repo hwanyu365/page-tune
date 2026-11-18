@@ -49,6 +49,7 @@ class PageViewEditTest {
             val tune = addTune("Edit", listOf(hideRule("none")), testUrl = TEST_URL)
             openViewer(addWebPage("Page", server.url, tune)).use {
                 val web = loaded()
+                eventually { assertEquals("true", web.js("document.getElementById('go') !== null")) }
                 web.js("document.getElementById('go').click()")
                 eventually { assertEquals("\"/moved\"", web.js("location.pathname")) }
                 val current = "${server.url}moved"
@@ -106,6 +107,7 @@ class PageViewEditTest {
             val pageId = addWebPage("Page", server.url)
             openViewer(pageId).use {
                 val web = loaded()
+                eventually { assertEquals("true", web.js("document.getElementById('go') !== null")) }
                 web.js("document.getElementById('go').click()")
                 eventually { assertEquals("\"/moved\"", web.js("location.pathname")) }
                 eventually { assertEquals("\"complete\"", web.js("document.readyState")) }

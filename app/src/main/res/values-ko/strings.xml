@@ -69,8 +69,9 @@
     <string name="edit_match_none">일치 %d · 다시 불러오면 찾지 못할 수 있어요</string>
     <string name="edit_match_many">일치 %d · 의도보다 많은 요소에 적용될 수 있어요</string>
     <string name="edit_start_position_set">현재 위치를 시작 위치로</string>
-    <string name="edit_select_parent">상위 ⇧</string>
-    <string name="edit_select_child">하위 ⇩</string>
+    <string name="edit_select_parent">상위 요소 선택</string>
+    <string name="edit_select_child">하위 요소 선택</string>
+    <string name="edit_make_rule">규칙 만들기</string>
     <string name="edit_action_type">적용할 동작</string>
     <string name="edit_action_hide">숨기기</string>
     <string name="edit_action_click">이전/다음 이동</string>
@@ -116,7 +117,7 @@
     <string name="edit_step_save">저장</string>
     <string name="edit_step_address_hint">페이지 주소를 넣고 불러오기를 눌러요</string>
     <string name="edit_step_pick_hint">요소 선택을 켜고 바꿀 요소를 눌러요</string>
-    <string name="edit_step_rule_hint">할 일을 고르고 규칙 추가를 눌러요</string>
+    <string name="edit_step_rule_hint">규칙 만들기를 눌러 할 일을 골라요</string>
     <string name="edit_step_save_hint">이름을 넣고 저장을 눌러요. 다른 요소를 더 골라도 돼요</string>
     <string name="edit_label_with_text">%1$s · %2$s</string>
     <string name="element_kind_link">링크</string>

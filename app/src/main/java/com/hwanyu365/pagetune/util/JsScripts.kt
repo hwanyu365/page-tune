@@ -485,12 +485,21 @@ object JsScripts {
             for (var p = el; p && p.nodeType === 1; p = p.parentElement) {
                 if (getComputedStyle(p).position === 'fixed') return;
             }
-            function reveal(h) {
+            function shift(top, bottom) {
                 var r = el.getBoundingClientRect();
-                var dy = 0;
-                if (r.height > h || r.top < 0) dy = r.top;
-                else if (r.bottom > h) dy = r.bottom - h;
-                if (dy !== 0) window.scrollBy(0, dy);
+                if (r.height > bottom - top || r.top < top) return r.top - top;
+                if (r.bottom > bottom) return r.bottom - bottom;
+                return 0;
+            }
+            function reveal(h) {
+                for (var p = el.parentElement; p; p = p.parentElement) {
+                    if (!/(auto|scroll)/.test(getComputedStyle(p).overflowY) || p.scrollHeight <= p.clientHeight) continue;
+                    var c = p.getBoundingClientRect();
+                    var dy = shift(Math.max(c.top + p.clientTop, 0), Math.min(c.top + p.clientTop + p.clientHeight, h));
+                    if (dy !== 0) p.scrollTop += dy;
+                }
+                var dw = shift(0, h);
+                if (dw !== 0) window.scrollBy(0, dw);
             }
             reveal($visibleHeightPx * window.innerWidth / $widthPx);
             function onResize() {

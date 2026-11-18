@@ -97,7 +97,22 @@ class EditSheetTest {
             tap(R.id.btn_toggle_inspect)
             assertSheetBottomOfWeb(selectionRow = false)
         }
+        LocalPage(innerScrollPage).use { server ->
+            ActivityScenario.launch<PluginEditActivity>(Intent(targetContext, PluginEditActivity::class.java)).use {
+                val web = loadInEditor(server.url, "document.getElementById('deep')")
+                inspectOn(web)
+                pick(web, "deep")
+                assertLow(web, "deep")
+            }
+        }
     }
+
+    // 문서는 스크롤되지 않고 안쪽 영역만 스크롤된다 → 문서 스크롤로는 요소를 보일 수 없다.
+    private val innerScrollPage = """
+        <html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body style="margin:0;height:100vh;overflow:hidden;background:#fff">
+        <div id="inner" style="height:100%;overflow:auto"><div style="height:2000px"></div><div id="deep" style="height:40px">DEEP</div><div style="height:600px"></div></div>
+        </body></html>
+    """.trimIndent()
 
     private fun sheetState(): Int = onMain { BottomSheetBehavior.from(resumedActivity().findViewById<View>(R.id.layout_bottom_config_container)).state }
 

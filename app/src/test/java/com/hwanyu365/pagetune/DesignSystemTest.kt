@@ -256,11 +256,13 @@ class DesignSystemTest {
         val overlays = listOf("layout_quick_overlay", "layout_gnb_stack", "tv_pull_top", "tv_pull_bottom").map { byId.getValue(it) }
         val elements = overlays.flatMap { sequenceOf(it) + it.descendants() }
 
-        val handle = parse(File(res, "drawable/bg_quick_handle.xml")).descendants().single { it.tagName == "solid" }
-        assertEquals("@color/scrim", handle.getAttribute("android:color"))
+        for (drawable in listOf("bg_quick_handle", "bg_quick_toolbar")) {
+            val solid = parse(File(res, "drawable/$drawable.xml")).descendants().single { it.tagName == "solid" }
+            assertEquals(drawable, "@color/scrim", solid.getAttribute("android:color"))
+        }
         val backgrounds = mapOf(
             "btn_quick_handle" to ("android:background" to "@drawable/bg_quick_handle"),
-            "layout_quick_toolbar" to ("android:background" to "@color/scrim"),
+            "layout_quick_toolbar" to ("android:background" to "@drawable/bg_quick_toolbar"),
             "tv_tune_status" to ("android:background" to "@color/scrim"),
             "tv_pull_top" to ("android:background" to "@color/scrim"),
             "tv_pull_bottom" to ("android:background" to "@color/scrim"),

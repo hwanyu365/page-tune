@@ -65,7 +65,16 @@ class WebBrowserActivity : AppCompatActivity() {
     private var pluginId: Long? = null
     private val handler = Handler(Looper.getMainLooper())
     private val refreshPull = Runnable { refreshPullIndicator() }
-    private val hideToolbar = Runnable { binding.layoutQuickToolbar.visibility = View.GONE }
+    private val hideToolbar = Runnable {
+        binding.layoutQuickToolbar.visibility = View.GONE
+        wakeHandle()
+    }
+    private val dimHandle = Runnable { binding.btnQuickHandle.alpha = HANDLE_DIM_ALPHA }
+    private val showHandle = Runnable {
+        handler.removeCallbacks(dimHandle)
+        binding.btnQuickHandle.alpha = HANDLE_DIM_ALPHA
+        binding.btnQuickHandle.visibility = View.VISIBLE
+    }
     private val hideStatus = Runnable { binding.tvTuneStatus.visibility = View.GONE }
     private val editLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK) onTuneEdited()
@@ -81,6 +90,11 @@ class WebBrowserActivity : AppCompatActivity() {
     private var gnbNextAction: PluginAction? = null
     private var pullTopAction: PluginAction? = null
     private var pullBottomAction: PluginAction? = null
+
+    override fun onResume() {
+        super.onResume()
+        wakeHandle()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -178,7 +192,10 @@ class WebBrowserActivity : AppCompatActivity() {
         }
         binding.wvBrowser.webViewClient = webClient
         binding.wvBrowser.installSafeDownloads(this, binding.root)
-        binding.wvBrowser.setOnScrollChangeListener { _, _, _, _, _ -> onBrowserScroll() }
+        binding.wvBrowser.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
+            onBrowserScroll()
+            onHandleScroll(scrollY - oldScrollY)
+        }
         // 회전해도 화면을 다시 만들지 않고(configChanges) 스크롤 이벤트도 오지 않는다 → 크기가 바뀌면 맨 아래 여부를 다시 판정한다.
         binding.wvBrowser.addOnLayoutChangeListener { v, l, t, r, b, ol, ot, or, ob ->
             if (r - l != or - ol || b - t != ob - ot) v.post { onBrowserScroll() }
@@ -341,8 +358,10 @@ class WebBrowserActivity : AppCompatActivity() {
             if (binding.layoutQuickToolbar.visibility == View.VISIBLE) {
                 handler.removeCallbacks(hideToolbar)
                 binding.layoutQuickToolbar.visibility = View.GONE
+                wakeHandle()
             } else {
                 binding.layoutQuickToolbar.visibility = View.VISIBLE
+                wakeHandle()
                 scheduleToolbarHide()
             }
         }
@@ -382,14 +401,38 @@ class WebBrowserActivity : AppCompatActivity() {
     }
 
     private fun scheduleToolbarHide() {
+        handler.removeCallbacks(hideToolbar)
+        handler.postDelayed(hideToolbar, quietMillis())
+    }
+
+    private fun quietMillis(): Long {
         val timeout = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             getSystemService(AccessibilityManager::class.java)
                 .getRecommendedTimeoutMillis(TOOLBAR_MILLIS, AccessibilityManager.FLAG_CONTENT_CONTROLS)
         } else {
             TOOLBAR_MILLIS
         }
-        handler.removeCallbacks(hideToolbar)
-        handler.postDelayed(hideToolbar, timeout.toLong())
+        return timeout.toLong()
+    }
+
+    private fun wakeHandle() {
+        handler.removeCallbacks(dimHandle)
+        handler.removeCallbacks(showHandle)
+        binding.btnQuickHandle.visibility = View.VISIBLE
+        binding.btnQuickHandle.alpha = 1f
+        if (binding.layoutQuickToolbar.visibility != View.VISIBLE) handler.postDelayed(dimHandle, quietMillis())
+    }
+
+    // 툴바가 열린 동안에는 핸들이 툴바의 일부라 숨기지 않는다.
+    private fun onHandleScroll(dy: Int) {
+        if (binding.layoutQuickToolbar.visibility == View.VISIBLE || dy == 0) return
+        handler.removeCallbacks(showHandle)
+        if (dy > 0) {
+            binding.btnQuickHandle.visibility = View.INVISIBLE
+            handler.postDelayed(showHandle, SCROLL_SETTLE_MILLIS)
+        } else if (binding.btnQuickHandle.visibility != View.VISIBLE) {
+            showHandle.run()
+        }
     }
 
     private fun openTuneEdit() {
@@ -419,6 +462,8 @@ class WebBrowserActivity : AppCompatActivity() {
 
     private companion object {
         const val TOOLBAR_MILLIS = 4000
+        const val HANDLE_DIM_ALPHA = 0.4f
+        const val SCROLL_SETTLE_MILLIS = 300L
         const val STATUS_MILLIS = 3000L
         const val END_CHECK_RETRIES = 10
         const val END_CHECK_DELAY_MS = 200L

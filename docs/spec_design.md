@@ -6,9 +6,9 @@
 | --- | --- |
 | 문서명 | spec_design |
 | 작성자 | dohwan.ahn |
-| 작성일 / 최종 수정일 | 2026-11-08 / 2026-11-15 |
+| 작성일 / 최종 수정일 | 2026-11-08 / 2026-11-19 |
 | 버전 | 0.2 |
-| 기준 커밋 ID | `0284e51` |
+| 기준 커밋 ID | `3f4cdfb` |
 
 - **기능명:** 디자인 시스템 — 모든 화면이 공유하는 테마·색 토큰·글자 스케일·간격·컴포넌트와 메인 화면 탭 구조.
 - **목적 (Why):**
@@ -128,6 +128,7 @@
 
 - `primary` 를 표면 위 글자색으로 쓰지 않는다 → `primary` / `surfaceContainer` = 4.44:1 로 4.5:1 미달 (D#1).
 - 칩·보조 글자를 투명도로 흐리게 하지 않는다 → 투명도는 배경에 따라 대비가 바뀐다. "흐림" 은 `onSurfaceVariant` 글자로 나타낸다.
+- 예외: 열람 화면에서 흐려진 빠른 메뉴 핸들(불투명도 40%)은 흰 페이지 위 핸들/페이지 2.2:1, 아이콘/핸들 2.0:1 로 3:1 미달이다 (`spec_page_view.md` FR#14, D#21, 소유자 결정 2026-11-19). 누르거나 툴바를 열면 원래 대비로 돌아온다.
 
 ### 4.2 타이포 스케일
 
@@ -195,7 +196,7 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 | `TC#205` | `layout` 의 `layout_margin*`·`padding*` 값이 0dp 또는 §4.3 값 | [FR#4] | 단위 |
 | `TC#206` | `layout` 에 `androidx.appcompat.widget.Toolbar`·`androidx.cardview.widget.CardView`·단독 편집칸(부모가 `TextInputLayout` 이 아닌 `EditText`/`NoAutofillEditText`) 0건. Kotlin 에 `android.app.AlertDialog`·`androidx.appcompat.app.AlertDialog` import 0건 | [FR#5] | 단위 (레이아웃) + `grep` (Kotlin) |
 | `TC#207` | 편집 화면(새 Tune)·웹페이지 추가 다이얼로그의 모든 입력칸이 `NoAutofillEditText` 이고 `autofillType` 이 `NONE` → 자동완성 서비스가 칸을 인식하지 않음. 두 화면과 삭제 선택 모드 목록의 버튼은 `MaterialButton`, 체크박스는 `MaterialCheckBox` | [FR#5] | 에뮬레이터 (`DesignSystemDeviceTest`) |
-| `TC#208` | 열람 화면 레이아웃에서 빠른 메뉴 툴바·Tune 상태·이전/다음 버튼·당기기 안내의 배경(`background`·`backgroundTint`)이 `@color/scrim`, 글자·아이콘(`textColor`·`iconTint`·`tint`)이 `@color/onSurface`. `WebBrowserActivity` 는 이 색을 코드에서 바꾸지 않음 | [FR#6] | 단위 (`DesignSystemTest`). 비율은 TC#203 |
+| `TC#208` | 열람 화면 레이아웃에서 빠른 메뉴 툴바·Tune 상태·이전/다음 버튼·당기기 안내의 배경(`background`·`backgroundTint`)이 `@color/scrim` 또는 채움이 `@color/scrim` 인 drawable(핸들·툴바), 글자·아이콘(`textColor`·`iconTint`·`tint`)이 `@color/onSurface`. `WebBrowserActivity` 는 이 색을 코드에서 바꾸지 않음 | [FR#6] | 단위 (`DesignSystemTest`). 비율은 TC#203 |
 | `TC#209` | 탭 누르기·밀기로 전환, 각 탭 툴바 삭제가 그 탭에만 작용, Tunes 탭에서 Tune 을 지운 뒤 Pages 탭으로 밀면 연결 표시 갱신, 화면 재생성(`recreate`) 뒤 보던 탭 유지, 선택 모드 중 탭 전환 → 선택 모드·되돌리기 창 닫힘 | [FR#7] | 에뮬레이터 (`MainTabsTest`) |
 | `TC#210` | §5 의 화면 × 영어·한국어 × 글꼴 100%·200% 에서 보이는 글자가 말줄임·세로 잘림 없이, 그려진 글자 모양이 칸 폭 안에 그려지고, `LinearLayout` 안의 보이는 형제끼리 겹치지 않음 | [NFR#2] [US#1] | 에뮬레이터 (`LayoutFitTest`). 역할별 모양은 TC#201~206·213 이 리소스로 고정한다 |
 | `TC#211` | `app/build.gradle` 에 compose 0건, 테스트 밖 의존성(설정·group:name)이 허용 목록과 같음 | [NFR#3] | 단위 (`StoreListingTest`). 허용 목록은 `spec_settings.md` TC#306 과 같다. 전이 의존성은 고정하지 않는다 → 라이브러리 버전 갱신마다 바뀐다 |
@@ -214,3 +215,4 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 - GH-68: §4.1 대비 표에 스낵바 행 (`colorPrimaryInverse` = `onPrimary`)
 - GH-74: TC#214 한국어 조사 붙여 쓰기
 - GH-106: TC#207~212 를 자동 테스트로 전환, TC#210 확인 API 를 36 으로
+- GH-125: §4.1 흐려진 빠른 메뉴 핸들 대비 예외, TC#208 에 툴바 drawable 배경

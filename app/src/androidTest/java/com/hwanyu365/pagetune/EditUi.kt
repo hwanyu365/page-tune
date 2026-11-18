@@ -28,6 +28,11 @@ fun tap(id: Int) {
     eventually {
         val state = onMain { sheetState() }
         check(state != BottomSheetBehavior.STATE_SETTLING && state != BottomSheetBehavior.STATE_DRAGGING) { "시트가 움직이는 중" }
+        // 화면에 없는 칸을 누르면 Espresso 가 실패를 내기까지 수 초가 걸려 재시도 시간을 다 쓴다 → 누르기 전에 펼친다.
+        if (state == BottomSheetBehavior.STATE_COLLAPSED && !onMain { resumedActivity().findViewById<View>(id).isShown }) {
+            onView(withId(R.id.sheet_handle)).perform(click())
+            error("시트를 펼치는 중")
+        }
         val result = runCatching {
             runCatching { view.perform(scrollTo()) }
             // 시트의 스크롤 영역 끝에 걸치면 일부만 보인다 → 그 칸 전체가 보이게 스크롤을 요청한다.
@@ -78,7 +83,7 @@ fun inspectOn(web: WebView) {
 // 사용자의 탭과 같은 click 이벤트를 요소에 보낸다 → 선택 스크립트와 앱 연결 경로를 그대로 탄다.
 fun pick(web: WebView, id: String) {
     web.js("document.getElementById('$id').click()")
-    eventually { onView(withId(R.id.layout_action_config)).check(matches(isDisplayed())) }
+    eventually { onView(withId(R.id.layout_traversal_actions)).check(matches(isDisplayed())) }
     eventually { assertEquals("#$id", textOf(R.id.tv_selector_detail)) }
 }
 

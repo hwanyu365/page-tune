@@ -476,6 +476,41 @@ object JsScripts {
         """.trimIndent()
     }
 
+    // 고정 위치 요소는 스크롤해도 화면 위치가 그대로라 스크롤하지 않는다.
+    // 줄어든 WebView 높이는 이 스크립트보다 늦게 페이지에 전달된다 → 그 resize 때 실제 높이로 한 번 더 맞춘다.
+    fun getRevealSelectionScript(visibleHeightPx: Int, widthPx: Int): String = """
+        (function() {
+            var el = window.currentlySelectedElement;
+            if (!el || !el.getBoundingClientRect) return;
+            for (var p = el; p && p.nodeType === 1; p = p.parentElement) {
+                if (getComputedStyle(p).position === 'fixed') return;
+            }
+            function shift(top, bottom) {
+                var r = el.getBoundingClientRect();
+                if (r.height > bottom - top || r.top < top) return r.top - top;
+                if (r.bottom > bottom) return r.bottom - bottom;
+                return 0;
+            }
+            function reveal(h) {
+                for (var p = el.parentElement; p; p = p.parentElement) {
+                    if (!/(auto|scroll)/.test(getComputedStyle(p).overflowY) || p.scrollHeight <= p.clientHeight) continue;
+                    var c = p.getBoundingClientRect();
+                    var dy = shift(Math.max(c.top + p.clientTop, 0), Math.min(c.top + p.clientTop + p.clientHeight, h));
+                    if (dy !== 0) p.scrollTop += dy;
+                }
+                var dw = shift(0, h);
+                if (dw !== 0) window.scrollBy(0, dw);
+            }
+            reveal($visibleHeightPx * window.innerWidth / $widthPx);
+            function onResize() {
+                window.removeEventListener('resize', onResize);
+                if (window.currentlySelectedElement === el) reveal(window.innerHeight);
+            }
+            window.addEventListener('resize', onResize);
+            setTimeout(function() { window.removeEventListener('resize', onResize); }, 1000);
+        })();
+    """.trimIndent()
+
     /**
      * 저장된 스크롤 위치로 페이지를 이동시킨다.
      * 로드 직후엔 본문이 아직 짧아 scrollTo 가 문서 끝에서 잘린다. 목표에 닿을 때까지 짧게 재시도한다.

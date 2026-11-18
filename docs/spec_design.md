@@ -8,7 +8,7 @@
 | 작성자 | dohwan.ahn |
 | 작성일 / 최종 수정일 | 2026-11-08 / 2026-11-19 |
 | 버전 | 0.2 |
-| 기준 커밋 ID | `3f4cdfb` |
+| 기준 커밋 ID | `097d807` |
 
 - **기능명:** 디자인 시스템 — 모든 화면이 공유하는 테마·색 토큰·글자 스케일·간격·컴포넌트와 메인 화면 탭 구조.
 - **목적 (Why):**
@@ -32,6 +32,7 @@
 - `Spinner` 를 Material exposed dropdown 으로 바꾸는 것 (D#6)
 - 화면 구성 변경 → 목록 카드(`spec_page_view.md` FR#1), 편집 단계 안내(`spec_tune_edit.md` FR#24), 이전/다음 버튼(`spec_page_view.md` FR#9), 설정(`spec_settings.md`)이 각자 정의한다
 - 스토어 스크린샷 다시 찍기 → `spec_store.md` §6 규칙대로 UX 2차 반영 뒤 별도로 한다
+- 오른쪽에서 왼쪽으로 쓰는 언어(RTL)의 좌우 반전 레이아웃 → 소유자 결정(2026-11-19)으로 지원하지 않는다 (FR#8, D#7)
 
 ## 3. 요구사항
 
@@ -75,6 +76,16 @@
   Given Pages 탭에서 삭제 선택 모드로 2개를 선택했다
   When  Tunes 탭으로 민다
   Then  Pages 탭의 선택 모드가 끝나고, 툴바 삭제는 Tune 목록의 선택 모드를 연다
+  ```
+
+- `FR#8` 화면 배치 방향은 왼쪽에서 오른쪽(LTR)으로 고정한다 [요구사항] GH-130
+  - 매니페스트 `application` 의 `android:supportsRtl` 은 `false` 다 → 기기 언어가 RTL 이어도 화면을 좌우 반전하지 않는다.
+  - 근거: 지원 언어는 영어·한국어뿐이다. 반전된 배치(빠른 메뉴 툴바의 반원 쪽 등)는 확인하지 않는다 (D#7).
+
+  ```
+  Given 기기의 레이아웃 방향이 RTL 이다 (개발자 옵션 "RTL 레이아웃 강제" 등)
+  When  앱 화면을 연다
+  Then  화면 배치가 LTR 과 같다
   ```
 
 ### 3.3 비기능 요구사항
@@ -184,6 +195,7 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 | `D#4` ViewPager2 의존성 [FR#7] [NFR#3] | Material 이 요청하는 1.0.0 을 명시 선언 | 전이 의존성에 기댐, 최신 버전 선언 | 직접 쓰는 라이브러리를 선언해 Material 버전이 바뀌어도 컴파일이 깨지지 않게 한다. 해석 버전은 recyclerview constraint 가 정하는 1.1.0-beta02 그대로라 APK 아티팩트 집합이 바뀌지 않는다 |
 | `D#5` 오버레이 배경 [FR#6] | `#171717` 85% | 50% 검정 유지, 불투명 배경 | 50% 검정은 흰 페이지 위 3.95:1. 85% 는 흰 페이지 위 합성색 `#3a3a3a` 에서 `onSurface` 8.62:1, 페이지가 비쳐 보여 오버레이임을 알 수 있다 |
 | `D#6` 드롭다운 [§4.4] | `Spinner` 유지 | exposed dropdown(`TextInputLayout` + `AutoCompleteTextView`) | 이슈 범위의 교체 목록(UX-2)에 없다. 트리거 드롭다운은 소형 화면 높이 보장(`spec_tune_edit.md` TC#12)이 걸려 있어 함께 바꾸면 회귀 범위가 커진다 |
+| `D#7` RTL 배치 [FR#8] | LTR 고정 (`supportsRtl=false`) | RTL 반전 지원, 선언만 두고 확인하지 않음 | 소유자 결정(2026-11-19). 지원 언어가 영어·한국어뿐이다. `supportsRtl=true` 로 두면 RTL 기기에서 확인하지 않은 반전 배치가 그대로 보인다 |
 
 ## 7. 테스트 및 검증 기준
 
@@ -197,6 +209,7 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 | `TC#206` | `layout` 에 `androidx.appcompat.widget.Toolbar`·`androidx.cardview.widget.CardView`·단독 편집칸(부모가 `TextInputLayout` 이 아닌 `EditText`/`NoAutofillEditText`) 0건. Kotlin 에 `android.app.AlertDialog`·`androidx.appcompat.app.AlertDialog` import 0건 | [FR#5] | 단위 (레이아웃) + `grep` (Kotlin) |
 | `TC#207` | 편집 화면(새 Tune)·웹페이지 추가 다이얼로그의 모든 입력칸이 `NoAutofillEditText` 이고 `autofillType` 이 `NONE` → 자동완성 서비스가 칸을 인식하지 않음. 두 화면과 삭제 선택 모드 목록의 버튼은 `MaterialButton`, 체크박스는 `MaterialCheckBox` | [FR#5] | 에뮬레이터 (`DesignSystemDeviceTest`) |
 | `TC#208` | 열람 화면 레이아웃에서 빠른 메뉴 툴바·Tune 상태·이전/다음 버튼·당기기 안내의 배경(`background`·`backgroundTint`)이 `@color/scrim` 또는 채움이 `@color/scrim` 인 drawable(핸들·툴바), 글자·아이콘(`textColor`·`iconTint`·`tint`)이 `@color/onSurface`. `WebBrowserActivity` 는 이 색을 코드에서 바꾸지 않음 | [FR#6] | 단위 (`DesignSystemTest`). 비율은 TC#203 |
+| `TC#520` | 매니페스트 `application` 의 `android:supportsRtl` 이 `false` | [FR#8] [D#7] | 단위 (`DesignSystemTest`, 매니페스트 XML 파싱). mutation: `true` 로 바꿔 실패하는지 확인 |
 | `TC#209` | 탭 누르기·밀기로 전환, 각 탭 툴바 삭제가 그 탭에만 작용, Tunes 탭에서 Tune 을 지운 뒤 Pages 탭으로 밀면 연결 표시 갱신, 화면 재생성(`recreate`) 뒤 보던 탭 유지, 선택 모드 중 탭 전환 → 선택 모드·되돌리기 창 닫힘 | [FR#7] | 에뮬레이터 (`MainTabsTest`) |
 | `TC#210` | §5 의 화면 × 영어·한국어 × 글꼴 100%·200% 에서 보이는 글자가 말줄임·세로 잘림 없이, 그려진 글자 모양이 칸 폭 안에 그려지고, `LinearLayout` 안의 보이는 형제끼리 겹치지 않음 | [NFR#2] [US#1] | 에뮬레이터 (`LayoutFitTest`). 역할별 모양은 TC#201~206·213 이 리소스로 고정한다 |
 | `TC#211` | `app/build.gradle` 에 compose 0건, 테스트 밖 의존성(설정·group:name)이 허용 목록과 같음 | [NFR#3] | 단위 (`StoreListingTest`). 허용 목록은 `spec_settings.md` TC#306 과 같다. 전이 의존성은 고정하지 않는다 → 라이브러리 버전 갱신마다 바뀐다 |
@@ -216,3 +229,4 @@ Material 3 `TextAppearance.Material3.*` 의 아래 역할만 쓴다.
 - GH-74: TC#214 한국어 조사 붙여 쓰기
 - GH-106: TC#207~212 를 자동 테스트로 전환, TC#210 확인 API 를 36 으로
 - GH-125: §4.1 흐려진 빠른 메뉴 핸들 대비 예외, TC#208 에 툴바 drawable 배경
+- GH-130: FR#8 LTR 고정, D#7, TC#520, Out of Scope 에 RTL

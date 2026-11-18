@@ -85,6 +85,12 @@ class DesignSystemTest {
     }
 
     @Test
+    fun `TC#520 화면 배치는 RTL 기기에서도 좌우 반전하지 않는다`() {
+        val application = parse(File("src/main/AndroidManifest.xml")).descendants().first { it.tagName == "application" }
+        assertEquals("false", application.getAttribute("android:supportsRtl"))
+    }
+
+    @Test
     fun `TC#201 모든 화면 테마는 Theme_Material3_Dark 를 최상위 부모로 둔 앱 테마 계열이다`() {
         val manifest = parse(File("src/main/AndroidManifest.xml"))
         val application = manifest.descendants().first { it.tagName == "application" }

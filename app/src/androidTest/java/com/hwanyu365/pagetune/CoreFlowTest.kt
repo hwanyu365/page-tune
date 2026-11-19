@@ -78,7 +78,7 @@ class CoreFlowTest {
 
             ActivityScenario.launch(MainActivity::class.java).use {
                 onView(tunesTab).perform(click())
-                eventually { onView(allOf(withId(R.id.btn_more), isDescendantOfA(withChild(NAME)))).perform(click()) }
+                eventually { openMenu(allOf(withId(R.id.btn_more), isDescendantOfA(withChild(NAME)))) }
                 onView(withText(R.string.tune_duplicate)).perform(click())
                 val copy = eventually { runBlocking { database.pluginDao().getAllPlugins() }.single { it.id != tune.id } }
                 assertNotEquals(tune.id, copy.id)

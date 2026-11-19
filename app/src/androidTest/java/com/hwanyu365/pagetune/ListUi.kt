@@ -40,8 +40,12 @@ fun inRowWith(content: Matcher<View>): Matcher<View> = object : TypeSafeMatcher<
     }
 }
 
-fun openItemMenu(item: Matcher<View>) {
-    onView(allOf(withId(R.id.btn_more), inRowWith(item), isDisplayed())).perform(click())
+fun openItemMenu(item: Matcher<View>) = openMenu(allOf(withId(R.id.btn_more), inRowWith(item), isDisplayed()))
+
+// 목록을 다시 그리는 순간에 누른 클릭은 메뉴를 열지 못한다 → 메뉴 창이 포커스를 가져갈 때까지 다시 누른다.
+fun openMenu(button: Matcher<View>) = eventually {
+    onView(button).perform(click())
+    waitUntil(timeoutMs = 2_000) { !onMain { resumedActivity().window.decorView.hasWindowFocus() } }
 }
 
 fun deleteFromItemMenu(item: Matcher<View>) {

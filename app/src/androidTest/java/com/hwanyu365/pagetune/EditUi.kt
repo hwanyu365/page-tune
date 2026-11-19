@@ -114,3 +114,9 @@ fun tapQuickHandle() {
     }
     onView(withId(R.id.btn_quick_handle)).perform(click())
 }
+
+// 페이지를 다 읽은 직후 WebView 가 아직 빈 문서로 배치된 동안 스크롤하면 배치가 끝나며 맨 위로 돌아간다 → WebView 자체가 맨 아래에 닿을 때까지 다시 스크롤한다.
+fun scrollToEnd(web: WebView) = eventually {
+    web.js("window.scrollTo(0, document.documentElement.scrollHeight)")
+    check(onMain { web.contentHeight > 0 && !web.canScrollVertically(1) }) { "WebView 가 맨 아래에 닿지 않음" }
+}

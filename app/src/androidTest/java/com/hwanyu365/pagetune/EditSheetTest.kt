@@ -75,7 +75,7 @@ class EditSheetTest {
             eventually { onMain { assertEquals(View.GONE, resumedActivity().findViewById<View>(R.id.layout_traversal_actions).visibility) } }
             assertSheetBottomOfWeb(selectionRow = false)
 
-            web.js("window.scrollTo(0, document.documentElement.scrollHeight)")
+            scrollToEnd(web)
             eventually { assertEquals("true", web.js("document.getElementById('end').getBoundingClientRect().bottom <= window.innerHeight")) }
             inspectOn(web)
             pick(web, "end")

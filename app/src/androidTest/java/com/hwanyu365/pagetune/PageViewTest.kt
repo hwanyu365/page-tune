@@ -273,7 +273,9 @@ class PageViewTest {
 
     private fun cookies() {
         val value = "tc113-${SystemClock.uptimeMillis()}"
-        val body = "<script>if (!document.cookie.includes('login=')) document.cookie = 'login=$value; max-age=86400; path=/';</script>"
+        // 쿠키는 포트를 가리지 않아 앞선 실행이 127.0.0.1 에 남긴 쿠키가 보인다 → 실행마다 다른 이름을 쓴다.
+        val name = "login_${SystemClock.uptimeMillis()}"
+        val body = "<script>if (!document.cookie.includes('$name=')) document.cookie = '$name=$value; max-age=86400; path=/';</script>"
         LocalPage(page(body)).use { server ->
             val pageId = addWebPage("Page", server.url)
             openViewer(pageId).use {
@@ -282,8 +284,10 @@ class PageViewTest {
             }
             openViewer(pageId).use {
                 val web = loaded()
-                assertTrue(web.js("document.cookie").contains("login=$value"))
-                assertTrue(onMain { CookieManager.getInstance().getCookie(server.url) }.orEmpty().contains("login=$value"))
+                val page = web.js("document.cookie")
+                assertTrue("다시 연 페이지에 쿠키 없음: $page", page.contains("$name=$value"))
+                val stored = onMain { CookieManager.getInstance().getCookie(server.url) }.orEmpty()
+                assertTrue("CookieManager 에 쿠키 없음: $stored", stored.contains("$name=$value"))
             }
         }
     }

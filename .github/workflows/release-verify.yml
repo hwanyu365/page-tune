@@ -47,6 +47,14 @@ jobs:
           # config.ini 값이 화면에 반영되지 않으면 다른 화면에서 판정하게 된다 → 테스트 전에 확인한다.
           script: |
             adb shell wm size | grep -q 'Physical size: 1344x2992' && adb shell wm density | grep -q 'Physical density: 480' && ./gradlew connectedDebugAndroidTest
+      # 콘솔 출력에는 실패한 줄이 남지 않는다 → 실패하면 테스트 결과 XML 과 실패 테스트의 logcat 을 남긴다.
+      - name: 에뮬레이터 테스트 결과 보관 (실패 시)
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: android-test-results
+          path: app/build/outputs/androidTest-results/
+          retention-days: 14
       - name: TC#506 서명 정보 없는 release 빌드는 빠진 키 이름과 함께 실패한다
         run: |
           if ./gradlew bundleRelease assembleRelease --continue > "$RUNNER_TEMP/unsigned.log" 2>&1; then echo "::error::서명 정보 없이 release 빌드가 성공함"; exit 1; fi

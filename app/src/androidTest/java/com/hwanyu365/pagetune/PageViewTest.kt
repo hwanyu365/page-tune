@@ -544,7 +544,7 @@ class PageViewTest {
                 val web = loaded()
                 SystemClock.sleep(1_000)
                 stackShown(false)
-                web.js("window.scrollTo(0, document.body.scrollHeight)")
+                scrollToEnd(web)
                 stackShown(true)
                 assertTwoRows()
                 assertReadable()
@@ -552,29 +552,29 @@ class PageViewTest {
                 stackShown(false)
 
                 lockRotation()
-                web.js("window.scrollTo(0, document.body.scrollHeight)")
+                scrollToEnd(web)
                 stackShown(true)
                 rotate(1)
                 eventually { scenario.onActivity { assertTrue(it.window.decorView.width > it.window.decorView.height) } }
                 stackShown(false)
-                web.js("window.scrollTo(0, document.body.scrollHeight)")
+                scrollToEnd(web)
                 stackShown(true)
                 rotate(0)
                 eventually { scenario.onActivity { assertTrue(it.window.decorView.width < it.window.decorView.height) } }
 
-                web.js("window.scrollTo(0, document.body.scrollHeight)")
+                scrollToEnd(web)
                 stackShown(true)
                 openToolbar()
                 onView(withId(R.id.btn_quick_toggle)).perform(click())
                 eventually { assertEquals("\"complete\"", web.js("document.readyState")) }
-                web.js("window.scrollTo(0, document.body.scrollHeight)")
+                scrollToEnd(web)
                 SystemClock.sleep(1_000)
                 stackShown(false)
             }
             // 내비게이션 모드를 바꾸면 열린 화면이 다시 만들어진다 → 모드마다 새로 연다.
             forEachNavMode { mode ->
                 openViewer(addWebPage("Long $mode", long.url, tune)).use { scenario ->
-                    loaded().js("window.scrollTo(0, document.body.scrollHeight)")
+                    scrollToEnd(loaded())
                     stackShown(true)
                     assertAboveNavBar(scenario, mode)
                 }
@@ -633,12 +633,13 @@ class PageViewTest {
                     for (rotation in listOf(0, 1)) {
                         rotate(rotation)
                         eventually { scenario.onActivity { assertEquals(rotation == 1, it.window.decorView.width > it.window.decorView.height) } }
-                        web.js("window.scrollTo(0, document.body.scrollHeight)")
+                        scrollToEnd(web)
                         stackShown(true)
                         labels += checkStack("$tag/$rotation")
                         checkPullHint(web, "$tag/$rotation")
                     }
                     rotate(0)
+                    eventually { scenario.onActivity { assertTrue(it.window.decorView.width < it.window.decorView.height) } }
                     onView(withId(R.id.btn_stack_next)).perform(click())
                     eventually { assertEquals("\"/next\"", web.js("location.pathname")) }
                 }

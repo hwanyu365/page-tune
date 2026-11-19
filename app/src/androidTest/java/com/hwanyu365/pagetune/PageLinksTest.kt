@@ -220,13 +220,13 @@ class PageLinksTest {
             clickRule("gesture_top", target("a", "blankTop")),
         )
         viewer(server.url, rules) { web ->
-            web.js("window.scrollTo(0, document.body.scrollHeight)")
+            scrollToEnd(web)
             eventually { onView(withId(R.id.btn_stack_next)).check(matches(isDisplayed())) }
             onView(withId(R.id.btn_stack_next)).perform(click())
             eventually { assertEquals("\"/blank\"", web.js("location.pathname")) }
         }
         viewer(server.url, rules) { web ->
-            web.js("window.scrollTo(0, document.body.scrollHeight)")
+            scrollToEnd(web)
             eventually { onView(withId(R.id.btn_stack_prev)).check(matches(isDisplayed())) }
             onView(withId(R.id.btn_stack_prev)).perform(click())
             eventually { assertEquals("\"/opened\"", web.js("location.pathname")) }
@@ -238,7 +238,7 @@ class PageLinksTest {
         }
         for ((id, expectPrompt) in listOf("blankMail" to true, "blankFile" to false)) {
             viewer(server.url, listOf(clickRule("gnb_next", target("a", id)))) { web ->
-                web.js("window.scrollTo(0, document.body.scrollHeight)")
+                scrollToEnd(web)
                 eventually { onView(withId(R.id.btn_stack_next)).check(matches(isDisplayed())) }
                 onView(withId(R.id.btn_stack_next)).perform(click())
                 if (expectPrompt) {

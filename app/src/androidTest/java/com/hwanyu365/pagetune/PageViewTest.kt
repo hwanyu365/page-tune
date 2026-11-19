@@ -358,12 +358,12 @@ class PageViewTest {
                     }
                 }
 
-                onView(withId(R.id.btn_quick_handle)).perform(click())
+                tapQuickHandle()
                 onView(withId(R.id.layout_quick_toolbar)).check(matches(isDisplayed()))
-                onView(withId(R.id.btn_quick_handle)).perform(click())
+                tapQuickHandle()
                 onView(withId(R.id.layout_quick_toolbar)).check(matches(not(isDisplayed())))
 
-                onView(withId(R.id.btn_quick_handle)).perform(click())
+                tapQuickHandle()
                 eventually { onView(withId(R.id.layout_gnb_stack)).check(matches(isDisplayed())) }
                 onMain {
                     val activity = resumedActivity()
@@ -376,7 +376,7 @@ class PageViewTest {
                 onView(withId(R.id.layout_quick_toolbar)).check(matches(isDisplayed()))
                 eventually(timeoutMs = hide) { onView(withId(R.id.layout_quick_toolbar)).check(matches(not(isDisplayed()))) }
 
-                onView(withId(R.id.btn_quick_handle)).perform(click())
+                tapQuickHandle()
                 SystemClock.sleep(hide * 5 / 8)
                 onView(withId(R.id.btn_quick_refresh)).perform(click())
                 SystemClock.sleep(hide * 5 / 8)
@@ -454,7 +454,7 @@ class PageViewTest {
                 SystemClock.sleep(1_000)
                 onView(withId(R.id.layout_gnb_stack)).check(matches(not(isDisplayed())))
                 // 열린 툴바가 위쪽을 덮으면 두 번 탭이 페이지가 아니라 툴바 버튼에 간다.
-                onView(withId(R.id.btn_quick_handle)).perform(click())
+                tapQuickHandle()
                 onView(withId(R.id.layout_quick_toolbar)).check(matches(not(isDisplayed())))
                 onView(withId(R.id.wv_browser)).perform(doubleTapAt(0.1f))
                 SystemClock.sleep(1_000)
@@ -711,7 +711,7 @@ class PageViewTest {
 
     private fun openToolbar() {
         if (onMain { resumedActivity().findViewById<View>(R.id.layout_quick_toolbar).isShown }) return
-        onView(withId(R.id.btn_quick_handle)).perform(click())
+        tapQuickHandle()
         onView(withId(R.id.layout_quick_toolbar)).check(matches(isDisplayed()))
     }
 

@@ -55,7 +55,7 @@ class QuickMenuTest {
             assertEquals(before.label, dimmed.label)
             assertEquals(View.VISIBLE, dimmed.visibility)
 
-            onView(withId(R.id.btn_quick_handle)).perform(click())
+            tapQuickHandle()
             onView(withId(R.id.layout_quick_toolbar)).check(matches(isDisplayed()))
             assertEquals(1f, onMain { handleState() }.alpha)
             checkToolbarShape()

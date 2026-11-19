@@ -68,7 +68,7 @@ class SystemBarsTest {
             val viewer = Intent(targetContext, WebBrowserActivity::class.java).putExtra("webpage_id", pageId)
             ActivityScenario.launch<WebBrowserActivity>(viewer).use {
                 eventually { onView(withId(R.id.layout_gnb_stack)).check(matches(isDisplayed())) }
-                onView(withId(R.id.btn_quick_handle)).perform(click())
+                tapQuickHandle()
                 onView(withId(R.id.layout_quick_toolbar)).check(matches(isDisplayed()))
                 // 열람 화면은 상태바를 숨기고 노치까지 쓰는 전체화면이다 → 내비게이션 바만 피한다.
                 check(it, "viewer", Type.navigationBars())

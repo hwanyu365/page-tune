@@ -102,3 +102,15 @@ fun WebView.js(script: String): String {
     assertTrue("스크립트 결과가 오지 않음: $script", latch.await(5, TimeUnit.SECONDS))
     return result
 }
+
+// 아래로 스크롤하는 동안 핸들은 숨는다 → 보이는 순간 누르면 터치가 들어가기 전에 다시 숨을 수 있어, 잠시 보인 채로 머문 뒤에 누른다.
+fun tapQuickHandle() {
+    var visibleSince = 0L
+    waitUntil(timeoutMs = 10_000) {
+        val now = android.os.SystemClock.uptimeMillis()
+        val visible = onMain { resumedActivity().findViewById<View>(R.id.btn_quick_handle).visibility == View.VISIBLE }
+        visibleSince = if (!visible) 0L else if (visibleSince == 0L) now else visibleSince
+        visible && now - visibleSince >= 500
+    }
+    onView(withId(R.id.btn_quick_handle)).perform(click())
+}

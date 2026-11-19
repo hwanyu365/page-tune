@@ -48,6 +48,7 @@ class LocalPage(
     private val server = (tls?.serverSocketFactory?.createServerSocket() ?: ServerSocket())
         .apply { reuseAddress = true; bind(java.net.InetSocketAddress(InetAddress.getByName("127.0.0.1"), port), 16) }
     val url = "${if (tls == null) "http" else "https"}://$host:${server.localPort}/"
+    val requested: MutableList<String> = java.util.Collections.synchronizedList(mutableListOf())
 
     init {
         thread(isDaemon = true) {
@@ -64,6 +65,7 @@ class LocalPage(
             it.soTimeout = 5_000
             val reader = it.getInputStream().bufferedReader()
             val path = reader.readLine()?.split(" ")?.getOrNull(1) ?: return@use
+            requested += path
             while (!reader.readLine().isNullOrEmpty()) Unit
             val reply = routes[path] ?: Reply(body = html)
             val body = reply.body.toByteArray()

@@ -77,7 +77,7 @@ class PageViewEditTest {
             val tune = addTune("Edit")
             openViewer(addWebPage("Page", server.url, tune)).use {
                 val web = loaded()
-                onView(withId(R.id.btn_quick_handle)).perform(click())
+                tapQuickHandle()
                 onView(withId(R.id.btn_quick_toggle)).perform(click())
                 eventually { assertEquals(onMain { resumedActivity().getString(R.string.quick_tune_on) }, onMain { resumedActivity().findViewById<View>(R.id.btn_quick_toggle).contentDescription.toString() }) }
                 quickEdit()
@@ -143,7 +143,7 @@ class PageViewEditTest {
 
     private fun quickEdit() {
         if (!onMain { resumedActivity().findViewById<View>(R.id.layout_quick_toolbar).isShown }) {
-            onView(withId(R.id.btn_quick_handle)).perform(click())
+            tapQuickHandle()
         }
         onView(withId(R.id.btn_quick_edit)).perform(click())
         eventually { assertTrue(resumedActivity() is PluginEditActivity) }

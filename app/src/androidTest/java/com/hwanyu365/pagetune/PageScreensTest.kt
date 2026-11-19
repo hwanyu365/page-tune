@@ -103,7 +103,7 @@ class PageScreensTest {
         ActivityScenario.launch<WebBrowserActivity>(viewer).use {
             eventually { onView(withId(R.id.layout_gnb_stack)).check(matches(isDisplayed())) }
             eventually { onView(withId(R.id.tv_tune_status)).check(matches(isDisplayed())) }
-            onView(withId(R.id.btn_quick_handle)).perform(click())
+            tapQuickHandle()
             onView(withId(R.id.layout_quick_toolbar)).check(matches(isDisplayed()))
             check("viewer_quick_menu", onMain { resumedActivity().window.decorView })
             checked += "viewer_quick_menu"
